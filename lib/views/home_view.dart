@@ -10,7 +10,7 @@ class HomeView extends StatelessWidget {
       body: Center(
         child: GestureDetector(
           onTap: () {
-            context.go('/setting');
+            context.go('/demo');
           },
           child: Container(
             decoration: BoxDecoration(

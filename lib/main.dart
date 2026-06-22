@@ -1,3 +1,5 @@
+import 'package:duantotnghiep_app_thue_xe/themes/dark_mode.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/light_mode.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/theme_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +33,8 @@ class DrivioApp extends StatelessWidget {
 
       // Main Code
       debugShowCheckedModeBanner: false,
-      theme: Provider.of<ThemeProvider>(context).themeData,
+      theme: lightMode,
+      darkTheme: darkMode,
       routerConfig: drivioRouter,
     );
   }
