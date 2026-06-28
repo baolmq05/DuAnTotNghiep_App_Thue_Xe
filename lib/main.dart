@@ -1,23 +1,12 @@
-import 'package:duantotnghiep_app_thue_xe/themes/dark_mode.dart';
-import 'package:duantotnghiep_app_thue_xe/themes/light_mode.dart';
-import 'package:duantotnghiep_app_thue_xe/themes/theme_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
-import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/routes/router_config.dart';
 
 void main() {
   runApp(
-    DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ],
-        child: DrivioApp(),
-      ),
-    ),
+    DevicePreview(enabled: !kReleaseMode, builder: (context) => DrivioApp()),
   );
 }
 
@@ -33,8 +22,7 @@ class DrivioApp extends StatelessWidget {
 
       // Main Code
       debugShowCheckedModeBanner: false,
-      theme: lightMode,
-      darkTheme: darkMode,
+      theme: appTheme,
       routerConfig: drivioRouter,
     );
   }
