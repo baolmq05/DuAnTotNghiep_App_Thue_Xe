@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:duantotnghiep_app_thue_xe/themes/app_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,16 @@ class DrivioApp extends StatelessWidget {
       // Device_Preview Package (Important)
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
+
+      // Enable drag-to-scroll with mouse on Web
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.trackpad,
+        },
+      ),
 
       // Main Code
       debugShowCheckedModeBanner: false,
