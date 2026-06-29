@@ -3,6 +3,7 @@ import 'package:duantotnghiep_app_thue_xe/views/home_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/setting_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/order_detail.dart';
 import 'package:duantotnghiep_app_thue_xe/views/car_detail.dart';
+import 'package:duantotnghiep_app_thue_xe/views/profile.dart';
 import 'package:go_router/go_router.dart';
 
 // GoRouter configuration
@@ -19,5 +20,10 @@ final drivioRouter = GoRouter(
       path: '/car_detail',
       builder: (context, state) => const CarDetailPage(),
     ),
+    GoRoute(
+      path: '/car_detail',
+      builder: (context, state) => const CarDetailPage(),
+    ),
+    GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
   ],
 );
