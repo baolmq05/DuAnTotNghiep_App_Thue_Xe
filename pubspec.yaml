@@ -39,6 +39,7 @@ dependencies:
   go_router: ^17.3.0
   google_nav_bar: ^5.0.7
   http: ^1.2.1
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -64,7 +65,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - lib\assets\
+    - assets/logo.png
+    - assets/splash_illustration.png
+    - assets/google_logo.svg
+    - assets/facebook_logo.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
