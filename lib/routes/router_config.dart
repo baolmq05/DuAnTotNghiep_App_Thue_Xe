@@ -12,6 +12,7 @@ import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide4_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/login_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/register_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/splash_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/main_screen.dart';
 import 'package:go_router/go_router.dart';
 
 // GoRouter configuration
@@ -26,6 +27,7 @@ final drivioRouter = GoRouter(
       builder: (context, state) => const RegisterView(),
     ),
     GoRoute(path: '/setting', builder: (context, state) => const SettingView()),
+    // GoRoute(path: '/', builder: (context, state) => const MainScreen()),
     GoRoute(path: '/demo', builder: (context, state) => const DemoPage()),
     GoRoute(
       path: '/order-detail',
