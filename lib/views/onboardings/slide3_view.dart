@@ -19,7 +19,7 @@ class Slide3View extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: TextButton(
                 onPressed: () {
-                  context.go('/');
+                  context.go('/login');
                 },
                 child: const Text(
                   "Bỏ qua",
@@ -98,7 +98,7 @@ class Slide3View extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         {
-                          context.go('/slide4'); 
+                          context.go('/slide4');
                         }
                       },
                       style: ElevatedButton.styleFrom(

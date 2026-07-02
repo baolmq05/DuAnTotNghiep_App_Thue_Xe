@@ -25,7 +25,7 @@ class _LoginViewState extends State<LoginView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 70.0),
-              
+
               // Title "Đăng nhập"
               Text(
                 'Đăng nhập',
@@ -38,7 +38,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 8.0),
-              
+
               // Subtitle "Chào mừng bạn trở lại!"
               Text(
                 'Chào mừng bạn trở lại!',
@@ -49,14 +49,11 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 36.0),
-              
+
               // Phone Input Field
               TextField(
                 keyboardType: TextInputType.phone,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 15.0,
-                ),
+                style: TextStyle(color: colorScheme.onSurface, fontSize: 15.0),
                 decoration: InputDecoration(
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
@@ -70,7 +67,7 @@ class _LoginViewState extends State<LoginView> {
                     minWidth: 40,
                     minHeight: 40,
                   ),
-                  hintText: 'Số điện thoại',
+                  hintText: 'Email',
                   hintStyle: TextStyle(
                     color: colorScheme.onSurfaceVariant,
                     fontSize: 15.0,
@@ -80,23 +77,26 @@ class _LoginViewState extends State<LoginView> {
                   fillColor: Colors.white,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline,
+                      width: 1.0,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                    borderSide: BorderSide(
+                      color: colorScheme.primaryContainer,
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 16.0),
-              
+
               // Password Input Field
               TextField(
                 obscureText: _isPasswordObscured,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 15.0,
-                ),
+                style: TextStyle(color: colorScheme.onSurface, fontSize: 15.0),
                 decoration: InputDecoration(
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
@@ -137,16 +137,22 @@ class _LoginViewState extends State<LoginView> {
                   fillColor: Colors.white,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                    borderSide: BorderSide(
+                      color: colorScheme.outline,
+                      width: 1.0,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                    borderSide: BorderSide(
+                      color: colorScheme.primaryContainer,
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 12.0),
-              
+
               // Forgot Password link
               Align(
                 alignment: Alignment.centerRight,
@@ -168,7 +174,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 28.0),
-              
+
               // Login Button
               SizedBox(
                 height: 54.0,
@@ -192,15 +198,12 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 24.0),
-              
+
               // Divider "Hoặc tiếp tục với"
               Row(
                 children: [
                   Expanded(
-                    child: Divider(
-                      color: colorScheme.outline,
-                      thickness: 1.0,
-                    ),
+                    child: Divider(color: colorScheme.outline, thickness: 1.0),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -213,15 +216,12 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   Expanded(
-                    child: Divider(
-                      color: colorScheme.outline,
-                      thickness: 1.0,
-                    ),
+                    child: Divider(color: colorScheme.outline, thickness: 1.0),
                   ),
                 ],
               ),
               const SizedBox(height: 20.0),
-              
+
               // Social Login - Google Button
               OutlinedButton(
                 onPressed: () {},
@@ -237,8 +237,6 @@ class _LoginViewState extends State<LoginView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
-                    
                     SvgPicture.asset(
                       'assets/google_logo.svg',
                       height: 24.0,
@@ -257,7 +255,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 12.0),
-              
+
               // Social Login - Facebook Button
               OutlinedButton(
                 onPressed: () {},
@@ -291,7 +289,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const SizedBox(height: 32.0),
-              
+
               // Navigation to Register
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -319,7 +317,7 @@ class _LoginViewState extends State<LoginView> {
                 ],
               ),
               const SizedBox(height: 48.0),
-              
+
               // Terms & Conditions Text
               Text.rich(
                 TextSpan(

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class ProfileView extends StatefulWidget {
+  const ProfileView({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfileView> createState() => _ProfileViewState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +35,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 icon: const Icon(Icons.notifications_none_rounded),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Tính năng thông báo đang được phát triển')),
+                    const SnackBar(
+                      content: Text('Tính năng thông báo đang được phát triển'),
+                    ),
                   );
                 },
                 iconSize: 26,
@@ -136,7 +138,10 @@ class _ProfilePageState extends State<ProfilePage> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
                 ),
                 child: const CircleAvatar(
                   radius: 36,
@@ -196,7 +201,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded, size: 16, color: Colors.amber),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 16,
+                          color: Colors.amber,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '4.8 (128 đánh giá)',
@@ -330,17 +339,13 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           ElevatedButton(
-            onPressed: () {
-            },
+            onPressed: () {},
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFAF2EC),
               foregroundColor: AppColors.secondary,
               elevation: 0,
               shadowColor: Colors.transparent,
-              side: const BorderSide(
-                color: Color(0xFFF0DCD0),
-                width: 1,
-              ),
+              side: const BorderSide(color: Color(0xFFF0DCD0), width: 1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -348,10 +353,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             child: const Text(
               'Xem chi tiết',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -387,9 +389,9 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: Icons.favorite_border_rounded,
             title: 'Xe yêu thích',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Xem Xe yêu thích')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Xem Xe yêu thích')));
             },
           ),
           _buildMenuItem(
@@ -401,10 +403,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Color(0xFFE08244),
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(
-                minWidth: 20,
-                minHeight: 20,
-              ),
+              constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
               child: const Center(
                 child: Text(
                   '3',
@@ -417,9 +416,9 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Xem Mã giảm giá')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Xem Mã giảm giá')));
             },
           ),
           _buildMenuItem(
@@ -511,10 +510,17 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 14.0,
+            ),
             child: Row(
               children: [
-                Icon(icon, color: AppColors.primary.withValues(alpha: 0.7), size: 22),
+                Icon(
+                  icon,
+                  color: AppColors.primary.withValues(alpha: 0.7),
+                  size: 22,
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
@@ -537,11 +543,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           if (showDivider)
-            const Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.border,
-            ),
+            const Divider(height: 1, thickness: 1, color: AppColors.border),
         ],
       ),
     );

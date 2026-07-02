@@ -12,28 +12,24 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
-    
+
     // Auto navigate to Home screen after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        context.go('/home');
+        context.go('/slide1');
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF144E5B), 
-              Color(0xFF092832), 
-            ],
+            colors: [Color(0xFF144E5B), Color(0xFF092832)],
           ),
         ),
         child: SafeArea(
@@ -41,7 +37,7 @@ class _SplashViewState extends State<SplashView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 50.0),
-              
+
               // Custom Team Logo
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40.0),
@@ -49,9 +45,8 @@ class _SplashViewState extends State<SplashView> {
                   'assets/logo.png',
                   height: 90.0,
                   fit: BoxFit.contain,
-                  opacity: const AlwaysStoppedAnimation<double>(0.9), 
+                  opacity: const AlwaysStoppedAnimation<double>(0.9),
                   errorBuilder: (context, error, stackTrace) {
-                  
                     return Text(
                       'Drivio',
                       textAlign: TextAlign.center,
@@ -73,7 +68,7 @@ class _SplashViewState extends State<SplashView> {
                 ),
               ),
               const SizedBox(height: 20.0),
-              
+
               // Subtitles/Slogans
               const Text(
                 'Thuê xe tự lái nhanh chóng',
@@ -95,9 +90,9 @@ class _SplashViewState extends State<SplashView> {
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Custom Illustration (SUV, Scooter & Road)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -108,14 +103,16 @@ class _SplashViewState extends State<SplashView> {
                     height: 260.0,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return const SizedBox(height: 260.0); // Empty fallback space
+                      return const SizedBox(
+                        height: 260.0,
+                      ); // Empty fallback space
                     },
                   ),
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Loading Progress
               Center(
                 child: SizedBox(
@@ -123,13 +120,15 @@ class _SplashViewState extends State<SplashView> {
                   height: 32.0,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.white,
+                    ),
                     backgroundColor: Colors.white.withAlpha(38),
                   ),
                 ),
               ),
               const SizedBox(height: 16.0),
-              
+
               // Starting up text
               const Text(
                 'Đang khởi động...',
