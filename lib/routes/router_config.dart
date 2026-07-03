@@ -9,6 +9,7 @@ import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide1_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide2_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide3_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide4_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/order_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/order_detail.dart';
 import 'package:duantotnghiep_app_thue_xe/views/register_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/setting_view.dart';
@@ -120,9 +121,7 @@ final drivioRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/orders',
-              builder: (context, state) => const Scaffold(
-                body: Center(child: Text("Màn hình Đơn thuê")),
-              ),
+              builder: (context, state) => const OrderView(),
             ),
           ],
         ),
