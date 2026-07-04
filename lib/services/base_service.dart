@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Lỗi phát sinh khi đi gọi API gặp chuyện.
 class ApiException implements Exception {
@@ -17,7 +18,25 @@ abstract class BaseService {
   final String baseUrl = 'http://127.0.0.1:8000';
 
   /// Lấy cái Token ra xài (mốt gắn storage sau).
-  Future<String?> _getToken() async => null;
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('auth_token');
+  }
+
+  /// Lấy token đã lưu ngoài bộ nhớ (nếu có).
+  Future<String?> getSavedToken() => _getToken();
+
+  /// Lưu token vào storage để xài lâu dài.
+  Future<bool> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setString('auth_token', token);
+  }
+
+  /// Xoá token khỏi storage khi đăng xuất.
+  Future<bool> deleteToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.remove('auth_token');
+  }
 
   /// Tạo tiêu đề (Headers) gửi kèm, có đòi token thì nhét vô luôn.
   Future<Map<String, String>> _getHeaders({

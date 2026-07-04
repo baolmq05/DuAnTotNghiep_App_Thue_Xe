@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/models/user_model.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -12,6 +15,8 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFC),
       appBar: AppBar(
@@ -86,7 +91,7 @@ class _ProfileViewState extends State<ProfileView> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         children: [
-          _buildProfileCard(),
+          _buildProfileCard(user),
           const SizedBox(height: 16),
           _buildWalletCard(),
           const SizedBox(height: 24),
@@ -99,7 +104,7 @@ class _ProfileViewState extends State<ProfileView> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildServicesCard(),
+          _buildServicesCard(user),
           const SizedBox(height: 24),
           const Text(
             'Khác',
@@ -117,7 +122,7 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildProfileCard() {
+  Widget _buildProfileCard(UserModel? user) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -143,11 +148,13 @@ class _ProfileViewState extends State<ProfileView> {
                     width: 2,
                   ),
                 ),
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 36,
-                  backgroundImage: NetworkImage(
-                    'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
-                  ),
+                  backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
+                      ? NetworkImage(user.avatar!)
+                      : const NetworkImage(
+                          'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
+                        ) as ImageProvider,
                 ),
               ),
               const SizedBox(width: 16),
@@ -157,9 +164,9 @@ class _ProfileViewState extends State<ProfileView> {
                   children: [
                     Row(
                       children: [
-                        const Text(
-                          'Quốc Bảo',
-                          style: TextStyle(
+                        Text(
+                          user?.name ?? 'Khách hàng',
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -361,7 +368,7 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildServicesCard() {
+  Widget _buildServicesCard(UserModel? user) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -424,21 +431,7 @@ class _ProfileViewState extends State<ProfileView> {
           _buildMenuItem(
             icon: Icons.badge_outlined,
             title: 'Giấy phép lái xe',
-            trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F5E9),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Text(
-                'Đã xác thực',
-                style: TextStyle(
-                  color: AppColors.success,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+            trailing: _buildLicenseBadge(user),
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Xem Giấy phép lái xe')),
@@ -545,6 +538,59 @@ class _ProfileViewState extends State<ProfileView> {
           if (showDivider)
             const Divider(height: 1, thickness: 1, color: AppColors.border),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLicenseBadge(UserModel? user) {
+    final license = user?.drivingLicense;
+    if (license == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.amber.shade50,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          'Chưa xác thực',
+          style: TextStyle(
+            color: Colors.amber.shade800,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+    if (license.status == 1) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5E9),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Text(
+          'Đã xác thực',
+          style: TextStyle(
+            color: AppColors.success,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Text(
+        'Chờ duyệt',
+        style: TextStyle(
+          color: Colors.orange,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -11,6 +13,55 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   bool _isPasswordObscured = true;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập Email.')),
+      );
+      return;
+    }
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập mật khẩu.')),
+      );
+      return;
+    }
+
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.login(email, password);
+
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập thành công! Chào mừng bạn quay lại.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Đăng nhập thất bại.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +101,16 @@ class _LoginViewState extends State<LoginView> {
               ),
               const SizedBox(height: 36.0),
 
-              // Phone Input Field
+              // Email Input Field
               TextField(
-                keyboardType: TextInputType.phone,
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: colorScheme.onSurface, fontSize: 15.0),
                 decoration: InputDecoration(
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
-                      Icons.phone,
+                      Icons.email_outlined,
                       color: colorScheme.primaryContainer,
                       size: 22.0,
                     ),
@@ -95,6 +147,7 @@ class _LoginViewState extends State<LoginView> {
 
               // Password Input Field
               TextField(
+                controller: _passwordController,
                 obscureText: _isPasswordObscured,
                 style: TextStyle(color: colorScheme.onSurface, fontSize: 15.0),
                 decoration: InputDecoration(
@@ -176,26 +229,40 @@ class _LoginViewState extends State<LoginView> {
               const SizedBox(height: 28.0),
 
               // Login Button
-              SizedBox(
-                height: 54.0,
-                child: ElevatedButton(
-                  onPressed: () => context.go('/home'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primaryContainer,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return SizedBox(
+                    height: 54.0,
+                    child: ElevatedButton(
+                      onPressed: auth.isLoading ? null : _handleLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primaryContainer,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                      ),
+                      child: auth.isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Đăng nhập',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
-                  ),
-                  child: const Text(
-                    'Đăng nhập',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
               const SizedBox(height: 24.0),
 

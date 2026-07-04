@@ -2,6 +2,9 @@ import 'package:duantotnghiep_app_thue_xe/components/setting_components/dark_mod
 import 'package:duantotnghiep_app_thue_xe/components/setting_components/logout_button.dart';
 import 'package:duantotnghiep_app_thue_xe/components/setting_components/setting_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingView extends StatelessWidget {
   const SettingView({super.key});
@@ -86,7 +89,15 @@ class SettingView extends StatelessWidget {
             onTap: () {},
           ),
           SizedBox(height: 48),
-          LogoutButton(onTap: () {}),
+          LogoutButton(
+            onTap: () async {
+              final authProvider = context.read<AuthProvider>();
+              await authProvider.logout();
+              if (context.mounted) {
+                context.go('/login');
+              }
+            },
+          ),
         ],
       ),
     );

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -13,10 +15,18 @@ class _SplashViewState extends State<SplashView> {
   void initState() {
     super.initState();
 
-    // Auto navigate to Home screen after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
+    // Auto navigate to Home screen after 3 seconds or do auto login
+    Future.delayed(const Duration(seconds: 3), () async {
+      if (!mounted) return;
+      final authProvider = context.read<AuthProvider>();
+      final isLoggedIn = await authProvider.tryAutoLogin();
+      
       if (mounted) {
-        context.go('/slide1');
+        if (isLoggedIn) {
+          context.go('/home');
+        } else {
+          context.go('/slide1');
+        }
       }
     });
   }

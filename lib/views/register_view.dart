@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -13,6 +15,107 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _handleRegister() async {
+    final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập Họ và tên.')),
+      );
+      return;
+    }
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập Số điện thoại.')),
+      );
+      return;
+    }
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập Email.')),
+      );
+      return;
+    }
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email không đúng định dạng.')),
+      );
+      return;
+    }
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập Mật khẩu.')),
+      );
+      return;
+    }
+    if (password.length < 6 || password.length > 16) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mật khẩu phải từ 6 đến 16 ký tự.')),
+      );
+      return;
+    }
+    if (confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng xác nhận mật khẩu.')),
+      );
+      return;
+    }
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mật khẩu xác nhận không trùng khớp.')),
+      );
+      return;
+    }
+
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.register(
+      name: name,
+      email: email,
+      password: password,
+      confirmPassword: confirmPassword,
+      phone: phone,
+    );
+
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng ký tài khoản thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Đăng ký thất bại. Vui lòng thử lại.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +180,7 @@ class _RegisterViewState extends State<RegisterView> {
               
               // Full name Input Field
               TextField(
+                controller: _nameController,
                 keyboardType: TextInputType.name,
                 style: TextStyle(
                   color: colorScheme.onSurface,
@@ -117,6 +221,7 @@ class _RegisterViewState extends State<RegisterView> {
               
               // Phone Input Field
               TextField(
+                controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 style: TextStyle(
                   color: colorScheme.onSurface,
@@ -154,9 +259,51 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
               ),
               const SizedBox(height: 16.0),
+
+              // Email Input Field
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 15.0,
+                ),
+                decoration: InputDecoration(
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 12.0),
+                    child: Icon(
+                      Icons.email_outlined,
+                      color: colorScheme.primaryContainer,
+                      size: 22.0,
+                    ),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
+                  hintText: 'Email',
+                  hintStyle: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 15.0,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
+                  filled: true,
+                  fillColor: Colors.white,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16.0),
               
               // Password Input Field
               TextField(
+                controller: _passwordController,
                 obscureText: _isPasswordObscured,
                 style: TextStyle(
                   color: colorScheme.onSurface,
@@ -214,6 +361,7 @@ class _RegisterViewState extends State<RegisterView> {
               
               // Confirm Password Input Field
               TextField(
+                controller: _confirmPasswordController,
                 obscureText: _isConfirmPasswordObscured,
                 style: TextStyle(
                   color: colorScheme.onSurface,
@@ -270,26 +418,39 @@ class _RegisterViewState extends State<RegisterView> {
               const SizedBox(height: 28.0),
               
               // Register Button
-              SizedBox(
-                height: 54.0,
-                child: ElevatedButton(
-                  onPressed: () => context.go('/home'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primaryContainer,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return SizedBox(
+                    height: 54.0,
+                    child: ElevatedButton(
+                      onPressed: auth.isLoading ? null : _handleRegister,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primaryContainer,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                      ),
+                      child: auth.isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Đăng ký',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
-                  ),
-                  child: const Text(
-                    'Đăng ký',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                  );
+                },
               ),
               const SizedBox(height: 24.0),
               
