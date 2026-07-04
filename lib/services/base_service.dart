@@ -81,8 +81,14 @@ abstract class BaseService {
     String errorMsg = 'Server báo lỗi mã $status nha!';
     try {
       final json = jsonDecode(response.body);
-      if (json is Map && json.containsKey('message')) {
-        errorMsg = json['message'];
+      if (json is Map) {
+        if (json.containsKey('message') && json.containsKey('errors')) {
+          errorMsg = "${json['message']} (${json['errors']})";
+        } else if (json.containsKey('message')) {
+          errorMsg = json['message'];
+        } else if (json.containsKey('errors')) {
+          errorMsg = json['errors']?.toString() ?? '';
+        }
       }
     } catch (_) {}
 

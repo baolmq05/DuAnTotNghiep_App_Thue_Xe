@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:duantotnghiep_app_thue_xe/models/message_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/chat_message.dart';
 import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/chatbot_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
 
 class ChatDetailView extends StatefulWidget {
   final String conversationId;
@@ -48,48 +51,46 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   }
 
   void _loadInitialMessages() {
-    final now = DateTime.now();
     if (_conv.isChatbot) {
-      _messages.addAll([
-        ChatMessage(
-          id: '1',
-          senderId: 'chatbot',
-          text: 'Chào bạn! Tôi là Trợ lý ảo của Drivio. 🚗',
-          timestamp: now.subtract(const Duration(minutes: 10)),
-          isMe: false,
-        ),
-        ChatMessage(
-          id: '2',
-          senderId: 'chatbot',
-          text: _conv.lastMessage,
-          timestamp: now.subtract(const Duration(minutes: 5)),
-          isMe: false,
-        ),
-      ]);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final chatbotVM = context.read<ChatbotViewModel>();
+        await chatbotVM.fetchChatbotSession();
+        if (chatbotVM.chatbotSession != null && mounted) {
+          setState(() {
+            _messages.clear();
+            _messages.addAll(
+              chatbotVM.chatbotSession!.messages.map((m) => ChatMessage(
+                    id: m.id.toString(),
+                    senderId: m.role == 'user' ? 'me' : 'chatbot',
+                    text: m.content,
+                    timestamp: DateTime.tryParse(m.created_at) ?? DateTime.now(),
+                    isMe: m.role == 'user',
+                  )),
+            );
+          });
+          _scrollToBottom();
+        }
+      });
     } else {
-      _messages.addAll([
-        ChatMessage(
-          id: '1',
-          senderId: _conv.id,
-          text: 'Xin chào, tôi quan tâm đến dịch vụ thuê xe của bạn.',
-          timestamp: now.subtract(const Duration(hours: 1)),
-          isMe: false,
-        ),
-        ChatMessage(
-          id: '2',
-          senderId: 'me',
-          text: 'Chào bạn, bạn muốn thuê loại xe nào và thuê trong bao lâu ạ?',
-          timestamp: now.subtract(const Duration(minutes: 30)),
-          isMe: true,
-        ),
-        ChatMessage(
-          id: '3',
-          senderId: _conv.id,
-          text: _conv.lastMessage,
-          timestamp: now.subtract(const Duration(minutes: 2)),
-          isMe: false,
-        ),
-      ]);
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          final conversationService = context.read<ConversationViewmodel>().conversationService;
+          final realMessages = await conversationService.getMessages(
+            _conv.id,
+            otherUserId: _conv.otherUser.id,
+          );
+
+          if (mounted) {
+            setState(() {
+              _messages.clear();
+              _messages.addAll(realMessages);
+            });
+            _scrollToBottom();
+          }
+        } catch (e) {
+          debugPrint('Lỗi tải tin nhắn cuộc hội thoại: $e');
+        }
+      });
     }
   }
 
@@ -286,51 +287,22 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             _buildAvatar(),
             const SizedBox(width: 10),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _conv.name,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _conv.isOnline ? AppColors.success : Colors.grey,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _conv.isOnline ? 'Đang hoạt động' : 'Ngoại tuyến',
-                        style: TextStyle(
-                          color: _conv.isOnline
-                              ? AppColors.success
-                              : Colors.grey.shade500,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              child: Text(
+                _conv.name,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.phone_outlined, color: Colors.black54),
-            onPressed: () {},
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.phone_outlined, color: Colors.black54),
+          //   onPressed: () {},
+          // ),
           IconButton(
             icon: const Icon(Icons.info_outline, color: Colors.black54),
             onPressed: () {},
@@ -341,7 +313,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
+            child: _conv.isChatbot && context.watch<ChatbotViewModel>().isLoading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
               itemCount: _messages.length + (_isTyping ? 1 : 0),
@@ -432,17 +406,20 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                       ),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: TextField(
-                      controller: _messageController,
-                      onSubmitted: (_) => _sendMessage(),
-                      decoration: const InputDecoration(
-                        hintText: 'Nhập tin nhắn...',
-                        hintStyle: TextStyle(
-                          color: Color(0xFF9CA3AF),
-                          fontSize: 14,
+                    child: Center(
+                      child: TextField(
+                        controller: _messageController,
+                        onSubmitted: (_) => _sendMessage(),
+                        decoration: const InputDecoration(
+                          hintText: 'Nhập tin nhắn...',
+                          hintStyle: TextStyle(
+                            color: Color(0xFF9CA3AF),
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
                         ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
                   ),

@@ -96,40 +96,22 @@ class _ConversationsViewState extends State<ConversationsView> {
       avatarWidget = _buildPlaceholderAvatar(conversation);
     }
 
-    return Stack(
-      children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: conversation.isChatbot
-                ? AppColors.primary.withOpacity(0.08)
-                : null,
-            border: Border.all(
-              color: conversation.isChatbot
-                  ? AppColors.primary.withOpacity(0.2)
-                  : Colors.grey.shade100,
-              width: 1.5,
-            ),
-          ),
-          child: avatarWidget,
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: conversation.isChatbot
+            ? AppColors.primary.withOpacity(0.08)
+            : null,
+        border: Border.all(
+          color: conversation.isChatbot
+              ? AppColors.primary.withOpacity(0.2)
+              : Colors.grey.shade100,
+          width: 1.5,
         ),
-        if (conversation.isOnline)
-          Positioned(
-            right: 1,
-            bottom: 1,
-            child: Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                color: AppColors.success,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-            ),
-          ),
-      ],
+      ),
+      child: avatarWidget,
     );
   }
 
@@ -633,19 +615,6 @@ class _ConversationsViewState extends State<ConversationsView> {
                                                     ? FontWeight.bold
                                                     : FontWeight.w600,
                                               ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            conv.time,
-                                            style: TextStyle(
-                                              color: conv.unreadCount > 0
-                                                  ? AppColors.primary
-                                                  : const Color(0xFF9CA3AF),
-                                              fontSize: 12,
-                                              fontWeight: conv.unreadCount > 0
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
                                             ),
                                           ),
                                         ],

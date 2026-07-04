@@ -1,7 +1,6 @@
 import 'package:duantotnghiep_app_thue_xe/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:duantotnghiep_app_thue_xe/models/message_model.dart';
 import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
 import 'package:duantotnghiep_app_thue_xe/views/car_detail.dart';
 import 'package:duantotnghiep_app_thue_xe/views/message/chat_detail_view.dart';

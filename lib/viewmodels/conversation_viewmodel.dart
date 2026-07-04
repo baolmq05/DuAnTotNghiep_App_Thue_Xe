@@ -44,7 +44,7 @@ class ConversationViewmodel extends ChangeNotifier {
             unreadCount: 0,
             lastMessageObj: LastMessage(
               text: chatbotSession.messages.isNotEmpty 
-                  ? chatbotSession.messages.last['text']?.toString() ?? ''
+                  ? chatbotSession.messages.last.content
                   : 'Bấm vào để trò chuyện với Trợ lý AI.',
               type: 'text',
               sender_id: 0,
