@@ -2,6 +2,8 @@ import 'package:duantotnghiep_app_thue_xe/components/home_components/promotion_t
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import '../../models/promotion.dart';
+import '../../services/promotion_service.dart';
 
 class HomePromotion extends StatefulWidget {
   const HomePromotion({super.key});
@@ -15,29 +17,34 @@ class _HomePromotionState extends State<HomePromotion> {
   final CarouselSliderController _carouselController =
       CarouselSliderController();
 
-  final List<Map<String, dynamic>> promotions = [
-    {
-      'title': 'Ưu đãi bạn mới',
-      'subtitle': 'Giảm ngay 10% tối đa 150k cho lần đầu thuê xe',
-      'code': 'DRIVIONEW',
-      'gradient': [AppColors.primaryDark, AppColors.primary],
-      'icon': Icons.card_giftcard,
-    },
-    {
-      'title': 'Vi vu cuối tuần',
-      'subtitle': 'Đồng giá thuê xe tự lái chỉ từ 699k/ngày',
-      'code': 'WEEKEND699',
-      'gradient': [Color(0xFF8C5333), AppColors.secondary],
-      'icon': Icons.directions_car,
-    },
-    {
-      'title': 'Trải nghiệm xe điện',
-      'subtitle': 'Giảm đến 20% khi thuê các dòng ô tô điện',
-      'code': 'EVFUTURE',
-      'gradient': [Color(0xFF1B3B5F), Color(0xFF3B6898)],
-      'icon': Icons.electric_car,
-    },
-  ];
+  final PromotionService _promotionService = PromotionService();
+
+  List<Promotion> promotions = [];
+
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPromotions();
+  }
+
+  Future<void> _loadPromotions() async {
+    try {
+      final data = await _promotionService.getPromotions();
+
+      setState(() {
+        promotions = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      debugPrint(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,31 +85,36 @@ class _HomePromotionState extends State<HomePromotion> {
         ),
 
         // Carousel Slider
-        CarouselSlider(
-          carouselController: _carouselController,
-          options: CarouselOptions(
-            height: 150.0,
-            autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 4),
-            autoPlayAnimationDuration: const Duration(milliseconds: 800),
-            autoPlayCurve: Curves.fastOutSlowIn,
-            enlargeCenterPage: true,
-            enlargeFactor: 0.22,
-            viewportFraction: 0.9,
-            enableInfiniteScroll: true,
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-          ),
-          items: promotions.map((promo) {
-            return PromotionTile();
-          }).toList(),
-        ),
+        isLoading
+            ? const SizedBox(
+                height: 180,
+                child: Center(child: CircularProgressIndicator()),
+              )
+            : CarouselSlider(
+                carouselController: _carouselController,
+                options: CarouselOptions(
+                  height: 180.0,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 4),
+                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                  autoPlayCurve: Curves.fastOutSlowIn,
+                  enlargeCenterPage: true,
+                  enlargeFactor: 0.22,
+                  viewportFraction: 0.9,
+                  enableInfiniteScroll: true,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                ),
+                items: promotions.map((promo) {
+                  return PromotionTile(promotion: promo);
+                }).toList(),
+              ),
 
         // Indicator dots
-        const SizedBox(height: 8),
+        const SizedBox(height: 7),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: promotions.asMap().entries.map((entry) {
