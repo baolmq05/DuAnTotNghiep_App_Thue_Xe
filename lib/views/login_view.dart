@@ -63,6 +63,32 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
+  void _handleGoogleLogin() async {
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.loginWithGoogle();
+
+    if (mounted) {
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập bằng Google thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/home');
+      } else {
+        if (authProvider.errorMessage != 'Bạn đã hủy đăng nhập Google.') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage ?? 'Đăng nhập Google thất bại.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -290,36 +316,40 @@ class _LoginViewState extends State<LoginView> {
               const SizedBox(height: 20.0),
 
               // Social Login - Google Button
-              OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(54.0),
-                  side: BorderSide(color: colorScheme.outline, width: 1.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  backgroundColor: Colors.white,
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/google_logo.svg',
-                      height: 24.0,
-                      width: 24.0,
-                    ),
-                    const SizedBox(width: 12.0),
-                    Text(
-                      'Tiếp tục với Google',
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w500,
+              Consumer<AuthProvider>(
+                builder: (context, auth, child) {
+                  return OutlinedButton(
+                    onPressed: auth.isLoading ? null : _handleGoogleLogin,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(54.0),
+                      side: BorderSide(color: colorScheme.outline, width: 1.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
                       ),
+                      backgroundColor: Colors.white,
+                      elevation: 0,
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/google_logo.svg',
+                          height: 24.0,
+                          width: 24.0,
+                        ),
+                        const SizedBox(width: 12.0),
+                        Text(
+                          'Tiếp tục với Google',
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12.0),
 

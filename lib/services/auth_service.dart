@@ -11,6 +11,26 @@ class AuthService extends BaseService {
     return response as Map<String, dynamic>;
   }
 
+  /// Đăng nhập bằng tài khoản Google
+  Future<Map<String, dynamic>> loginWithGoogle({
+    String? idToken,
+    String? accessToken,
+    String? email,
+    String? name,
+  }) async {
+    final Map<String, dynamic> body = {};
+    if (idToken != null) {
+      body['id_token'] = idToken;
+      body['token'] = idToken;
+    }
+    if (accessToken != null) body['access_token'] = accessToken;
+    if (email != null) body['email'] = email;
+    if (name != null) body['name'] = name;
+
+    final response = await store('api/auth/google', body: body);
+    return response as Map<String, dynamic>;
+  }
+
   /// Đăng ký tài khoản mới
   Future<Map<String, dynamic>> register({
     required String name,
