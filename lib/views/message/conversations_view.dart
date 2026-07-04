@@ -1,133 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:duantotnghiep_app_thue_xe/models/message_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
 
-class MessageListView extends StatefulWidget {
-  const MessageListView({super.key});
+class ConversationsView extends StatefulWidget {
+  const ConversationsView({super.key});
 
   @override
-  State<MessageListView> createState() => _MessageListViewState();
+  State<ConversationsView> createState() => _ConversationsViewState();
 }
 
-class _MessageListViewState extends State<MessageListView> {
+class _ConversationsViewState extends State<ConversationsView> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _filterType = 'all'; 
+  String _filterType = 'all';
 
-  final List<Conversation> _allConversations = [
-    Conversation(
-      id: 'chatbot',
-      name: 'Hỗ trợ Drivio',
-      avatarUrl: 'lib/assets/images/drivio_logo.png',
-      lastMessage: 'Chúng tôi sẽ hỗ trợ bạn trong thời gian sớm nhất.',
-      time: '2 ngày trước',
-      isChatbot: true,
-      isOnline: true,
-    ),
-    Conversation(
-      id: 'duc',
-      name: 'Nguyễn Minh Đức',
-      avatarUrl: 'lib/assets/images/avatar_duc.png',
-      lastMessage: 'Chào bạn, mình đã xem lịch và có thể giao xe vào lúc 9h nhé.',
-      time: '09:30',
-      attachmentImageUrl: 'lib/assets/images/car_white.png',
-      unreadCount: 2,
-      isOnline: true,
-    ),
-    Conversation(
-      id: 'huy',
-      name: 'Phạm Gia Huy',
-      avatarUrl: 'lib/assets/images/avatar_huy.png',
-      lastMessage: 'Bạn gửi mình thêm ảnh nội thất xe được không?',
-      time: 'Hôm qua',
-      attachmentImageUrl: 'lib/assets/images/scooter_grey.png',
-      unreadCount: 1,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
 
-  List<Conversation> get _filteredConversations {
-    var list = _allConversations.where((c) {
-      final nameMatch = c.name.toLowerCase().contains(_searchQuery.toLowerCase());
-      final msgMatch = c.lastMessage.toLowerCase().contains(_searchQuery.toLowerCase());
-      return nameMatch || msgMatch;
-    }).toList();
-
-    if (_filterType == 'unread') {
-      list = list.where((c) => c.unreadCount > 0).toList();
-    } else if (_filterType == 'chatbot') {
-      list = list.where((c) => c.isChatbot).toList();
-    }
-
-    final chatbots = list.where((c) => c.isChatbot).toList();
-    final others = list.where((c) => !c.isChatbot).toList();
-
-    return [...chatbots, ...others];
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ConversationViewmodel>().fetchConversations();
+    });
   }
 
-  List<Color> _getGradientColors(String name) {
-    final hash = name.hashCode;
-    final List<List<Color>> palettes = [
-      [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)], 
-      [const Color(0xFF10B981), const Color(0xFF047857)], 
-      [const Color(0xFFF59E0B), const Color(0xFFB45309)], 
-      [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)], 
-      [const Color(0xFFEC4899), const Color(0xFFBE185D)], 
-      [const Color(0xFF06B6D4), const Color(0xFF0891B2)], 
-    ];
-    return palettes[hash.abs() % palettes.length];
+  /// Filters the conversation list based on the search query and active filter type
+  List<Conversation> filteredConversations(
+    List<Conversation> allConversations,
+  ) {
+    final List<Conversation> results = [];
+
+    // STEP 1: Loop through each conversation to check search and filter criteria
+    for (var conversation in allConversations) {
+      final String userName = conversation.name.toLowerCase();
+      final String lastMessageText = conversation.lastMessage.toLowerCase();
+      final String searchQuery = _searchQuery.toLowerCase();
+
+      // 1. Check search match (Username or Last message)
+      final bool isSearchMatch =
+          userName.contains(searchQuery) ||
+          lastMessageText.contains(searchQuery);
+
+      // 2. Check filter match (Unread / Chatbot)
+      bool isFilterMatch = true;
+      if (_filterType == 'unread') {
+        isFilterMatch = conversation.unreadCount > 0;
+      } else if (_filterType == 'chatbot') {
+        isFilterMatch = conversation.isChatbot;
+      }
+
+      // 3. Add to results if both search and filter match
+      if (isSearchMatch && isFilterMatch) {
+        results.add(conversation);
+      }
+    }
+
+    // STEP 2: Sort the results (prioritize chatbots to the top)
+    results.sort((a, b) {
+      if (a.isChatbot && !b.isChatbot) return -1;
+      if (!a.isChatbot && b.isChatbot) return 1;
+      return 0;
+    });
+
+    return results;
   }
 
   Widget _buildAvatar(Conversation conversation) {
-    if (conversation.isChatbot) {
-      return Stack(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.08),
-              border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1.5),
-            ),
-            child: ClipOval(
-              child: Image.asset(
+    final bool hasAvatar =
+        conversation.avatarUrl.isNotEmpty &&
+        (conversation.avatarUrl.startsWith('http') ||
+            conversation.avatarUrl.startsWith('assets') ||
+            conversation.avatarUrl.startsWith('lib'));
+
+    Widget avatarWidget;
+    if (hasAvatar) {
+      final bool isNetwork = conversation.avatarUrl.startsWith('http');
+      avatarWidget = ClipOval(
+        child: isNetwork
+            ? Image.network(
                 conversation.avatarUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Center(
-                    child: Text(
-                      'D',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
-                    ),
-                  );
-                },
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildPlaceholderAvatar(conversation),
+              )
+            : Image.asset(
+                conversation.avatarUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildPlaceholderAvatar(conversation),
               ),
-            ),
-          ),
-          if (conversation.isOnline)
-            Positioned(
-              right: 1,
-              bottom: 1,
-              child: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: AppColors.success,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-              ),
-            ),
-        ],
       );
+    } else {
+      avatarWidget = _buildPlaceholderAvatar(conversation);
     }
 
-    final colors = _getGradientColors(conversation.name);
     return Stack(
       children: [
         Container(
@@ -135,22 +103,17 @@ class _MessageListViewState extends State<MessageListView> {
           height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: colors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+            color: conversation.isChatbot
+                ? AppColors.primary.withOpacity(0.08)
+                : null,
+            border: Border.all(
+              color: conversation.isChatbot
+                  ? AppColors.primary.withOpacity(0.2)
+                  : Colors.grey.shade100,
+              width: 1.5,
             ),
           ),
-          child: Center(
-            child: Text(
-              conversation.name.split(' ').last[0].toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
+          child: avatarWidget,
         ),
         if (conversation.isOnline)
           Positioned(
@@ -170,39 +133,44 @@ class _MessageListViewState extends State<MessageListView> {
     );
   }
 
-  Widget _buildAttachment(String? path) {
-    if (path == null) return const SizedBox.shrink();
-
-    IconData icon = Icons.directions_car_filled_outlined;
-    Color iconColor = AppColors.primary;
-    if (path.contains('scooter')) {
-      icon = Icons.two_wheeler_outlined;
-      iconColor = AppColors.secondary;
+  Widget _buildPlaceholderAvatar(Conversation conversation) {
+    if (conversation.isChatbot) {
+      return Center(
+        child: Text(
+          'D',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+      );
     }
 
+    final colors = _getGradientColors(conversation.name);
+    // Lấy chữ cái đầu tiên của Tên (Ví dụ: "Bảo Lê" -> "B")
+    final String initialLetter = conversation.name.isNotEmpty
+        ? conversation.name[0].toUpperCase()
+        : '?';
+
     return Container(
-      margin: const EdgeInsets.only(left: 8),
-      width: 58,
-      height: 42,
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.withOpacity(0.12), width: 0.5),
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
-      child: Stack(
-        children: [
-          Center(
-            child: Icon(icon, color: iconColor.withOpacity(0.4), size: 22),
+      child: Center(
+        child: Text(
+          initialLetter,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
           ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              path,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -231,10 +199,7 @@ class _MessageListViewState extends State<MessageListView> {
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   'Lọc tin nhắn',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               ListTile(
@@ -254,7 +219,9 @@ class _MessageListViewState extends State<MessageListView> {
               ListTile(
                 leading: Icon(
                   Icons.mark_chat_unread,
-                  color: _filterType == 'unread' ? AppColors.primary : Colors.grey,
+                  color: _filterType == 'unread'
+                      ? AppColors.primary
+                      : Colors.grey,
                 ),
                 title: const Text('Chưa đọc'),
                 trailing: _filterType == 'unread'
@@ -268,7 +235,9 @@ class _MessageListViewState extends State<MessageListView> {
               ListTile(
                 leading: Icon(
                   Icons.smart_toy,
-                  color: _filterType == 'chatbot' ? AppColors.primary : Colors.grey,
+                  color: _filterType == 'chatbot'
+                      ? AppColors.primary
+                      : Colors.grey,
                 ),
                 title: const Text('Hỗ trợ Drivio (Chatbot)'),
                 trailing: _filterType == 'chatbot'
@@ -287,6 +256,98 @@ class _MessageListViewState extends State<MessageListView> {
     );
   }
 
+  List<Color> _getGradientColors(String name) {
+    final hash = name.hashCode;
+    final List<List<Color>> palettes = [
+      [const Color(0xFF6366F1), const Color(0xFF4F46E5)], // Indigo
+      [const Color(0xFFEC4899), const Color(0xFFD946EF)], // Pink/Fuchsia
+      [const Color(0xFF14B8A6), const Color(0xFF0D9488)], // Teal
+      [const Color(0xFFF59E0B), const Color(0xFFEAB308)], // Yellow/Amber
+      [const Color(0xFF0EA5E9), const Color(0xFF2563EB)], // Light Blue/Blue
+      [const Color(0xFF10B981), const Color(0xFF059669)], // Emerald
+    ];
+    return palettes[hash.abs() % palettes.length];
+  }
+
+  Widget _buildSkeletonLoader() {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: 4,
+      separatorBuilder: (context, index) => const Divider(
+        color: Color(0xFFF3F4F6),
+        height: 1,
+        indent: 86,
+        endIndent: 20,
+      ),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar Circle Placeholder
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 110,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        Container(
+                          width: 40,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 150,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -295,7 +356,8 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   Widget build(BuildContext context) {
-    final list = _filteredConversations;
+    final viewModel = context.watch<ConversationViewmodel>();
+    final list = filteredConversations(viewModel.conversations);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -303,9 +365,12 @@ class _MessageListViewState extends State<MessageListView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          
             Padding(
-              padding: const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 15.0),
+              padding: const EdgeInsets.only(
+                left: 20.0,
+                top: 20.0,
+                bottom: 15.0,
+              ),
               child: const Text(
                 'Tin nhắn',
                 style: TextStyle(
@@ -351,7 +416,9 @@ class _MessageListViewState extends State<MessageListView> {
                             size: 20,
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -371,11 +438,7 @@ class _MessageListViewState extends State<MessageListView> {
                         ),
                       ),
                       child: const Center(
-                        child: Icon(
-                          Icons.tune,
-                          color: Colors.black,
-                          size: 20,
-                        ),
+                        child: Icon(Icons.tune, color: Colors.black, size: 20),
                       ),
                     ),
                   ),
@@ -386,9 +449,15 @@ class _MessageListViewState extends State<MessageListView> {
 
             if (_filterType != 'all')
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 5.0,
+                ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
@@ -397,7 +466,9 @@ class _MessageListViewState extends State<MessageListView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _filterType == 'unread' ? 'Đang lọc: Chưa đọc' : 'Đang lọc: Chatbot',
+                        _filterType == 'unread'
+                            ? 'Đang lọc: Chưa đọc'
+                            : 'Đang lọc: Chatbot',
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 12,
@@ -414,28 +485,100 @@ class _MessageListViewState extends State<MessageListView> {
                           color: AppColors.primary,
                           size: 14,
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
 
             Expanded(
-              child: list.isEmpty
+              child: viewModel.isLoading
+                  ? _buildSkeletonLoader()
+                  : viewModel.errorMessage != null
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.error_outline_rounded,
+                                size: 40,
+                                color: Colors.red.shade400,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Không thể kết nối danh sách',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              viewModel.errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: 130,
+                              height: 40,
+                              child: ElevatedButton(
+                                onPressed: () => viewModel.fetchConversations(),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Tải lại',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : list.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.chat_bubble_outline,
-                            size: 64,
-                            color: Colors.grey.shade300,
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 48,
+                              color: Colors.grey.shade300,
+                            ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
                           Text(
-                            'Không tìm thấy tin nhắn nào',
+                            'Không tìm thấy cuộc hội thoại nào',
                             style: TextStyle(
-                              color: Colors.grey.shade500,
+                              color: Colors.grey.shade400,
                               fontSize: 15,
                             ),
                           ),
@@ -448,7 +591,7 @@ class _MessageListViewState extends State<MessageListView> {
                       separatorBuilder: (context, index) => const Divider(
                         color: Color(0xFFF3F4F6),
                         height: 1,
-                        indent: 84,
+                        indent: 86,
                         endIndent: 20,
                       ),
                       itemBuilder: (context, index) {
@@ -461,7 +604,7 @@ class _MessageListViewState extends State<MessageListView> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20.0,
-                              vertical: 12.0,
+                              vertical: 14.0,
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,7 +614,8 @@ class _MessageListViewState extends State<MessageListView> {
 
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         mainAxisAlignment:
@@ -483,8 +627,8 @@ class _MessageListViewState extends State<MessageListView> {
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 16,
+                                                color: Colors.black87,
+                                                fontSize: 15.5,
                                                 fontWeight: conv.unreadCount > 0
                                                     ? FontWeight.bold
                                                     : FontWeight.w600,
@@ -514,13 +658,13 @@ class _MessageListViewState extends State<MessageListView> {
                                           Expanded(
                                             child: Text(
                                               conv.lastMessage,
-                                              maxLines: 2,
+                                              maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 color: conv.unreadCount > 0
                                                     ? Colors.black87
                                                     : const Color(0xFF6B7280),
-                                                fontSize: 14.5,
+                                                fontSize: 14,
                                                 height: 1.3,
                                                 fontWeight: conv.unreadCount > 0
                                                     ? FontWeight.w500
@@ -528,14 +672,14 @@ class _MessageListViewState extends State<MessageListView> {
                                               ),
                                             ),
                                           ),
-                                          _buildAttachment(
-                                              conv.attachmentImageUrl),
+
                                           if (conv.unreadCount > 0)
                                             Container(
                                               margin: const EdgeInsets.only(
-                                                  left: 10),
-                                              width: 22,
-                                              height: 22,
+                                                left: 10,
+                                              ),
+                                              width: 20,
+                                              height: 20,
                                               decoration: const BoxDecoration(
                                                 color: AppColors.primary,
                                                 shape: BoxShape.circle,
@@ -545,7 +689,7 @@ class _MessageListViewState extends State<MessageListView> {
                                                   '${conv.unreadCount}',
                                                   style: const TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 12,
+                                                    fontSize: 11,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),

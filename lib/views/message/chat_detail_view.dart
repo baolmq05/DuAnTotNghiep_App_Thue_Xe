@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:duantotnghiep_app_thue_xe/models/message_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 
 class ChatDetailView extends StatefulWidget {

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:duantotnghiep_app_thue_xe/routes/router_config.dart';
 import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
 
 void main() {
   runApp(
@@ -24,25 +25,30 @@ class DrivioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      // Device_Preview Package (Important)
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ConversationViewmodel()),
+      ],
+      child: MaterialApp.router(
+        // Device_Preview Package (Important)
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
 
-      // Enable drag-to-scroll with mouse on Web
-      scrollBehavior: const MaterialScrollBehavior().copyWith(
-        dragDevices: {
-          PointerDeviceKind.touch,
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.stylus,
-          PointerDeviceKind.trackpad,
-        },
+        // Enable drag-to-scroll with mouse on Web
+        scrollBehavior: const MaterialScrollBehavior().copyWith(
+          dragDevices: {
+            PointerDeviceKind.touch,
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.stylus,
+            PointerDeviceKind.trackpad,
+          },
+        ),
+
+        // Main Code
+        debugShowCheckedModeBanner: false,
+        theme: appTheme,
+        routerConfig: drivioRouter,
       ),
-
-      // Main Code
-      debugShowCheckedModeBanner: false,
-      theme: appTheme,
-      routerConfig: drivioRouter,
     );
   }
 }

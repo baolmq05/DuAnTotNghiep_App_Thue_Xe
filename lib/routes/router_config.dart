@@ -2,9 +2,10 @@ import 'package:duantotnghiep_app_thue_xe/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:duantotnghiep_app_thue_xe/models/message_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
 import 'package:duantotnghiep_app_thue_xe/views/car_detail.dart';
 import 'package:duantotnghiep_app_thue_xe/views/message/chat_detail_view.dart';
-import 'package:duantotnghiep_app_thue_xe/views/message/message_list_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/message/conversations_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide1_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide2_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide3_view.dart';
@@ -131,7 +132,7 @@ final drivioRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/messages',
-              builder: (context, state) => const MessageListView(),
+              builder: (context, state) => const ConversationsView(),
             ),
           ],
         ),
