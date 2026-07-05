@@ -84,57 +84,75 @@ class _HomePromotionState extends State<HomePromotion> {
           ),
         ),
 
-        // Carousel Slider
+        // Carousel Slider or Loading
         isLoading
             ? const SizedBox(
                 height: 180,
                 child: Center(child: CircularProgressIndicator()),
               )
-            : CarouselSlider(
-                carouselController: _carouselController,
-                options: CarouselOptions(
-                  height: 180.0,
-                  autoPlay: true,
-                  autoPlayInterval: const Duration(seconds: 4),
-                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                  autoPlayCurve: Curves.fastOutSlowIn,
-                  enlargeCenterPage: true,
-                  enlargeFactor: 0.22,
-                  viewportFraction: 0.9,
-                  enableInfiniteScroll: true,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
+            : promotions.isEmpty
+            ? const SizedBox(
+                height: 100,
+                child: Center(
+                  child: Text(
+                    'Hôm nay không có khuyến mãi nào',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
-                items: promotions.map((promo) {
-                  return PromotionTile(promotion: promo);
-                }).toList(),
-              ),
+              )
+            : Column(
+                children: [
+                  CarouselSlider(
+                    carouselController: _carouselController,
+                    options: CarouselOptions(
+                      height: 180.0,
+                      autoPlay: true,
+                      autoPlayInterval: const Duration(seconds: 4),
+                      autoPlayAnimationDuration: const Duration(
+                        milliseconds: 800,
+                      ),
+                      autoPlayCurve: Curves.fastOutSlowIn,
+                      enlargeCenterPage: true,
+                      enlargeFactor: 0.22,
+                      viewportFraction: 0.9,
+                      enableInfiniteScroll: true,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
+                    ),
+                    items: promotions.map((promo) {
+                      return PromotionTile(promotion: promo);
+                    }).toList(),
+                  ),
 
-        // Indicator dots
-        const SizedBox(height: 7),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: promotions.asMap().entries.map((entry) {
-            final int index = entry.key;
-            final bool isActive = _currentIndex == index;
-            return GestureDetector(
-              onTap: () => _carouselController.animateToPage(index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: isActive ? 18.0 : 6.0,
-                height: 6.0,
-                margin: const EdgeInsets.symmetric(horizontal: 3.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3.0),
-                  color: isActive ? AppColors.primary : Colors.grey.shade300,
-                ),
+                  // Indicator dots
+                  const SizedBox(height: 7),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: promotions.asMap().entries.map((entry) {
+                      final int index = entry.key;
+                      final bool isActive = _currentIndex == index;
+                      return GestureDetector(
+                        onTap: () => _carouselController.animateToPage(index),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: isActive ? 18.0 : 6.0,
+                          height: 6.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 3.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(3.0),
+                            color: isActive
+                                ? AppColors.primary
+                                : Colors.grey.shade300,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-            );
-          }).toList(),
-        ),
       ],
     );
   }

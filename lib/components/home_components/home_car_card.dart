@@ -1,6 +1,7 @@
 import 'package:duantotnghiep_app_thue_xe/components/home_components/feature_car.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../../models/car.dart';
 
 class CarFeature {
   final IconData icon;
@@ -11,40 +12,70 @@ class CarFeature {
 
 class HomeCarCard extends StatelessWidget {
   final double? width;
-  final String name;
-  final String imageUrl;
-  final String? discountText;
-  final String location;
-  final double rating;
-  final int ridesCount;
-  final int pricePerDay;
-  final int? originalPricePerDay;
+  final Car car;
   final bool isFavorite;
-  final List<CarFeature> features;
   final VoidCallback? onFavoriteTap;
   final VoidCallback? onTap;
 
   const HomeCarCard({
     super.key,
     this.width,
-    this.name = "SUZUKI XL7 2022",
-    this.imageUrl =
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwq-iHhpwhX--WirOBKIQr24jifaWPe2yFlqLiLqmCMGr4pdaVwD8YGiU&s=10",
-    this.discountText = "Giảm 10%",
-    this.location = "Phường 5, Đà Lạt",
-    this.rating = 4.5,
-    this.ridesCount = 100,
-    this.pricePerDay = 933,
-    this.originalPricePerDay = 1033,
+    required this.car,
     this.isFavorite = false,
-    this.features = const [
-      CarFeature(icon: Icons.ac_unit, text: "Số tự động"),
-      CarFeature(icon: Icons.ac_unit, text: "Số tự động"),
-      CarFeature(icon: Icons.ac_unit, text: "Số tự động"),
-    ],
     this.onFavoriteTap,
     this.onTap,
   });
+
+  String get imageUrl {
+    if (car.images.isEmpty) {
+      return "https://via.placeholder.com/600x300";
+    }
+    final thumbnailImage = car.images.firstWhere(
+      (img) => img.isThumbnail,
+      orElse: () => car.images.first,
+    );
+    return thumbnailImage.imageUrl;
+  }
+
+  String? get discountText {
+    if (car.unitPrice > 0 && car.discountValue > 0) {
+      final pct = ((car.discountValue / car.unitPrice) * 100).round();
+      return "Giảm $pct%";
+    }
+    return null;
+  }
+
+  String get location => car.carLocation?.address ?? 'Chưa xác định';
+
+  double get rating => car.reviewsAvgRating;
+
+  int get ridesCount => car.tripsCount;
+
+  List<CarFeature> get features {
+    final bool isAuto =
+        car.transmission.toLowerCase().contains("tự động") ||
+        car.transmission.toLowerCase().contains("auto");
+    return [
+      CarFeature(
+        icon: Icons.airline_seat_recline_normal,
+        text: "${car.seatCount} chỗ",
+      ),
+      CarFeature(
+        icon: isAuto ? Icons.autorenew_outlined : Icons.settings,
+        text: isAuto ? "Số tự động" : "Số sàn",
+      ),
+      CarFeature(icon: Icons.local_gas_station_outlined, text: car.fuelType),
+    ];
+  }
+
+  String formatPrice(num price) {
+    final value = price.toInt();
+    final formatted = value.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
+    return '$formattedđ';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +101,7 @@ class HomeCarCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
+    final discount = discountText;
     return Stack(
       children: [
         // Car Image with Error Placeholder
@@ -125,7 +157,7 @@ class HomeCarCard extends StatelessWidget {
         ),
 
         // Discount Tag
-        if (discountText != null && discountText!.isNotEmpty)
+        if (discount != null && discount.isNotEmpty)
           Positioned(
             top: 18,
             left: 18,
@@ -136,12 +168,8 @@ class HomeCarCard extends StatelessWidget {
                 color: AppColors.primary,
               ),
               child: Text(
-                discountText!,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
+                discount,
+                style: const TextStyle(color: Colors.white, fontSize: 11),
               ),
             ),
           ),
@@ -158,7 +186,7 @@ class HomeCarCard extends StatelessWidget {
         children: [
           // Title / Car Name
           Text(
-            name.toUpperCase(),
+            car.name.toUpperCase(),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -251,13 +279,18 @@ class HomeCarCard extends StatelessWidget {
   }
 
   Widget _buildPriceSection(BuildContext context) {
-    return Row(
+    final originalPriceVal = car.unitPrice;
+    final currentPriceVal = car.unitPrice - car.discountValue;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       spacing: 6,
       children: [
         // Original Price (Line-through)
-        if (originalPricePerDay != null)
+        if (car.discountValue > 0)
           Text(
-            '${originalPricePerDay}K',
+            formatPrice(originalPriceVal),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
@@ -267,19 +300,24 @@ class HomeCarCard extends StatelessWidget {
           ),
 
         // Current Rent Price
-        Text(
-          '${pricePerDay}K',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              formatPrice(currentPriceVal),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
 
-        // Unit
-        const Text(
-          '/ngày',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            // Unit
+            const Text(
+              '/ngày',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+          ],
         ),
       ],
     );
