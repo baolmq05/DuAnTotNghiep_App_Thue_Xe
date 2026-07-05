@@ -1,24 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../themes/app_colors.dart';
+import '../models/trip_model.dart';
+import '../services/trip_service.dart';
 
-class OrderDetailView extends StatelessWidget {
-  const OrderDetailView({super.key});
+class OrderDetailView extends StatefulWidget {
+  final int orderId;
+  const OrderDetailView({super.key, required this.orderId});
+
+  @override
+  State<OrderDetailView> createState() => _OrderDetailViewState();
+}
+
+class _OrderDetailViewState extends State<OrderDetailView> {
+  final TripService _tripService = TripService();
+  TripModel? _trip;
+  bool _isLoading = true;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTripDetail();
+  }
+
+  void _fetchTripDetail() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+    try {
+      final trip = await _tripService.getTripDetail(widget.orderId);
+      setState(() {
+        _trip = trip;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Không thể tải chi tiết đơn hàng. Vui lòng thử lại!';
+      });
+    }
+  }
+
+  String _formatPrice(double price) {
+    String priceStr = price.toInt().toString();
+    RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    String result = priceStr.replaceAllMapped(reg, (Match match) => '${match[1]}.');
+    return '$resultđ';
+  }
+
+  String _formatDate(DateTime date) {
+    const weekdays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    String pad(int v) => v.toString().padLeft(2, '0');
+    final weekdayStr = weekdays[date.weekday % 7];
+    return '$weekdayStr, ${pad(date.day)}/${pad(date.month)}/${date.year}';
+  }
+
+  String _formatDateTime(DateTime date) {
+    String pad(int v) => v.toString().padLeft(2, '0');
+    return '${pad(date.hour)}:${pad(date.minute)}';
+  }
+
+  int _calculateDays(DateTime start, DateTime end) {
+    final difference = end.difference(start).inDays;
+    return difference <= 0 ? 1 : difference;
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
+    if (_errorMessage.isNotEmpty || _trip == null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.primary,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => context.go('/orders'),
+          ),
+          title: const Text('Lỗi', style: TextStyle(color: Colors.white)),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_errorMessage.isNotEmpty ? _errorMessage : 'Không tìm thấy đơn hàng.', style: const TextStyle(color: Colors.red)),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _fetchTripDetail,
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                child: const Text('Thử lại', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final trip = _trip!;
+    final car = trip.car;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          // header có màu xanh đâm bên trên
           SliverAppBar(
             backgroundColor: AppColors.primary,
-            pinned: true, // giữ header luôn hiển thị khi cuộn
+            pinned: true,
             leading: IconButton(
-              // nut back
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.go('/'),
+              onPressed: () => context.go('/orders'),
             ),
             title: const Text(
               'Chi tiết đơn hàng',
@@ -33,7 +129,7 @@ class OrderDetailView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(right: 16.0),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min, // cho các nút nằm sát nhau
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: const Icon(
@@ -43,8 +139,7 @@ class OrderDetailView extends StatelessWidget {
                       onPressed: () {},
                     ),
                     IconButton(
-                      constraints:
-                          const BoxConstraints(), // xóa bỏ mặc định của pd của icon
+                      constraints: const BoxConstraints(),
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.more_horiz, color: Colors.white),
                       onPressed: () {},
@@ -54,34 +149,25 @@ class OrderDetailView extends StatelessWidget {
               ),
             ],
           ),
-
-          // nội dung chính của trang chi tiết đơn hàng
           SliverToBoxAdapter(
             child: Column(
               children: [
-                _buildHeaderStatus(),
+                _buildHeaderStatus(trip),
                 Transform.translate(
-                  offset: const Offset(
-                    0,
-                    -30,
-                  ), // Kéo toàn bộ cả cụm card lên 30dp
+                  offset: const Offset(0, -30),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       children: [
-                        // chiều cao của các card
-                        _buildCarCard(),
+                        if (car != null) _buildCarCard(car),
                         const SizedBox(height: 20),
-                        _buildOwnerCard(),
+                        if (car != null && car.owner != null) _buildOwnerCard(car.owner!),
                         const SizedBox(height: 20),
-                        _buildTimeCard(),
+                        _buildTimeCard(trip),
                         const SizedBox(height: 20),
-                        _buildPriceCard(),
+                        _buildPriceCard(trip),
                         const SizedBox(height: 20),
-                        _buildStatusTimeline(),
-                        // const SizedBox(height: 24),
-                        // _buildBottomActionButtons(),
-                        // const SizedBox(height: 40),
+                        _buildStatusTimeline(trip),
                         const SizedBox(height: 16),
                       ],
                     ),
@@ -93,7 +179,6 @@ class OrderDetailView extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Container(
-        // padding cho nút ở dưới cùng, thêm MediaQuery.of(context).padding.bottom để tránh bị che bởi thanh điều hướng của điện thoại
         decoration: BoxDecoration(
           color: AppColors.background,
           border: Border(
@@ -104,15 +189,31 @@ class OrderDetailView extends StatelessWidget {
           left: 12,
           right: 12,
           top: 10,
-          bottom: MediaQuery.of(context).padding.bottom + 10, // thêm khoảng cách dưới cùng để tránh bị che bởi thanh điều hướng của điện thoại
+          bottom: MediaQuery.of(context).padding.bottom + 10,
         ),
         child: _buildBottomActionButtons(),
       ),
     );
   }
 
-  // header trạng thái đơn hàng
-  Widget _buildHeaderStatus() {
+  Widget _buildHeaderStatus(TripModel trip) {
+    Color statusBgColor;
+    switch (trip.status) {
+      case 0:
+        statusBgColor = Colors.orange;
+        break;
+      case 1:
+        statusBgColor = Colors.blue;
+        break;
+      case 2:
+      case 3:
+      case 4:
+        statusBgColor = AppColors.success;
+        break;
+      default:
+        statusBgColor = AppColors.error;
+    }
+
     return Container(
       color: AppColors.primary,
       padding: const EdgeInsets.fromLTRB(20, 5, 20, 36),
@@ -122,46 +223,45 @@ class OrderDetailView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.success,
+              color: statusBgColor,
               borderRadius: BorderRadius.circular(7),
             ),
-            child: const Text(
-              'Đang thuê',
-              style: TextStyle(color: Colors.white, fontSize: 12),
+            child: Text(
+              trip.getStatusDisplay(),
+              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ),
           const SizedBox(height: 8),
           Row(
-            mainAxisAlignment: MainAxisAlignment
-                .spaceBetween, // chia ra để đều 2 cột trái phải
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '#RT123456',
-                    style: TextStyle(color: Colors.white),
+                  Text(
+                    '#RT${trip.id}',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Đặt ngày 10/06/2024 - 10:30',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                    'Đặt ngày ${_formatDate(trip.startAt)}',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
-                    '2.000.000đ',
-                    style: TextStyle(
+                  Text(
+                    _formatPrice(trip.cost),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
                   Text(
-                    'Đặt cọc: 2.000.000đ',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                    'Đặt cọc: ${_formatPrice(trip.cost)}',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
               ),
@@ -172,8 +272,10 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // card thông tin xe
-  Widget _buildCarCard() {
+  Widget _buildCarCard(CarModel car) {
+    final imageUrl = car.getFirstImageUrl();
+    final addressText = car.carLocation?.address ?? car.carLocation?.city ?? 'TP. Hồ Chí Minh';
+
     return Card(
       margin: EdgeInsets.zero,
       color: AppColors.card,
@@ -186,10 +288,16 @@ class OrderDetailView extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                'https://picsum.photos/100/70',
+                imageUrl,
                 width: 90,
                 height: 65,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Image.network(
+                  'https://picsum.photos/300/200',
+                  width: 90,
+                  height: 65,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -197,43 +305,42 @@ class OrderDetailView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Toyota Corolla Cross 2023',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Text(
+                    car.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.location_on,
                         size: 14,
                         color: AppColors.primary,
                       ),
                       const SizedBox(width: 4),
-                      const Text(
-                        '51K-123.45 • Trắng',
-                        style: TextStyle(fontSize: 14),
+                      Expanded(
+                        child: Text(
+                          '${car.licensePlate} • $addressText',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
-                    children: const [
-                      Icon(Icons.person_outline, size: 14),
-                      Text(' 5 chỗ  ', style: TextStyle(fontSize: 13)),
-                      Icon(Icons.autorenew, size: 14),
-                      Text(' Số tự động  ', style: TextStyle(fontSize: 13)),
-                      Icon(Icons.local_gas_station_outlined, size: 14),
-                      Text(' Xăng', style: TextStyle(fontSize: 13)),
+                    children: [
+                      const Icon(Icons.person_outline, size: 14),
+                      Text(' ${car.seatCount} chỗ  ', style: const TextStyle(fontSize: 13)),
+                      const Icon(Icons.autorenew, size: 14),
+                      Text(' ${car.transmission ?? "Số tự động"}  ', style: const TextStyle(fontSize: 13)),
+                      const Icon(Icons.local_gas_station_outlined, size: 14),
+                      Text(' ${car.fuelType ?? "Xăng"}', style: const TextStyle(fontSize: 13)),
                     ],
                   ),
                 ],
               ),
-            ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 15,
-              color: AppColors.primary,
             ),
           ],
         ),
@@ -241,8 +348,9 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // card thông tin chủ xe
-  Widget _buildOwnerCard() {
+  Widget _buildOwnerCard(OwnerModel owner) {
+    final avatarUrl = owner.avatar ?? 'https://picsum.photos/100';
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -252,7 +360,7 @@ class OrderDetailView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Chủ xe',
             style: TextStyle(
               color: AppColors.textPrimary,
@@ -262,18 +370,19 @@ class OrderDetailView extends StatelessWidget {
           const SizedBox(height: 13),
           Row(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 25,
-                backgroundImage: NetworkImage('https://picsum.photos/100'),
+                backgroundImage: NetworkImage(avatarUrl),
+                onBackgroundImageError: (exception, stackTrace) {},
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Nguyễn Minh Đức',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      owner.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Row(
                       children: [
@@ -298,11 +407,9 @@ class OrderDetailView extends StatelessWidget {
                   ],
                 ),
               ),
-
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // nút chat
                   Container(
                     width: 48,
                     height: 48,
@@ -317,15 +424,12 @@ class OrderDetailView extends StatelessWidget {
                         color: AppColors.primary,
                       ),
                       onPressed: () {},
-                      // xóa bỏ hover, splash, highlight để tránh màu nền khi bấm
                       hoverColor: Colors.transparent,
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                     ),
                   ),
                   const SizedBox(width: 10),
-
-                  // nút gọi
                   Container(
                     width: 48,
                     height: 48,
@@ -351,8 +455,11 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // card thời gian thuê
-  Widget _buildTimeCard() {
+  Widget _buildTimeCard(TripModel trip) {
+    final startCity = trip.car?.carLocation?.city ?? 'TP. Hồ Chí Minh';
+    final endCity = trip.car?.carLocation?.city ?? 'TP. Hồ Chí Minh';
+    final rentalDays = _calculateDays(trip.startAt, trip.endAt);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -362,7 +469,7 @@ class OrderDetailView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Thời gian thuê',
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -375,14 +482,14 @@ class OrderDetailView extends StatelessWidget {
             children: [
               _buildTimeSubCol(
                 'Nhận xe',
-                'T7, 22/06/2024',
-                '09:00',
-                'TP. Hồ Chí Minh',
+                _formatDate(trip.startAt),
+                _formatDateTime(trip.startAt),
+                startCity,
               ),
               Column(
                 children: [
                   Text(
-                    '2 ngày',
+                    '$rentalDays ngày',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,
@@ -393,7 +500,7 @@ class OrderDetailView extends StatelessWidget {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
@@ -402,7 +509,7 @@ class OrderDetailView extends StatelessWidget {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
@@ -413,9 +520,9 @@ class OrderDetailView extends StatelessWidget {
               ),
               _buildTimeSubCol(
                 'Trả xe',
-                'T2, 24/06/2024',
-                '09:00',
-                'TP. Hồ Chí Minh',
+                _formatDate(trip.endAt),
+                _formatDateTime(trip.endAt),
+                endCity,
               ),
             ],
           ),
@@ -424,7 +531,6 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // cột cho tg thuê
   Widget _buildTimeSubCol(
     String label,
     String date,
@@ -432,7 +538,6 @@ class OrderDetailView extends StatelessWidget {
     String location,
   ) {
     return Column(
-      // căn chỉnh các cột trái phải theo label
       crossAxisAlignment: label == 'Nhận xe'
           ? CrossAxisAlignment.start
           : CrossAxisAlignment.end,
@@ -440,7 +545,7 @@ class OrderDetailView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.access_time, size: 10, color: AppColors.primary),
+            const Icon(Icons.access_time, size: 10, color: AppColors.primary),
             const SizedBox(width: 4),
             Text(
               label,
@@ -460,7 +565,7 @@ class OrderDetailView extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.location_on, size: 10, color: AppColors.primary),
+            const Icon(Icons.location_on, size: 10, color: AppColors.primary),
             const SizedBox(width: 4),
             Text(
               location,
@@ -472,8 +577,11 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // card chi tiết giá
-  Widget _buildPriceCard() {
+  Widget _buildPriceCard(TripModel trip) {
+    final rentalDays = _calculateDays(trip.startAt, trip.endAt);
+    final subtotal = trip.cost + trip.discountAmount;
+    final unitPrice = subtotal / rentalDays;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -483,23 +591,24 @@ class OrderDetailView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Chi phí',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
           ),
-          const Divider(height: 24), // đươpng kẻ ngang
-          _buildPriceRow('Tiền thuê xe (2 ngày x 700.000đ)', '1.400.000đ'),
-          _buildPriceRow('Phí giao xe', '100.000đ'),
-          _buildPriceRow('Phí vệ sinh', '100.000đ'),
-          _buildPriceRow('Khuyến mãi', '-100.000đ', isDiscount: true),
+          const Divider(height: 24),
+          _buildPriceRow('Tiền thuê xe ($rentalDays ngày x ${_formatPrice(unitPrice)})', _formatPrice(subtotal)),
+          _buildPriceRow('Phí giao xe', _formatPrice(0)),
+          _buildPriceRow('Phí vệ sinh', _formatPrice(0)),
+          if (trip.discountAmount > 0)
+            _buildPriceRow('Khuyến mãi', '-${_formatPrice(trip.discountAmount)}', isDiscount: true),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Tổng cộng',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -508,8 +617,8 @@ class OrderDetailView extends StatelessWidget {
                 ),
               ),
               Text(
-                '2.000.000đ',
-                style: TextStyle(
+                _formatPrice(trip.cost),
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                   fontSize: 16,
@@ -521,12 +630,12 @@ class OrderDetailView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Đã thanh toán (đặt cọc)',
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
               ),
               Text(
-                '2.000.000đ',
+                _formatPrice(trip.cost),
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
               ),
             ],
@@ -536,16 +645,13 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // hàng chi tiết giá
   Widget _buildPriceRow(String label, String value, {bool isDiscount = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4.0,
-      ), // khoảng cách các hàng
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: AppColors.textPrimary)),
+          Text(label, style: const TextStyle(color: AppColors.textPrimary)),
           Text(
             value,
             style: TextStyle(
@@ -558,8 +664,13 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // timeline trạng thái đơn hàng
-  Widget _buildStatusTimeline() {
+  Widget _buildStatusTimeline(TripModel trip) {
+    final isStep1 = trip.status >= 0;
+    final isStep2 = trip.status >= 1;
+    final isStep3 = trip.status >= 2;
+    final isStep4 = trip.status >= 3;
+    final isStep5 = trip.status == 4;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -569,7 +680,7 @@ class OrderDetailView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Trạng thái đơn ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -577,26 +688,34 @@ class OrderDetailView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-
           Row(
             children: [
               Expanded(
-                // mỗi bước chiếm 1 phần bằng nhau
                 child: _buildTimelineStep(
-                  icon: Icons.account_balance_wallet,
-                  title: 'Đặt cọc',
-                  time: '10/06 10:30',
-                  isDone: true,
+                  icon: Icons.assignment_outlined,
+                  title: 'Đăng ký thuê',
+                  time: isStep1 ? _formatDateTime(trip.startAt) : '--',
+                  isDone: isStep1,
                   showLeftLine: false,
                   showRightLine: true,
                 ),
               ),
               Expanded(
                 child: _buildTimelineStep(
+                  icon: Icons.account_balance_wallet,
+                  title: 'Đặt cọc',
+                  time: isStep2 ? 'Đã cọc' : '--',
+                  isDone: isStep2,
+                  showLeftLine: true,
+                  showRightLine: true,
+                ),
+              ),
+              Expanded(
+                child: _buildTimelineStep(
                   icon: Icons.check,
-                  title: 'Chủ xe xác nhận',
-                  time: '10/06 11:15',
-                  isDone: true,
+                  title: 'Xác nhận',
+                  time: isStep3 ? 'Thành công' : '--',
+                  isDone: isStep3,
                   showLeftLine: true,
                   showRightLine: true,
                 ),
@@ -605,18 +724,8 @@ class OrderDetailView extends StatelessWidget {
                 child: _buildTimelineStep(
                   icon: Icons.directions_car,
                   title: 'Nhận xe',
-                  time: '22/06 09:00',
-                  isDone: true,
-                  showLeftLine: true,
-                  showRightLine: true,
-                ),
-              ),
-              Expanded(
-                child: _buildTimelineStep(
-                  icon: Icons.car_rental,
-                  title: 'Trả xe',
-                  time: '--',
-                  isDone: false,
+                  time: isStep4 ? _formatDateTime(trip.startAt) : '--',
+                  isDone: isStep4,
                   showLeftLine: true,
                   showRightLine: true,
                 ),
@@ -625,8 +734,8 @@ class OrderDetailView extends StatelessWidget {
                 child: _buildTimelineStep(
                   icon: Icons.assignment_turned_in,
                   title: 'Hoàn tất',
-                  time: '--',
-                  isDone: false,
+                  time: isStep5 ? 'Đã xong' : '--',
+                  isDone: isStep5,
                   showLeftLine: true,
                   showRightLine: false,
                 ),
@@ -638,7 +747,6 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // hàm tái sử  dụng cho timeline dùng để tạo từng bước trong timeline
   Widget _buildTimelineStep({
     required IconData icon,
     required String title,
@@ -661,14 +769,12 @@ class OrderDetailView extends StatelessWidget {
                   color: showLeftLine ? color : Colors.transparent,
                 ),
               ),
-
               Container(
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: color),
                 child: Icon(icon, color: Colors.white, size: 14),
               ),
-
               Expanded(
                 child: Container(
                   height: 2,
@@ -678,7 +784,6 @@ class OrderDetailView extends StatelessWidget {
             ],
           ),
         ),
-
         const SizedBox(height: 6),
         SizedBox(
           height: 30,
@@ -687,14 +792,13 @@ class OrderDetailView extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
           ),
         ),
-
         const SizedBox(height: 2),
         Text(
           time,
@@ -705,16 +809,12 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  //  nút nút hỗ trợ sự cố
   Widget _buildBottomActionButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildActionItem(Icons.assignment_outlined, 'Biên bản\nnhận xe'),
-        _buildActionItem(
-          Icons.assignment_turned_in_outlined,
-          'Biên bản\ntrả xe',
-        ),
+        _buildActionItem(Icons.assignment_turned_in_outlined, 'Biên bản\ntrả xe'),
         _buildActionItem(Icons.headset_mic_outlined, 'Liên hệ\nhỗ trợ'),
         _buildActionItem(
           Icons.gpp_bad_outlined,
@@ -725,7 +825,6 @@ class OrderDetailView extends StatelessWidget {
     );
   }
 
-  // hàm tái sử dụng cho các nút hành động ở dưới cùng, có thể là "Biên bản nhận xe", "Biên bản trả xe", "Liên hệ hỗ trợ", "Báo cáo sự cố"
   Widget _buildActionItem(
     IconData icon,
     String label, {
@@ -757,7 +856,7 @@ class OrderDetailView extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 10, // Giảm nhẹ size chữ từ 11 xuống 10 để an toàn hơn
+                fontSize: 10,
                 color: isDanger ? AppColors.error : AppColors.textPrimary,
               ),
             ),

@@ -58,9 +58,13 @@ final drivioRouter = GoRouter(
       builder: (context, state) => const SettingView(),
     ),
     GoRoute(
-      path: '/order-detail',
+      path: '/order-detail/:id',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const OrderDetailView(),
+      builder: (context, state) {
+        final idStr = state.pathParameters['id']!;
+        final id = int.tryParse(idStr) ?? 0;
+        return OrderDetailView(orderId: id);
+      },
     ),
     GoRoute(
       path: '/car_detail',
