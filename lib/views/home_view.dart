@@ -5,6 +5,7 @@ import 'package:duantotnghiep_app_thue_xe/components/home_components/home_insura
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_promotion.dart';
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_rent_out_banner.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -40,7 +41,9 @@ class HomeView extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.go('/notification');
+                  },
                   icon: const Icon(Icons.notifications_none_outlined),
                 ),
 

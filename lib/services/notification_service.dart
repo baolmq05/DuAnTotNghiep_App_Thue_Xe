@@ -2,19 +2,13 @@ import '../models/notification_model.dart';
 import 'base_service.dart';
 
 class NotificationService extends BaseService {
-  Map<String, String> _authHeaders() {
-    const yourJwtToken =
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvcmVmcmVzaCIsImlhdCI6MTc4MzMwNjkxNiwiZXhwIjoxNzgzMzE1Mjg5LCJuYmYiOjE3ODMzMTE2ODksImp0aSI6IjF0VGwycDVNekxwbVNyQk8iLCJzdWIiOiI4IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.a4cuH19Z2IrgACYHqa0Q-oswzFoRznQ99a4ehoCRaec";
-
-    return {'Authorization': 'Bearer $yourJwtToken'};
-  }
-
-  // Lấy danh sách thông báo từ API
+  // Lấy danh sách thông báo từ API theo user_id
   Future<List<Notification>> fetchNotifications() async {
     try {
-      final response = await get(
-        'api/auth/notifications?user_id=8',
-        headers: _authHeaders(),
+      // Gọi API để lấy danh sách thông báo và token tự động được thêm vào header bởi BaseService
+      final response = await get( 
+        'api/auth/notifications',
+        requiresAuth: true, 
       );
 
       print('DỮ LIỆU TỪ LARAVEL TRẢ VỀ: $response');
@@ -38,8 +32,10 @@ class NotificationService extends BaseService {
     try {
       await update(
         'api/auth/notifications/${notification.id}',
-        body: {'is_read': '1'},
-        headers: _authHeaders(),
+        body: {
+          'is_read': '1', 
+        },
+        requiresAuth: true, 
       );
     } catch (e) {
       print('LỖI KHI CẬP NHẬT THÔNG BÁO ĐÃ ĐỌC: $e');
@@ -47,12 +43,12 @@ class NotificationService extends BaseService {
     }
   }
 
-// Xóa thông báo
+  // Xóa thông báo
   Future<void> deleteNotification(Notification notification) async {
     try {
       await delete(
         'api/auth/notifications/${notification.id}',
-        headers: _authHeaders(),
+        requiresAuth: true, 
       );
     } catch (e) {
       print('LỖI KHI XÓA THÔNG BÁO: $e');

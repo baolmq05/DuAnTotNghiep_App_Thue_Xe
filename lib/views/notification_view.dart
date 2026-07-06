@@ -25,10 +25,12 @@ class _NotificationViewState extends State<NotificationView> {
     _loadNotifications();
   }
 
-  // tải dữ liệu thông báo từ API sắp xếp theo thời gian mới nhất
+  // hàm tải thông báo từ API
   Future<void> _loadNotifications() async {
     try {
+      // gọi từ bên service
       final notifications = await _notificationService.fetchNotifications();
+
       setState(() {
         _allNotifications = [...notifications]
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -93,6 +95,7 @@ class _NotificationViewState extends State<NotificationView> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // tiêu đề
                 Row(
                   children: [
                     Container(
@@ -122,6 +125,30 @@ class _NotificationViewState extends State<NotificationView> {
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Divider(height: 1),
                 ),
+
+                // tg tb
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.access_time_rounded,
+                      size: 14,
+                      color: Colors.black45, 
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.black45,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                // nội dung thông báo 
                 Flexible(
                   child: SingleChildScrollView(
                     child: Text(
@@ -134,33 +161,9 @@ class _NotificationViewState extends State<NotificationView> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.access_time_rounded,
-                        size: 16,
-                        color: Colors.black54,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        formattedDate,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
+
+                // 4. Nút Đóng
                 Align(
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
@@ -280,7 +283,7 @@ class _NotificationViewState extends State<NotificationView> {
               ),
             ],
           ),
-          backgroundColor: AppColors.success, 
+          backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           elevation: 3,
           margin: const EdgeInsets.all(16),
@@ -324,7 +327,7 @@ class _NotificationViewState extends State<NotificationView> {
     }
   }
 
- // UI
+  // UI
   @override
   Widget build(BuildContext context) {
     final displayedNotifications = _isAllTab
@@ -423,7 +426,7 @@ class _NotificationViewState extends State<NotificationView> {
     );
   }
 
-// hàm xây dựng toggle giữa tab "Tất cả" và "Chưa đọc"
+  // hàm xây dựng toggle giữa tab "Tất cả" và "Chưa đọc"
   Widget _buildTabToggle() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -510,7 +513,7 @@ class _NotificationViewState extends State<NotificationView> {
     );
   }
 
-// hàm xây dựng header cho từng nhóm thông báo theo ngày
+  // hàm xây dựng header cho từng nhóm thông báo theo ngày
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0, left: 4.0),
@@ -525,7 +528,7 @@ class _NotificationViewState extends State<NotificationView> {
     );
   }
 
-// hàm xây dựng từng item thông báo
+  // hàm xây dựng từng item thông báo
   Widget _buildNotificationItem({required Notification notification}) {
     final String timeString = DateFormat(
       'dd/MM/yyyy HH:mm',
