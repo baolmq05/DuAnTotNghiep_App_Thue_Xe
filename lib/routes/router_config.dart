@@ -17,6 +17,7 @@ import 'package:duantotnghiep_app_thue_xe/views/splash_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/main_screen.dart';
 import 'package:duantotnghiep_app_thue_xe/views/home_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/profile.dart';
+import 'package:duantotnghiep_app_thue_xe/views/notification_view.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -99,6 +100,11 @@ final drivioRouter = GoRouter(
         final conv = state.extra as Conversation?;
         return ChatDetailView(conversationId: id, conversation: conv);
       },
+    ),
+    GoRoute(
+      path: '/notification',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const NotificationView(),
     ),
 
     // StatefulShellRoute chứa 4 tab chính của ứng dụng
