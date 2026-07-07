@@ -448,6 +448,13 @@ class _ProfileViewState extends State<ProfileView> {
             },
           ),
           _buildMenuItem(
+            icon: Icons.place_outlined,
+            title: 'Địa chỉ của tôi',
+            onTap: () {
+              context.push('/address');
+            },
+          ),
+          _buildMenuItem(
             icon: Icons.support_agent,
             title: 'Trung tâm hỗ trợ',
             showDivider: false,

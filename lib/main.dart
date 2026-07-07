@@ -13,6 +13,7 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/order_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/order_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/address_viewmodel.dart';
 
 void main() {
   runApp(
@@ -40,6 +41,7 @@ class DrivioApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => OrderDetailViewModel()),
         ChangeNotifierProvider(create: (context) => NotificationViewModel()),
         ChangeNotifierProvider(create: (context) => ChatDetailViewModel()),
+        ChangeNotifierProvider(create: (context) => AddressViewModel()),
       ],
       child: MaterialApp.router(
         // Device_Preview Package (Important)

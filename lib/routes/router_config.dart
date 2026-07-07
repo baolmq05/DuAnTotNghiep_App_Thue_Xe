@@ -20,6 +20,7 @@ import 'package:duantotnghiep_app_thue_xe/views/profile_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/notification_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/support_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/support_detail_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/address_view.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -112,6 +113,11 @@ final drivioRouter = GoRouter(
       path: '/support',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const SupportView(),
+    ),
+    GoRoute(
+      path: '/address',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const AddressView(),
     ),
     GoRoute(
       path: '/support-detail',
