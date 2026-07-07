@@ -72,14 +72,18 @@ class SettingView extends StatelessWidget {
           SizedBox(height: 6),
           SettingTile(
             title: 'Điều khoản sử dụng',
-            icon: Icon(Icons.note_alt_outlined),
-            onTap: () {},
+            icon: const Icon(Icons.note_alt_outlined),
+            onTap: () {
+              context.push('/policy');
+            },
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           SettingTile(
             title: 'Chính sách bảo mật',
-            icon: Icon(Icons.policy_outlined),
-            onTap: () {},
+            icon: const Icon(Icons.policy_outlined),
+            onTap: () {
+              context.push('/policy');
+            },
           ),
           SizedBox(height: 6),
           SettingTile(

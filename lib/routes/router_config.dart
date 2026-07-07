@@ -14,6 +14,7 @@ import 'package:duantotnghiep_app_thue_xe/views/order_detail_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/register_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/setting_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/splash_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/policy_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/main_screen_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/home_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/profile_view.dart';
@@ -46,6 +47,19 @@ final drivioRouter = GoRouter(
       path: '/',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const SplashView(),
+    ),
+    GoRoute(
+      path: '/policy',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final showAcceptance = extra?['showAcceptance'] as bool? ?? false;
+        final onAccept = extra?['onAccept'] as VoidCallback?;
+        return PolicyView(
+          showAcceptance: showAcceptance,
+          onAccept: onAccept,
+        );
+      },
     ),
     GoRoute(
       path: '/register',

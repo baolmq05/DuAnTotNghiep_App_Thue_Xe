@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -432,6 +433,10 @@ class _LoginViewState extends State<LoginView> {
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
                       ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          context.push('/policy');
+                        },
                     ),
                     const TextSpan(text: ' và '),
                     TextSpan(
@@ -441,6 +446,10 @@ class _LoginViewState extends State<LoginView> {
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
                       ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          context.push('/policy');
+                        },
                     ),
                   ],
                 ),

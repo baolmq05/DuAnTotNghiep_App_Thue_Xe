@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/policy_viewmodel.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -21,6 +23,14 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PolicyViewModel>().resetAcceptance();
+    });
+  }
 
   @override
   void dispose() {
@@ -84,6 +94,17 @@ class _RegisterViewState extends State<RegisterView> {
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mật khẩu xác nhận không trùng khớp.')),
+      );
+      return;
+    }
+
+    final isPolicyAccepted = context.read<PolicyViewModel>().isAccepted;
+    if (!isPolicyAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng đọc và đồng ý với Chính sách & Quy định trước khi đăng ký.'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -441,7 +462,67 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                 ),
               ),
-              const SizedBox(height: 28.0),
+              const SizedBox(height: 16.0),
+              
+              // Policy Agreement Checkbox
+              Consumer<PolicyViewModel>(
+                builder: (context, policyViewModel, child) {
+                  return Row(
+                    children: [
+                      Checkbox(
+                        value: policyViewModel.isAccepted,
+                        onChanged: (value) {
+                          if (value == true) {
+                            // Mở trang chính sách khi người dùng bấm chọn đồng ý (chưa tích)
+                            context.push('/policy', extra: {
+                              'showAcceptance': true,
+                              'onAccept': () {
+                                policyViewModel.setAccepted(true);
+                              }
+                            });
+                          } else {
+                            // Bỏ chọn trực tiếp nếu đã tích trước đó
+                            policyViewModel.setAccepted(false);
+                          }
+                        },
+                        activeColor: colorScheme.primary,
+                      ),
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            text: 'Tôi đã đọc và đồng ý với ',
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                              fontSize: 13.0,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Chính sách & Quy định',
+                                style: TextStyle(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    context.push('/policy', extra: {
+                                      'showAcceptance': true,
+                                      'onAccept': () {
+                                        policyViewModel.setAccepted(true);
+                                      }
+                                    });
+                                  },
+                              ),
+                              const TextSpan(text: ' của DRIVIO.'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 24.0),
               
               // Register Button
               Consumer<AuthProvider>(
