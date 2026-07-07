@@ -4,11 +4,26 @@ import 'package:duantotnghiep_app_thue_xe/components/home_components/home_filter
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_insurance.dart';
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_promotion.dart';
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_rent_out_banner.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeViewModel>().fetchHomeData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +102,7 @@ class HomeView extends StatelessWidget {
           const HomePromotion(),
           const SizedBox(height: 20),
           // Xe nổi bật gần bạn
-          HomeCarList(),
+          const HomeCarList(),
           const SizedBox(height: 20),
           // Bảo hiểm
           const HomeInsurance(),
@@ -103,3 +118,4 @@ class HomeView extends StatelessWidget {
     );
   }
 }
+

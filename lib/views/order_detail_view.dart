@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../themes/app_colors.dart';
 import '../models/trip_model.dart';
-import '../services/trip_service.dart';
+import '../viewmodels/order_detail_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class OrderDetailView extends StatefulWidget {
   final int orderId;
@@ -13,40 +14,21 @@ class OrderDetailView extends StatefulWidget {
 }
 
 class _OrderDetailViewState extends State<OrderDetailView> {
-  final TripService _tripService = TripService();
-  TripModel? _trip;
-  bool _isLoading = true;
-  String _errorMessage = '';
-
   @override
   void initState() {
     super.initState();
-    _fetchTripDetail();
-  }
-
-  void _fetchTripDetail() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderDetailViewModel>().fetchTripDetail(widget.orderId);
     });
-    try {
-      final trip = await _tripService.getTripDetail(widget.orderId);
-      setState(() {
-        _trip = trip;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Không thể tải chi tiết đơn hàng. Vui lòng thử lại!';
-      });
-    }
   }
 
   String _formatPrice(double price) {
     String priceStr = price.toInt().toString();
     RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    String result = priceStr.replaceAllMapped(reg, (Match match) => '${match[1]}.');
+    String result = priceStr.replaceAllMapped(
+      reg,
+      (Match match) => '${match[1]}.',
+    );
     return '$resultđ';
   }
 
@@ -69,13 +51,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    final viewModel = context.watch<OrderDetailViewModel>();
+
+    if (viewModel.isLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
-    if (_errorMessage.isNotEmpty || _trip == null) {
+    if (viewModel.errorMessage.isNotEmpty || viewModel.trip == null) {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: AppColors.primary,
@@ -89,12 +75,22 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_errorMessage.isNotEmpty ? _errorMessage : 'Không tìm thấy đơn hàng.', style: const TextStyle(color: Colors.red)),
+              Text(
+                viewModel.errorMessage.isNotEmpty
+                    ? viewModel.errorMessage
+                    : 'Không tìm thấy đơn hàng.',
+                style: const TextStyle(color: Colors.red),
+              ),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: _fetchTripDetail,
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                child: const Text('Thử lại', style: TextStyle(color: Colors.white)),
+                onPressed: () => viewModel.fetchTripDetail(widget.orderId),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                child: const Text(
+                  'Thử lại',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -102,7 +98,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       );
     }
 
-    final trip = _trip!;
+    final trip = viewModel.trip!;
     final car = trip.car;
 
     return Scaffold(
@@ -161,7 +157,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       children: [
                         if (car != null) _buildCarCard(car),
                         const SizedBox(height: 20),
-                        if (car != null && car.owner != null) _buildOwnerCard(car.owner!),
+                        if (car != null && car.owner != null)
+                          _buildOwnerCard(car.owner!),
                         const SizedBox(height: 20),
                         _buildTimeCard(trip),
                         const SizedBox(height: 20),
@@ -228,7 +225,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
             child: Text(
               trip.getStatusDisplay(),
-              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -240,7 +241,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 children: [
                   Text(
                     '#RT${trip.id}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     'Đặt ngày ${_formatDate(trip.startAt)}',
@@ -274,7 +278,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
   Widget _buildCarCard(CarModel car) {
     final imageUrl = car.getFirstImageUrl();
-    final addressText = car.carLocation?.address ?? car.carLocation?.city ?? 'TP. Hồ Chí Minh';
+    final addressText =
+        car.carLocation?.address ?? car.carLocation?.city ?? 'TP. Hồ Chí Minh';
 
     return Card(
       margin: EdgeInsets.zero,
@@ -307,7 +312,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 children: [
                   Text(
                     car.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -332,11 +340,20 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   Row(
                     children: [
                       const Icon(Icons.person_outline, size: 14),
-                      Text(' ${car.seatCount} chỗ  ', style: const TextStyle(fontSize: 13)),
+                      Text(
+                        ' ${car.seatCount} chỗ  ',
+                        style: const TextStyle(fontSize: 13),
+                      ),
                       const Icon(Icons.autorenew, size: 14),
-                      Text(' ${car.transmission ?? "Số tự động"}  ', style: const TextStyle(fontSize: 13)),
+                      Text(
+                        ' ${car.transmission ?? "Số tự động"}  ',
+                        style: const TextStyle(fontSize: 13),
+                      ),
                       const Icon(Icons.local_gas_station_outlined, size: 14),
-                      Text(' ${car.fuelType ?? "Xăng"}', style: const TextStyle(fontSize: 13)),
+                      Text(
+                        ' ${car.fuelType ?? "Xăng"}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
                     ],
                   ),
                 ],
@@ -599,11 +616,18 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
           ),
           const Divider(height: 24),
-          _buildPriceRow('Tiền thuê xe ($rentalDays ngày x ${_formatPrice(unitPrice)})', _formatPrice(subtotal)),
+          _buildPriceRow(
+            'Tiền thuê xe ($rentalDays ngày x ${_formatPrice(unitPrice)})',
+            _formatPrice(subtotal),
+          ),
           _buildPriceRow('Phí giao xe', _formatPrice(0)),
           _buildPriceRow('Phí vệ sinh', _formatPrice(0)),
           if (trip.discountAmount > 0)
-            _buildPriceRow('Khuyến mãi', '-${_formatPrice(trip.discountAmount)}', isDiscount: true),
+            _buildPriceRow(
+              'Khuyến mãi',
+              '-${_formatPrice(trip.discountAmount)}',
+              isDiscount: true,
+            ),
           const Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -814,7 +838,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildActionItem(Icons.assignment_outlined, 'Biên bản\nnhận xe'),
-        _buildActionItem(Icons.assignment_turned_in_outlined, 'Biên bản\ntrả xe'),
+        _buildActionItem(
+          Icons.assignment_turned_in_outlined,
+          'Biên bản\ntrả xe',
+        ),
         _buildActionItem(Icons.headset_mic_outlined, 'Liên hệ\nhỗ trợ'),
         _buildActionItem(
           Icons.gpp_bad_outlined,

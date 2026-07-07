@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../themes/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../models/trip_model.dart';
-import '../services/trip_service.dart';
+import '../viewmodels/order_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class OrderView extends StatefulWidget {
   const OrderView({super.key});
@@ -14,18 +15,15 @@ class OrderView extends StatefulWidget {
 class _OrderViewState extends State<OrderView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final TripService _tripService = TripService();
-  List<TripModel> _allTrips = [];
-  List<TripModel> _filteredTrips = [];
-  bool _isLoading = true;
-  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 7, vsync: this);
     _tabController.addListener(_handleTabSelection);
-    _fetchTrips();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderViewModel>().fetchTrips();
+    });
   }
 
   @override
@@ -37,72 +35,16 @@ class _OrderViewState extends State<OrderView>
 
   void _handleTabSelection() {
     if (_tabController.indexIsChanging) return;
-    _filterTrips();
-  }
-
-  void _fetchTrips() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = '';
-    });
-    try {
-      final trips = await _tripService.getMyTrips();
-      setState(() {
-        _allTrips = trips;
-        _isLoading = false;
-      });
-      _filterTrips();
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Không thể tải danh sách đơn hàng. Vui lòng thử lại!';
-      });
-    }
-  }
-
-  void _filterTrips() {
-    int index = _tabController.index;
-    setState(() {
-      if (index == 0) {
-        _filteredTrips = _allTrips;
-      } else {
-        int targetStatus = 0;
-        bool isMultiStatus = false;
-        List<int> statuses = [];
-        switch (index) {
-          case 1: // Chờ duyệt
-            targetStatus = 0; // Pending
-            break;
-          case 2: // Chờ thanh toán
-            targetStatus = 1; // WaitingPayment
-            break;
-          case 3: // Đang di chuyển / Đang thuê
-            isMultiStatus = true;
-            statuses = [2, 3]; // Confirmed, Ongoing
-            break;
-          case 4: // Hoàn tất
-            targetStatus = 4; // Complete
-            break;
-          case 5: // Chủ xe hủy
-            targetStatus = 6; // OwnerCancel
-            break;
-          case 6: // Người thuê hủy
-            targetStatus = 5; // UserCancel
-            break;
-        }
-        if (isMultiStatus) {
-          _filteredTrips = _allTrips.where((trip) => statuses.contains(trip.status)).toList();
-        } else {
-          _filteredTrips = _allTrips.where((trip) => trip.status == targetStatus).toList();
-        }
-      }
-    });
+    context.read<OrderViewModel>().filterTrips(_tabController.index);
   }
 
   String _formatPrice(double price) {
     String priceStr = price.toInt().toString();
     RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    String result = priceStr.replaceAllMapped(reg, (Match match) => '${match[1]}.');
+    String result = priceStr.replaceAllMapped(
+      reg,
+      (Match match) => '${match[1]}.',
+    );
     return '$resultđ';
   }
 
@@ -117,6 +59,8 @@ class _OrderViewState extends State<OrderView>
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<OrderViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -169,41 +113,51 @@ class _OrderViewState extends State<OrderView>
             ),
           ),
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                : _errorMessage.isNotEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(_errorMessage, style: const TextStyle(color: Colors.red)),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: _fetchTrips,
-                              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                              child: const Text('Thử lại', style: TextStyle(color: Colors.white)),
-                            ),
-                          ],
+            child: viewModel.isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
+                : viewModel.errorMessage.isNotEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          viewModel.errorMessage,
+                          style: const TextStyle(color: Colors.red),
                         ),
-                      )
-                    : _filteredTrips.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'Không tìm thấy đơn hàng nào.',
-                              style: TextStyle(color: Colors.grey, fontSize: 16),
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () async => _fetchTrips(),
-                            color: AppColors.primary,
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: _filteredTrips.length,
-                              itemBuilder: (context, index) {
-                                return _buildOrderItem(_filteredTrips[index]);
-                              },
-                            ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () => viewModel.fetchTrips(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
                           ),
+                          child: const Text(
+                            'Thử lại',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : viewModel.filteredTrips.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Không tìm thấy đơn hàng nào.',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async => viewModel.fetchTrips(),
+                    color: AppColors.primary,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: viewModel.filteredTrips.length,
+                      itemBuilder: (context, index) {
+                        return _buildOrderItem(viewModel.filteredTrips[index]);
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -212,9 +166,13 @@ class _OrderViewState extends State<OrderView>
 
   Widget _buildOrderItem(TripModel trip) {
     final carName = trip.car?.name ?? 'Chưa xác định';
-    final imageUrl = trip.car?.getFirstImageUrl() ?? "https://picsum.photos/300/200";
-    final locationText = trip.car?.carLocation?.address ?? trip.car?.carLocation?.city ?? "TP. Hồ Chí Minh";
-    
+    final imageUrl =
+        trip.car?.getFirstImageUrl() ?? "https://picsum.photos/300/200";
+    final locationText =
+        trip.car?.carLocation?.address ??
+        trip.car?.carLocation?.city ??
+        "TP. Hồ Chí Minh";
+
     // Xử lý màu sắc cho trạng thái
     Color statusBgColor;
     Color statusTextColor;
@@ -299,7 +257,10 @@ class _OrderViewState extends State<OrderView>
                       children: [
                         Text(
                           "#RT${trip.id}",
-                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Container(

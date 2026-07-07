@@ -8,6 +8,11 @@ import 'package:duantotnghiep_app_thue_xe/routes/router_config.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/chatbot_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/order_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/order_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart';
 
 void main() {
   runApp(
@@ -30,6 +35,11 @@ class DrivioApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => ConversationViewmodel()),
         ChangeNotifierProvider(create: (context) => ChatbotViewModel()),
+        ChangeNotifierProvider(create: (context) => HomeViewModel()),
+        ChangeNotifierProvider(create: (context) => OrderViewModel()),
+        ChangeNotifierProvider(create: (context) => OrderDetailViewModel()),
+        ChangeNotifierProvider(create: (context) => NotificationViewModel()),
+        ChangeNotifierProvider(create: (context) => ChatDetailViewModel()),
       ],
       child: MaterialApp.router(
         // Device_Preview Package (Important)

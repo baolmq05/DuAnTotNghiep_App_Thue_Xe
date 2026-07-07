@@ -6,7 +6,7 @@ import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/chatbot_viewmodel.dart';
-import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart';
 
 class ChatDetailView extends StatefulWidget {
   final String conversationId;
@@ -26,7 +26,6 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late Conversation _conv;
-  final List<ChatMessage> _messages = [];
   bool _isTyping = false;
 
   @override
@@ -52,51 +51,14 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   }
 
   void _loadInitialMessages() {
-    if (_conv.isChatbot) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final chatbotVM = context.read<ChatbotViewModel>();
-        await chatbotVM.fetchChatbotSession();
-        if (chatbotVM.chatbotSession != null && mounted) {
-          setState(() {
-            _messages.clear();
-            _messages.addAll(
-              chatbotVM.chatbotSession!.messages.map(
-                (m) => ChatMessage(
-                  id: m.id.toString(),
-                  senderId: m.role == 'user' ? 'me' : 'chatbot',
-                  text: m.content,
-                  timestamp: DateTime.tryParse(m.created_at) ?? DateTime.now(),
-                  isMe: m.role == 'user',
-                ),
-              ),
-            );
-          });
-          _scrollToBottom();
-        }
-      });
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          final conversationService = context
-              .read<ConversationViewmodel>()
-              .conversationService;
-          final realMessages = await conversationService.getMessages(
-            _conv.id,
-            otherUserId: _conv.otherUser.id,
-          );
-
-          if (mounted) {
-            setState(() {
-              _messages.clear();
-              _messages.addAll(realMessages);
-            });
-            _scrollToBottom();
-          }
-        } catch (e) {
-          debugPrint('Lỗi tải tin nhắn cuộc hội thoại: $e');
-        }
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final chatDetailViewModel = context.read<ChatDetailViewModel>();
+      await chatDetailViewModel.loadMessagesForConversation(_conv);
+      if (mounted) {
+        setState(() {});
+        _scrollToBottom();
+      }
+    });
   }
 
   void _sendMessage() {
@@ -112,9 +74,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       isMe: true,
     );
 
-    setState(() {
-      _messages.add(userMsg);
-    });
+    final chatDetailViewModel = context.read<ChatDetailViewModel>();
+    chatDetailViewModel.messages.add(userMsg);
+    setState(() {});
     _scrollToBottom();
 
     if (_conv.isChatbot) {
@@ -143,16 +105,18 @@ class _ChatDetailViewState extends State<ChatDetailView> {
 
         setState(() {
           _isTyping = false;
-          _messages.add(
-            ChatMessage(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              senderId: 'chatbot',
-              text: replyText,
-              timestamp: DateTime.now(),
-              isMe: false,
-            ),
-          );
         });
+        final chatDetailViewModel = context.read<ChatDetailViewModel>();
+        chatDetailViewModel.messages.add(
+          ChatMessage(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            senderId: 'chatbot',
+            text: replyText,
+            timestamp: DateTime.now(),
+            isMe: false,
+          ),
+        );
+        if (mounted) setState(() {});
         _scrollToBottom();
       });
     } else {
@@ -165,16 +129,18 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         if (!mounted) return;
         setState(() {
           _isTyping = false;
-          _messages.add(
-            ChatMessage(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              senderId: _conv.id,
-              text: 'Dạ vâng, cảm ơn bạn đã phản hồi nhanh chóng! 😊',
-              timestamp: DateTime.now(),
-              isMe: false,
-            ),
-          );
         });
+        final chatDetailViewModel = context.read<ChatDetailViewModel>();
+        chatDetailViewModel.messages.add(
+          ChatMessage(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            senderId: _conv.id,
+            text: 'Dạ vâng, cảm ơn bạn đã phản hồi nhanh chóng! 😊',
+            timestamp: DateTime.now(),
+            isMe: false,
+          ),
+        );
+        if (mounted) setState(() {});
         _scrollToBottom();
       });
     }
@@ -273,6 +239,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final chatDetailViewModel = context.watch<ChatDetailViewModel>();
+    final messages = chatDetailViewModel.messages;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -333,9 +301,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                       horizontal: 16.0,
                       vertical: 20.0,
                     ),
-                    itemCount: _messages.length + (_isTyping ? 1 : 0),
+                    itemCount: messages.length + (_isTyping ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index == _messages.length && _isTyping) {
+                      if (index == messages.length && _isTyping) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: Row(
@@ -368,7 +336,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                         );
                       }
 
-                      final msg = _messages[index];
+                      final msg = messages[index];
                       return _buildMessageBubble(msg);
                     },
                   ),

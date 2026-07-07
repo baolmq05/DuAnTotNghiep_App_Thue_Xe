@@ -1,9 +1,9 @@
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_car_card.dart';
-import 'package:duantotnghiep_app_thue_xe/models/car_model.dart';
-import 'package:duantotnghiep_app_thue_xe/services/car_service.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
 
 class HomeCarList extends StatefulWidget {
   const HomeCarList({super.key});
@@ -16,145 +16,132 @@ class _HomeCarListState extends State<HomeCarList> {
   int _currentIndex = 0;
   final CarouselSliderController _carouselController =
       CarouselSliderController();
-  final CarService _carService = CarService();
-  List<Car> cars = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCars();
-  }
-
-  Future<void> _loadCars() async {
-    try {
-      final data = await _carService.getCars();
-      setState(() {
-        cars = data;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      debugPrint(e.toString());
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title Section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Xe nổi bật',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(50, 30),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  'Xem tất cả',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+    return Consumer<HomeViewModel>(
+      builder: (context, homeVM, _) {
+        final cars = homeVM.cars;
+        final isLoading = homeVM.isCarsLoading;
 
-        // Carousel Slider or Loading
-        isLoading
-            ? const SizedBox(
-                height: 380,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : cars.isEmpty
-            ? const SizedBox(
-                height: 150,
-                child: Center(
-                  child: Text(
-                    'Không có xe nào khả dụng gần bạn',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-              )
-            : Column(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title Section
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CarouselSlider(
-                    carouselController: _carouselController,
-                    options: CarouselOptions(
-                      height: 440.0,
-                      autoPlay: true,
-                      autoPlayInterval: const Duration(seconds: 5),
-                      autoPlayAnimationDuration: const Duration(
-                        milliseconds: 800,
-                      ),
-                      autoPlayCurve: Curves.fastOutSlowIn,
-                      enlargeCenterPage: true,
-                      enlargeFactor: 0.15,
-                      viewportFraction: 0.9,
-                      enableInfiniteScroll: true,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _currentIndex = index;
-                        });
-                      },
+                  const Text(
+                    'Xe nổi bật',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
-                    items: cars.map((car) {
-                      return HomeCarCard(
-                        width: double.infinity,
-                        car: car,
-                        onTap: () {
-                          // Navigate to detail
-                        },
-                      );
-                    }).toList(),
                   ),
-
-                  // Indicator dots
-                  const SizedBox(height: 7),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: cars.asMap().entries.map((entry) {
-                      final int index = entry.key;
-                      final bool isActive = _currentIndex == index;
-                      return GestureDetector(
-                        onTap: () => _carouselController.animateToPage(index),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: isActive ? 18.0 : 6.0,
-                          height: 6.0,
-                          margin: const EdgeInsets.symmetric(horizontal: 3.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(3.0),
-                            color: isActive
-                                ? AppColors.primary
-                                : Colors.grey.shade300,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                  TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'Xem tất cả',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
-      ],
+            ),
+
+            // Carousel Slider or Loading
+            isLoading
+                ? const SizedBox(
+                    height: 380,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : cars.isEmpty
+                ? const SizedBox(
+                    height: 150,
+                    child: Center(
+                      child: Text(
+                        'Không có xe nào khả dụng gần bạn',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: [
+                      CarouselSlider(
+                        carouselController: _carouselController,
+                        options: CarouselOptions(
+                          height: 440.0,
+                          autoPlay: true,
+                          autoPlayInterval: const Duration(seconds: 5),
+                          autoPlayAnimationDuration: const Duration(
+                            milliseconds: 800,
+                          ),
+                          autoPlayCurve: Curves.fastOutSlowIn,
+                          enlargeCenterPage: true,
+                          enlargeFactor: 0.15,
+                          viewportFraction: 0.9,
+                          enableInfiniteScroll: true,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              _currentIndex = index;
+                            });
+                          },
+                        ),
+                        items: cars.map((car) {
+                          return HomeCarCard(
+                            width: double.infinity,
+                            car: car,
+                            onTap: () {
+                              // Navigate to detail
+                            },
+                          );
+                        }).toList(),
+                      ),
+
+                      // Indicator dots
+                      const SizedBox(height: 7),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: cars.asMap().entries.map((entry) {
+                          final int index = entry.key;
+                          final bool isActive = _currentIndex == index;
+                          return GestureDetector(
+                            onTap: () =>
+                                _carouselController.animateToPage(index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: isActive ? 18.0 : 6.0,
+                              height: 6.0,
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 3.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(3.0),
+                                color: isActive
+                                    ? AppColors.primary
+                                    : Colors.grey.shade300,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+          ],
+        );
+      },
     );
   }
 }
+

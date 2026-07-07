@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:intl/intl.dart';
 import '../models/notification_model.dart';
-import '../services/notification_service.dart';
 import '../themes/app_colors.dart';
+import '../viewmodels/notification_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class NotificationView extends StatefulWidget {
   const NotificationView({super.key});
@@ -14,34 +15,13 @@ class NotificationView extends StatefulWidget {
 class _NotificationViewState extends State<NotificationView> {
   bool _isAllTab = true;
   bool _isSelectionMode = false;
-  final NotificationService _notificationService = NotificationService();
-  List<Notification> _allNotifications = [];
   final Set<int> _selectedNotificationIds = {};
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _loadNotifications();
-  }
-
-  // hàm tải thông báo từ API
-  Future<void> _loadNotifications() async {
-    try {
-      // gọi từ bên service
-      final notifications = await _notificationService.fetchNotifications();
-
-      setState(() {
-        _allNotifications = [...notifications]
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      debugPrint('Lỗi khi tải thông báo: $e');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationViewModel>().loadNotifications();
+    });
   }
 
   // modal thông báo chi tiết
@@ -58,18 +38,7 @@ class _NotificationViewState extends State<NotificationView> {
 
     // Cập nhật trạng thái trong danh sách lập tức trên UI
     if (!notification.isRead) {
-      setState(() {
-        _allNotifications = _allNotifications
-            .map(
-              (item) =>
-                  item.id == detailNotification.id ? detailNotification : item,
-            )
-            .toList();
-      });
-
-      _notificationService.markAsRead(notification).catchError((e) {
-        debugPrint('Không cập nhật được trạng thái đã đọc: $e');
-      });
+      context.read<NotificationViewModel>().markAsRead(notification);
     }
 
     // định nghĩa lại ngày và tg cho chi tiết thông báo
@@ -132,7 +101,7 @@ class _NotificationViewState extends State<NotificationView> {
                     const Icon(
                       Icons.access_time_rounded,
                       size: 14,
-                      color: Colors.black45, 
+                      color: Colors.black45,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -145,10 +114,8 @@ class _NotificationViewState extends State<NotificationView> {
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 16,
-                ),
-                // nội dung thông báo 
+                const SizedBox(height: 16),
+                // nội dung thông báo
                 Flexible(
                   child: SingleChildScrollView(
                     child: Text(
@@ -240,24 +207,20 @@ class _NotificationViewState extends State<NotificationView> {
     );
 
     if (shouldDelete != true) return;
-    // Lọc danh sách thông báo đã chọn dựa trên ID
-    final selectedNotifications = _allNotifications
+    final viewModel = context.read<NotificationViewModel>();
+    final selectedNotifications = viewModel.allNotifications
         .where((item) => _selectedNotificationIds.contains(item.id))
         .toList();
 
     try {
       await Future.wait(
         selectedNotifications
-            .map(_notificationService.deleteNotification)
+            .map((notification) => viewModel.deleteNotification(notification))
             .toList(),
       );
 
       if (!mounted) return;
-      // Cập nhật danh sách thông báo và xóa các thông báo đã chọn khỏi danh sách
       setState(() {
-        _allNotifications.removeWhere(
-          (item) => _selectedNotificationIds.contains(item.id),
-        );
         _selectedNotificationIds.clear();
         _isSelectionMode = false;
       });
@@ -330,9 +293,10 @@ class _NotificationViewState extends State<NotificationView> {
   // UI
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<NotificationViewModel>();
     final displayedNotifications = _isAllTab
-        ? _allNotifications
-        : _allNotifications
+        ? viewModel.allNotifications
+        : viewModel.allNotifications
               .where((notification) => !notification.isRead)
               .toList();
 
@@ -362,7 +326,7 @@ class _NotificationViewState extends State<NotificationView> {
             IconButton(
               icon: const Icon(Icons.delete_sweep, color: Colors.black87),
               onPressed: () {
-                if (_allNotifications.isEmpty) return;
+                if (viewModel.allNotifications.isEmpty) return;
                 _toggleSelectionMode();
               },
             ),
@@ -387,7 +351,7 @@ class _NotificationViewState extends State<NotificationView> {
         children: [
           _buildTabToggle(),
           Expanded(
-            child: _isLoading
+            child: viewModel.isLoading
                 ? const Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )
