@@ -3,6 +3,7 @@ import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:duantotnghiep_app_thue_xe/routes/router_config.dart';
 import 'package:provider/provider.dart';
@@ -47,6 +48,12 @@ class DrivioApp extends StatelessWidget {
         // Device_Preview Package (Important)
         locale: DevicePreview.locale(context),
         builder: DevicePreview.appBuilder,
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
 
         // Enable drag-to-scroll with mouse on Web
         scrollBehavior: const MaterialScrollBehavior().copyWith(
