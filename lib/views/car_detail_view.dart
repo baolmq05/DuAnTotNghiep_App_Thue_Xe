@@ -1,292 +1,257 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart';
+import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
 
 class CarDetailPage extends StatefulWidget {
-  const CarDetailPage({super.key});
-  // Track the favorite state
+  final int carId;
+  const CarDetailPage({super.key, required this.carId});
 
   @override
   State<CarDetailPage> createState() => _CarDetailPageState();
 }
 
 class _CarDetailPageState extends State<CarDetailPage> {
-  bool isFavorite = false; // Track the favorite state
-  final List<String> imageUrls = [
-    'https://res.cloudinary.com/dfmoftnpw/image/upload/v1782701253/723259832561355_vwjsa7.jpg',
-    'https://canthoauto.com/wp-content/uploads/2023/05/new-toyota-vios-2023-can-tho-auto-avatar.jpg',
-    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f',
-  ];
-  int currentIndex = 0; // Track the current image index
+  @override
+  void initState() {
+    super.initState();
+    context.read<CarDetailViewmodel>().fetchCarDetail(id: widget.carId);
+  }
 
-  final List<Map<String, String>> amenities = [
-    {
-      'name': 'Bản đồ',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073781/gps-v2_cjy1dg.png',
-    },
-    {
-      'name': 'Bluetooth',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073780/bluetooth-v2_m9z2wh.png',
-    },
-    {
-      'name': 'Camera lùi',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073782/reverse_camera-v2_yanwh4.png',
-    },
-    {
-      'name': 'Cảm biến lốp',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073783/tpms-v2_kgsvg4.png',
-    },
-    {
-      'name': 'Ghế trẻ em',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073782/sunroof-v2_kyo2mt.png',
-    },
-    {
-      'name': 'USB kết nối',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073782/usb-v2_vvx1vt.png',
-    },
-    {
-      'name': 'Định vị GPS',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073781/gps-v2_cjy1dg.png',
-    },
-    {
-      'name': 'Điều hòa',
-      'image': 'https://res.cloudinary.com/dfmoftnpw/image/upload/v1781073781/head_up-v2_fxa7mn.png',
-    },
-  ];
+  bool isFavorite = false;
+  int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 15.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: isFavorite
-                      ? const Icon(Icons.favorite)
-                      : const Icon(Icons.favorite_border),
-                  color: isFavorite ? Colors.red : AppColors.primary,
-                  onPressed: () {
-                    // Handle favorite button press
-                    setState(() {
-                      isFavorite = !isFavorite; // Toggle the favorite state
-                    });
-                  },
-                  padding: const EdgeInsets.all(10.0),
-                  iconSize: 20.0, // Adjust the size as needed
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(
-                      color: AppColors.primary,
-                      width: 1.0,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 10.0,
-                ), // Add some spacing between the buttons
-                IconButton(
-                  icon: const Icon(Icons.share),
-                  onPressed: () {
-                    // Handle share button press
-                  },
-                  padding: const EdgeInsets.all(10.0),
-                  iconSize: 20.0, // Adjust the size as needed
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(
-                      color: AppColors.primary,
-                      width: 1.0,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-      ),
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          _buildImageCarousel(),
-          const SizedBox(height: 20.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Consumer<CarDetailViewmodel>(
+      builder: (context, viewmodel, child) {
+        // Trạng thái loading
+        if (viewmodel.isLoading) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Trạng thái lỗi
+        if (viewmodel.errorMessage != null) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      'Toyota Vios 2023',
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    viewmodel.errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.textSecondary),
                   ),
-                  const SizedBox(height: 10.0),
-                  Row(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 16.0),
-                        child: Icon(Icons.star, color: Colors.amber),
-                      ),
-                      const SizedBox(width: 4.0),
-                      const Text(
-                        '4.5 (120 đánh giá)',
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => viewmodel.fetchCarDetail(id: widget.carId),
+                    child: const Text('Thử lại'),
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+            ),
+          );
+        }
+
+        final car = viewmodel.carDetail;
+        if (car == null) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
+            body: const Center(child: Text('Không tìm thấy thông tin xe')),
+          );
+        }
+
+        // Lấy danh sách image URLs từ model
+        final imageUrls = car.images.map((img) => img.imageUrl).toList();
+
+        return Scaffold(
+          appBar: AppBar(
+            actions: [
+              Container(
+                margin: const EdgeInsets.only(right: 15.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '500.000đ',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          const TextSpan(
-                            text: ' / ngày',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          ),
-                        ],
+                    IconButton(
+                      icon: isFavorite
+                          ? const Icon(Icons.favorite)
+                          : const Icon(Icons.favorite_border),
+                      color: isFavorite ? Colors.red : AppColors.primary,
+                      onPressed: () {
+                        setState(() {
+                          isFavorite = !isFavorite;
+                        });
+                      },
+                      padding: const EdgeInsets.all(10.0),
+                      iconSize: 20.0,
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1.0,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 10.0),
-                    const Text(
-                      'Đặt cọc: 1.000.000đ',
-                      style: TextStyle(fontSize: 16.0),
+                    const SizedBox(width: 10.0),
+                    IconButton(
+                      icon: const Icon(Icons.share),
+                      onPressed: () {
+                        // Handle share button press
+                      },
+                      padding: const EdgeInsets.all(10.0),
+                      iconSize: 20.0,
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1.0,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+            scrolledUnderElevation: 0,
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Divider(color: Color.fromARGB(92, 158, 158, 158), thickness: 1,),
-          ),
-          _buildSpecSection(),
-          const SizedBox(height: 24.0),
-          _buildAmenitiesSection(),
-          const SizedBox(height: 24.0),
-          _buildHostSection(),
-          const SizedBox(height: 24.0),
-          _buildDescriptionSection(),
-          const SizedBox(height: 24.0),
-          _buildRequirementsSection(),
-          const SizedBox(height: 24.0),
-          _buildTermsSection(),
-          const SizedBox(height: 32.0),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: const Color.fromRGBO(0, 0, 0, 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          body: ListView(
+            padding: EdgeInsets.zero,
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tổng cộng (ước tính)',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '500.000đ',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const TextSpan(
-                          text: ' / ngày',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle booking action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
+              _buildImageCarousel(imageUrls),
+              const SizedBox(height: 20.0),
+              _buildCarInfoHeader(car),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Divider(
+                  color: Color.fromARGB(92, 158, 158, 158),
+                  thickness: 1,
                 ),
-                child: const Text(
-                  'ĐẶT XE NGAY',
-                  style: TextStyle(
-                    fontSize: 12,
+              ),
+              _buildSpecSection(car),
+              const SizedBox(height: 24.0),
+              _buildAmenitiesSection(car),
+              const SizedBox(height: 24.0),
+              _buildHostSection(car),
+              const SizedBox(height: 24.0),
+              _buildDescriptionSection(car),
+              const SizedBox(height: 24.0),
+              _buildRequirementsSection(),
+              const SizedBox(height: 24.0),
+              _buildTermsSection(car),
+              const SizedBox(height: 32.0),
+            ],
+          ),
+          bottomNavigationBar: _buildBottomBar(car),
+          extendBodyBehindAppBar: true,
+        );
+      },
+    );
+  }
+
+  // ==================== Car Info Header ====================
+  Widget _buildCarInfoHeader(Car_Detail car) {
+    final rating = car.reviewsAvgRating ?? '0';
+    final tripsCount = car.tripsCount;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  car.name,
+                  style: const TextStyle(
+                    fontSize: 20.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+              const SizedBox(height: 10.0),
+              Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(left: 16.0),
+                    child: Icon(Icons.star, color: Colors.amber),
+                  ),
+                  const SizedBox(width: 4.0),
+                  Text(
+                    '$rating ($tripsCount chuyến)',
+                    style: const TextStyle(fontSize: 16.0),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
-      ),
-      extendBodyBehindAppBar: true,
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: formatPriceWithUnit(car.unitPrice.toString()),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: ' / ngày',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              Text(
+                'Giảm giá: ${car.discountValue}đ',
+                style: const TextStyle(fontSize: 16.0),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildImageCarousel() {
+  // ==================== Image Carousel ====================
+  Widget _buildImageCarousel(List<String> imageUrls) {
+    if (imageUrls.isEmpty) {
+      return Container(
+        height: 300,
+        color: Colors.grey[200],
+        child: const Center(
+          child: Icon(Icons.directions_car, size: 64, color: Colors.grey),
+        ),
+      );
+    }
+
     return Stack(
       children: [
         CarouselSlider(
@@ -295,11 +260,11 @@ class _CarDetailPageState extends State<CarDetailPage> {
             enlargeCenterPage: false,
             padEnds: false,
             aspectRatio: 16 / 9,
-            enableInfiniteScroll: true,
+            enableInfiniteScroll: imageUrls.length > 1,
             viewportFraction: 1,
             onPageChanged: (index, reason) {
               setState(() {
-                currentIndex = index; // Update the current image index
+                currentIndex = index;
               });
             },
           ),
@@ -309,7 +274,22 @@ class _CarDetailPageState extends State<CarDetailPage> {
                 return SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: ClipRRect(
-                    child: Image.network(url, fit: BoxFit.cover),
+                    child: Image.network(
+                      url,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -338,7 +318,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
     );
   }
 
-  Widget _buildSpecSection() {
+  // ==================== Spec Section ====================
+  Widget _buildSpecSection(Car_Detail car) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -353,10 +334,26 @@ class _CarDetailPageState extends State<CarDetailPage> {
             mainAxisSpacing: 12,
             childAspectRatio: 2.5,
             children: [
-              _buildSpecTile(Icons.airline_seat_recline_normal_rounded, 'Số ghế', '5 chỗ'),
-              _buildSpecTile(Icons.settings_suggest_rounded, 'Truyền động', 'Tự động'),
-              _buildSpecTile(Icons.local_gas_station_rounded, 'Nhiên liệu', 'Xăng'),
-              _buildSpecTile(Icons.speed_rounded, 'Tiêu hao', '6.5L/100km'),
+              _buildSpecTile(
+                Icons.airline_seat_recline_normal_rounded,
+                'Số ghế',
+                '${car.seatCount} chỗ',
+              ),
+              _buildSpecTile(
+                Icons.settings_suggest_rounded,
+                'Truyền động',
+                car.transmission,
+              ),
+              _buildSpecTile(
+                Icons.local_gas_station_rounded,
+                'Nhiên liệu',
+                car.fuelType,
+              ),
+              _buildSpecTile(
+                Icons.speed_rounded,
+                'Tiêu hao',
+                '${car.fuelConsumption}L/100km',
+              ),
             ],
           ),
         ],
@@ -406,7 +403,12 @@ class _CarDetailPageState extends State<CarDetailPage> {
     );
   }
 
-  Widget _buildAmenitiesSection() {
+  // ==================== Amenities Section ====================
+  Widget _buildAmenitiesSection(Car_Detail car) {
+    if (car.features.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -431,10 +433,10 @@ class _CarDetailPageState extends State<CarDetailPage> {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: amenities.length,
+            itemCount: car.features.length,
             itemBuilder: (context, index) {
-              final amenity = amenities[index];
-              return _buildAmenityImage(amenity['name']!, amenity['image']!);
+              final feature = car.features[index];
+              return _buildAmenityImage(feature.featureName, feature.icon);
             },
           ),
         ],
@@ -482,13 +484,18 @@ class _CarDetailPageState extends State<CarDetailPage> {
     );
   }
 
-  Widget _buildDescriptionSection() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+  // ==================== Description Section ====================
+  Widget _buildDescriptionSection(Car_Detail car) {
+    if (car.description == null || car.description!.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Mô tả',
             style: TextStyle(
               fontSize: 18,
@@ -496,10 +503,10 @@ class _CarDetailPageState extends State<CarDetailPage> {
               color: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Toyota Vios 2023 là dòng xe sedan quốc dân được thiết kế hiện đại, nội thất rộng rãi và vận hành êm ái. Xe tiết kiệm nhiên liệu tối ưu, trang bị đầy đủ các tính năng an toàn hiện đại như hệ thống phanh ABS, EBD, túi khí quanh xe và camera lùi sắc nét. Thích hợp cho các chuyến du lịch gia đình, đi công tác hoặc di chuyển trong đô thị đông đúc.',
-            style: TextStyle(
+            car.description!,
+            style: const TextStyle(
               fontSize: 14,
               height: 1.5,
               color: AppColors.textSecondary,
@@ -510,6 +517,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
     );
   }
 
+  // ==================== Requirements Section ====================
   Widget _buildRequirementsSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -588,7 +596,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
     );
   }
 
-  Widget _buildTermsSection() {
+  // ==================== Terms Section ====================
+  Widget _buildTermsSection(Car_Detail car) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -603,9 +612,18 @@ class _CarDetailPageState extends State<CarDetailPage> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildTermItem(Icons.info_outline, 'Giới hạn quãng đường: Tối đa 250km/ngày, phụ trội 3.000đ/km.'),
-          _buildTermItem(Icons.clean_hands_outlined, 'Vệ sinh: Phí vệ sinh 100.000đ - 300.000đ nếu xe bẩn hoặc có mùi thuốc lá.'),
-          _buildTermItem(Icons.cancel_presentation_outlined, 'Hủy chuyến: Miễn phí hủy chuyến trước 24 giờ kể từ thời điểm nhận xe.'),
+          _buildTermItem(
+            Icons.info_outline,
+            'Giới hạn quãng đường: Tối đa ${car.usageLimit.maxDailyDistance}km/ngày, phụ trội ${car.usageLimit.extraDistanceFee}đ/km.',
+          ),
+          _buildTermItem(
+            Icons.local_shipping_outlined,
+            'Giao xe tận nơi: Tối đa ${car.deliveryOption.maxDistance}km, miễn phí ${car.deliveryOption.freeDistance}km đầu, phí ${car.deliveryOption.feeDistance}đ/km.',
+          ),
+          _buildTermItem(
+            Icons.description_outlined,
+            'Điều khoản thuê: ${car.rentalTerms}',
+          ),
         ],
       ),
     );
@@ -634,7 +652,10 @@ class _CarDetailPageState extends State<CarDetailPage> {
     );
   }
 
-  Widget _buildHostSection() {
+  // ==================== Host Section ====================
+  Widget _buildHostSection(Car_Detail car) {
+    final owner = car.owner;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Container(
@@ -649,11 +670,14 @@ class _CarDetailPageState extends State<CarDetailPage> {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 28,
-                  backgroundImage: NetworkImage(
-                    'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
-                  ),
+                  backgroundImage: owner.avatar != null
+                      ? NetworkImage(owner.avatar!)
+                      : null,
+                  child: owner.avatar == null
+                      ? const Icon(Icons.person, size: 28)
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -662,9 +686,9 @@ class _CarDetailPageState extends State<CarDetailPage> {
                     children: [
                       Row(
                         children: [
-                          const Text(
-                            'Nguyễn Minh Đức',
-                            style: TextStyle(
+                          Text(
+                            owner.name,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textPrimary,
@@ -674,9 +698,9 @@ class _CarDetailPageState extends State<CarDetailPage> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        'Tham gia từ 06/2022',
-                        style: TextStyle(
+                      Text(
+                        owner.phone ?? '',
+                        style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
                         ),
@@ -688,26 +712,18 @@ class _CarDetailPageState extends State<CarDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Row(
-                      children: const [
-                        Icon(Icons.star, color: Colors.amber, size: 16),
-                        SizedBox(width: 4),
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                        const SizedBox(width: 4),
                         Text(
-                          '4.9 (86)',
-                          style: TextStyle(
+                          '${car.reviewsAvgRating ?? '0'} (${car.tripsCount})',
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Tỷ lệ phản hồi 98%',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
                     ),
                   ],
                 ),
@@ -774,6 +790,86 @@ class _CarDetailPageState extends State<CarDetailPage> {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== Bottom Bar ====================
+  Widget _buildBottomBar(Car_Detail car) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromRGBO(0, 0, 0, 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tổng cộng (ước tính)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: formatPrice(car.unitPrice),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const TextSpan(
+                        text: ' / ngày',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Handle booking action
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'ĐẶT XE NGAY',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),

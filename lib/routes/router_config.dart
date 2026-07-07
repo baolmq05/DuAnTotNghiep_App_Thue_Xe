@@ -71,9 +71,13 @@ final drivioRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/car_detail',
+      path: '/car_detail/:id',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const CarDetailPage(),
+      builder: (context, state) {
+        final idStr = state.pathParameters['id']!;
+        final id = int.tryParse(idStr) ?? 0;
+        return CarDetailPage(carId: id);
+      },
     ),
     GoRoute(
       path: '/slide1',

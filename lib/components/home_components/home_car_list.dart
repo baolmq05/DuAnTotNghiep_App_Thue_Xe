@@ -3,6 +3,7 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class HomeCarList extends StatefulWidget {
@@ -29,8 +30,10 @@ class _HomeCarListState extends State<HomeCarList> {
           children: [
             // Title Section
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -104,7 +107,7 @@ class _HomeCarListState extends State<HomeCarList> {
                             width: double.infinity,
                             car: car,
                             onTap: () {
-                              // Navigate to detail
+                              context.push('/car_detail/${car.id}');
                             },
                           );
                         }).toList(),
@@ -124,8 +127,9 @@ class _HomeCarListState extends State<HomeCarList> {
                               duration: const Duration(milliseconds: 300),
                               width: isActive ? 18.0 : 6.0,
                               height: 6.0,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 3.0),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 3.0,
+                              ),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(3.0),
                                 color: isActive
@@ -144,4 +148,3 @@ class _HomeCarListState extends State<HomeCarList> {
     );
   }
 }
-
