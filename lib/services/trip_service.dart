@@ -5,7 +5,7 @@ import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 class TripService extends BaseService {
   Future<List<TripModel>> getMyTrips() async {
     try {
-      final response = await get('api/my-trips');
+      final response = await get('api/my-trips', requiresAuth: true);
       if (response != null && response['success'] == true) {
         final List dataList = response['data'] as List? ?? [];
         return dataList.map((json) => TripModel.fromJson(json)).toList();
@@ -19,7 +19,7 @@ class TripService extends BaseService {
 
   Future<TripModel?> getTripDetail(int id) async {
     try {
-      final response = await get('api/trips/$id');
+      final response = await get('api/trips/$id', requiresAuth: true);
       if (response != null && response['success'] == true) {
         return TripModel.fromJson(response['data']);
       }

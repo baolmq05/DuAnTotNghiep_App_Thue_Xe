@@ -57,7 +57,7 @@ class _HomeViewState extends State<HomeView> {
               children: [
                 IconButton(
                   onPressed: () {
-                    context.go('/notification');
+                    context.push('/notification');
                   },
                   icon: const Icon(Icons.notifications_none_outlined),
                 ),
