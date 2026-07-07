@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';

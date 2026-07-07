@@ -1,8 +1,8 @@
 import 'package:duantotnghiep_app_thue_xe/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
-import 'package:duantotnghiep_app_thue_xe/views/car_detail.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
+import 'package:duantotnghiep_app_thue_xe/views/car_detail_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/message/chat_detail_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/message/conversations_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide1_view.dart';
@@ -10,13 +10,13 @@ import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide2_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide3_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/onboardings/slide4_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/order_view.dart';
-import 'package:duantotnghiep_app_thue_xe/views/order_detail.dart';
+import 'package:duantotnghiep_app_thue_xe/views/order_detail_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/register_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/setting_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/splash_view.dart';
-import 'package:duantotnghiep_app_thue_xe/views/main_screen.dart';
+import 'package:duantotnghiep_app_thue_xe/views/main_screen_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/home_view.dart';
-import 'package:duantotnghiep_app_thue_xe/views/profile.dart';
+import 'package:duantotnghiep_app_thue_xe/views/profile_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/notification_view.dart';
 
 // Khởi tạo các Global Navigator Keys

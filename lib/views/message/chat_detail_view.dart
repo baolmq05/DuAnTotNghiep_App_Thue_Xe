@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:duantotnghiep_app_thue_xe/models/chat_message.dart';
-import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
+import 'package:duantotnghiep_app_thue_xe/models/chat_message_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/chatbot_viewmodel.dart';
@@ -32,7 +32,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   @override
   void initState() {
     super.initState();
-    _conv = widget.conversation ??
+    _conv =
+        widget.conversation ??
         Conversation(
           id: widget.conversationId,
           name: widget.conversationId == 'chatbot'
@@ -59,13 +60,15 @@ class _ChatDetailViewState extends State<ChatDetailView> {
           setState(() {
             _messages.clear();
             _messages.addAll(
-              chatbotVM.chatbotSession!.messages.map((m) => ChatMessage(
-                    id: m.id.toString(),
-                    senderId: m.role == 'user' ? 'me' : 'chatbot',
-                    text: m.content,
-                    timestamp: DateTime.tryParse(m.created_at) ?? DateTime.now(),
-                    isMe: m.role == 'user',
-                  )),
+              chatbotVM.chatbotSession!.messages.map(
+                (m) => ChatMessage(
+                  id: m.id.toString(),
+                  senderId: m.role == 'user' ? 'me' : 'chatbot',
+                  text: m.content,
+                  timestamp: DateTime.tryParse(m.created_at) ?? DateTime.now(),
+                  isMe: m.role == 'user',
+                ),
+              ),
             );
           });
           _scrollToBottom();
@@ -74,7 +77,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
-          final conversationService = context.read<ConversationViewmodel>().conversationService;
+          final conversationService = context
+              .read<ConversationViewmodel>()
+              .conversationService;
           final realMessages = await conversationService.getMessages(
             _conv.id,
             otherUserId: _conv.otherUser.id,
@@ -130,7 +135,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         } else if (lowerText.contains('đặt cọc') || lowerText.contains('cọc')) {
           replyText =
               'Để đặt cọc thuê xe, bạn có thể chuyển khoản online hoặc đặt cọc trực tiếp tại văn phòng. Mức cọc thông thường là 2.000.000đ đối với xe máy và từ 5.000.000đ đối với ô tô.';
-        } else if (lowerText.contains('thủ tục') || lowerText.contains('giấy tờ')) {
+        } else if (lowerText.contains('thủ tục') ||
+            lowerText.contains('giấy tờ')) {
           replyText =
               'Thủ tục thuê xe tại Drivio rất đơn giản: Bạn chỉ cần chuẩn bị CCCD gắn chíp, Bằng lái xe hợp lệ (A1/A2 cho xe máy, B1/B2 cho ô tô) và tiền đặt cọc.';
         }
@@ -190,10 +196,10 @@ class _ChatDetailViewState extends State<ChatDetailView> {
     final hash = name.hashCode;
     final List<List<Color>> palettes = [
       [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
-      [const Color(0xFF10B981), const Color(0xFF047857)], 
+      [const Color(0xFF10B981), const Color(0xFF047857)],
       [const Color(0xFFF59E0B), const Color(0xFFB45309)],
-      [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)], 
-      [const Color(0xFFEC4899), const Color(0xFFBE185D)], 
+      [const Color(0xFF8B5CF6), const Color(0xFF6D28D9)],
+      [const Color(0xFFEC4899), const Color(0xFFBE185D)],
       [const Color(0xFF06B6D4), const Color(0xFF0891B2)],
     ];
     return palettes[hash.abs() % palettes.length];
@@ -207,7 +213,10 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: AppColors.primary.withOpacity(0.08),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1.5),
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.2),
+            width: 1.5,
+          ),
         ),
         child: ClipOval(
           child: Image.asset(
@@ -313,50 +322,56 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       body: Column(
         children: [
           Expanded(
-            child: _conv.isChatbot && context.watch<ChatbotViewModel>().isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            child:
+                _conv.isChatbot && context.watch<ChatbotViewModel>().isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
                 : ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-              itemCount: _messages.length + (_isTyping ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == _messages.length && _isTyping) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildAvatar(),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const SizedBox(
-                            width: 30,
-                            child: LinearProgressIndicator(
-                              backgroundColor: Colors.transparent,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.primary,
-                              ),
-                              minHeight: 2,
-                            ),
-                          ),
-                        ),
-                      ],
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 20.0,
                     ),
-                  );
-                }
+                    itemCount: _messages.length + (_isTyping ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == _messages.length && _isTyping) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildAvatar(),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF3F4F6),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: const SizedBox(
+                                  width: 30,
+                                  child: LinearProgressIndicator(
+                                    backgroundColor: Colors.transparent,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.primary,
+                                    ),
+                                    minHeight: 2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
 
-                final msg = _messages[index];
-                return _buildMessageBubble(msg);
-              },
-            ),
+                      final msg = _messages[index];
+                      return _buildMessageBubble(msg);
+                    },
+                  ),
           ),
 
           Container(
@@ -436,11 +451,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                       shape: BoxShape.circle,
                     ),
                     child: const Center(
-                      child: Icon(
-                        Icons.send,
-                        color: Colors.white,
-                        size: 16,
-                      ),
+                      child: Icon(Icons.send, color: Colors.white, size: 16),
                     ),
                   ),
                 ),
@@ -456,18 +467,17 @@ class _ChatDetailViewState extends State<ChatDetailView> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Column(
-        crossAxisAlignment:
-            msg.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: msg.isMe
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment:
-                msg.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: msg.isMe
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (!msg.isMe) ...[
-                _buildAvatar(),
-                const SizedBox(width: 8),
-              ],
+              if (!msg.isMe) ...[_buildAvatar(), const SizedBox(width: 8)],
               Flexible(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -475,7 +485,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: msg.isMe ? AppColors.primary : const Color(0xFFF3F4F6),
+                    color: msg.isMe
+                        ? AppColors.primary
+                        : const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -507,10 +519,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             ),
             child: Text(
               _formatTime(msg.timestamp),
-              style: TextStyle(
-                color: Colors.grey.shade400,
-                fontSize: 10,
-              ),
+              style: TextStyle(color: Colors.grey.shade400, fontSize: 10),
             ),
           ),
         ],

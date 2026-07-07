@@ -1,7 +1,7 @@
 import 'package:duantotnghiep_app_thue_xe/components/home_components/feature_car.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../../models/car.dart';
+import '../../models/car_model.dart';
 
 class CarFeature {
   final IconData icon;

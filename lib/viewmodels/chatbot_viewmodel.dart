@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:duantotnghiep_app_thue_xe/models/chatbot_session.dart';
+import 'package:duantotnghiep_app_thue_xe/models/chatbot_session_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/chatbot_service.dart';
 
 class ChatbotViewModel extends ChangeNotifier {

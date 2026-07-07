@@ -1,4 +1,4 @@
-import '../models/car.dart';
+import '../models/car_model.dart';
 import 'base_service.dart';
 
 class CarService extends BaseService {

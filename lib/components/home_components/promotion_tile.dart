@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/promotion.dart';
+import '../../models/promotion_model.dart';
 import '../../themes/app_colors.dart';
 
 class PromotionTile extends StatelessWidget {

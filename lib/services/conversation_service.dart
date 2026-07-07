@@ -1,5 +1,5 @@
-import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
-import 'package:duantotnghiep_app_thue_xe/models/chat_message.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/chat_message_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/base_service.dart';
 
 class ConversationService extends BaseService {
@@ -20,9 +20,15 @@ class ConversationService extends BaseService {
   }
 
   /// Lấy danh sách tin nhắn của một cuộc hội thoại theo ID
-  Future<List<ChatMessage>> getMessages(String conversationId, {int? otherUserId}) async {
+  Future<List<ChatMessage>> getMessages(
+    String conversationId, {
+    int? otherUserId,
+  }) async {
     try {
-      final response = await get('api/messages/$conversationId', requiresAuth: true);
+      final response = await get(
+        'api/messages/$conversationId',
+        requiresAuth: true,
+      );
 
       List<dynamic> messageList = [];
       if (response is List) {
@@ -36,10 +42,10 @@ class ConversationService extends BaseService {
       }
 
       return messageList.map((json) {
-        final int senderIdInt = json['sender_id'] is int 
-            ? json['sender_id'] 
+        final int senderIdInt = json['sender_id'] is int
+            ? json['sender_id']
             : int.tryParse(json['sender_id']?.toString() ?? '') ?? 0;
-            
+
         // Xác định xem tin nhắn là của bản thân hay đối phương gửi
         bool isMe = json['is_me'] == true || json['is_me'] == 1;
         if (json['is_me'] == null && otherUserId != null) {
@@ -47,10 +53,14 @@ class ConversationService extends BaseService {
         }
 
         return ChatMessage(
-          id: json['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+          id:
+              json['id']?.toString() ??
+              DateTime.now().millisecondsSinceEpoch.toString(),
           senderId: senderIdInt.toString(),
           text: json['text']?.toString() ?? json['content']?.toString() ?? '',
-          timestamp: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+          timestamp:
+              DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+              DateTime.now(),
           isMe: isMe,
         );
       }).toList();

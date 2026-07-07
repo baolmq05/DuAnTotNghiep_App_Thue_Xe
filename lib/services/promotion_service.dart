@@ -1,4 +1,4 @@
-import '../models/promotion.dart';
+import '../models/promotion_model.dart';
 import 'base_service.dart';
 
 class PromotionService extends BaseService {

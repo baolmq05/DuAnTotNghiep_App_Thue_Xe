@@ -1,5 +1,5 @@
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_car_card.dart';
-import 'package:duantotnghiep_app_thue_xe/models/car.dart';
+import 'package:duantotnghiep_app_thue_xe/models/car_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/car_service.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';

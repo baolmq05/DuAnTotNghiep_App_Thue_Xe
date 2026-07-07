@@ -2,7 +2,7 @@ import 'package:duantotnghiep_app_thue_xe/components/home_components/promotion_t
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../../models/promotion.dart';
+import '../../models/promotion_model.dart';
 import '../../services/promotion_service.dart';
 
 class HomePromotion extends StatefulWidget {

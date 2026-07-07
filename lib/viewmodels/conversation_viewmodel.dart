@@ -1,5 +1,5 @@
-import 'package:duantotnghiep_app_thue_xe/models/conversation.dart';
-import 'package:duantotnghiep_app_thue_xe/models/chatbot_session.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/chatbot_session_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/conversation_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/chatbot_service.dart';
 import 'package:flutter/material.dart';
@@ -24,12 +24,14 @@ class ConversationViewmodel extends ChangeNotifier {
 
     try {
       // 1. Tải danh sách hội thoại thông thường của người dùng
-      final List<Conversation> userConversations = await conversationService.getConversations();
+      final List<Conversation> userConversations = await conversationService
+          .getConversations();
 
       // 2. Tải thông tin phiên Chatbot từ API
       Conversation? chatbotConv;
       try {
-        final ChatbotSession? chatbotSession = await _chatbotService.getChatbotSession();
+        final ChatbotSession? chatbotSession = await _chatbotService
+            .getChatbotSession();
         if (chatbotSession != null) {
           chatbotConv = Conversation.raw(
             id: chatbotSession.id.toString(), // Ví dụ: "19"
@@ -39,11 +41,12 @@ class ConversationViewmodel extends ChangeNotifier {
             otherUser: OtherUser(
               id: chatbotSession.userId,
               name: chatbotSession.title, // "Trợ lý AI"
-              avatar: 'lib/assets/images/drivio_logo.png', // Avatar mặc định của Drivio
+              avatar:
+                  'lib/assets/images/drivio_logo.png', // Avatar mặc định của Drivio
             ),
             unreadCount: 0,
             lastMessageObj: LastMessage(
-              text: chatbotSession.messages.isNotEmpty 
+              text: chatbotSession.messages.isNotEmpty
                   ? chatbotSession.messages.last.content
                   : 'Bấm vào để trò chuyện với Trợ lý AI.',
               type: 'text',
@@ -62,7 +65,7 @@ class ConversationViewmodel extends ChangeNotifier {
       if (chatbotConv != null) {
         _conversations.add(chatbotConv);
       }
-      
+
       // Lọc bỏ trùng lặp nếu trong danh sách hội thoại thường đã có ID này
       for (var conv in userConversations) {
         if (chatbotConv == null || conv.id != chatbotConv.id) {
