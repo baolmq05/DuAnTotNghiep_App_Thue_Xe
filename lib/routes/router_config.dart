@@ -18,6 +18,8 @@ import 'package:duantotnghiep_app_thue_xe/views/main_screen_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/home_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/profile_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/notification_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/support_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/support_detail_view.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -105,6 +107,24 @@ final drivioRouter = GoRouter(
       path: '/notification',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const NotificationView(),
+    ),
+    GoRoute(
+      path: '/support',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const SupportView(),
+    ),
+    GoRoute(
+      path: '/support-detail',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return SupportDetailView(
+          title: extra['title'] as String,
+          content: extra['content'] as String,
+          imageUrl: extra['imageUrl'] as String?,
+          steps: extra['steps'] as List<String>?,
+        );
+      },
     ),
 
     // StatefulShellRoute chứa 4 tab chính của ứng dụng

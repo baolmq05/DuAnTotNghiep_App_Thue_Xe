@@ -448,13 +448,12 @@ class _ProfileViewState extends State<ProfileView> {
             },
           ),
           _buildMenuItem(
-            icon: Icons.help_outline_rounded,
+            icon: Icons.support_agent,
             title: 'Trung tâm hỗ trợ',
             showDivider: false,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Xem Trung tâm hỗ trợ')),
-              );
+            onTap: (
+            ) {
+              context.go('/support');
             },
           ),
         ],
