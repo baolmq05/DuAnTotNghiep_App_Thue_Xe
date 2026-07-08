@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart';
 import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
+import 'package:go_router/go_router.dart';
 
 class CarDetailPage extends StatefulWidget {
   final int carId;
@@ -670,42 +671,55 @@ class _CarDetailPageState extends State<CarDetailPage> {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundImage: owner.avatar != null
-                      ? NetworkImage(owner.avatar!)
-                      : null,
-                  child: owner.avatar == null
-                      ? const Icon(Icons.person, size: 28)
-                      : null,
+                GestureDetector(
+                  onTap: () => context.pushReplacement(
+                    '/owner-profile/${owner.id}',
+                    extra: {'fromCarId': car.id},
+                  ),
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundImage: owner.avatar != null
+                        ? NetworkImage(owner.avatar!)
+                        : null,
+                    child: owner.avatar == null
+                        ? const Icon(Icons.person, size: 28)
+                        : null,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            owner.name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                  child: GestureDetector(
+                    onTap: () => context.pushReplacement(
+                      '/owner-profile/${owner.id}',
+                      extra: {'fromCarId': car.id},
+                    ),
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              owner.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        owner.phone ?? '',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
+                            const SizedBox(width: 8),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          owner.phone ?? '',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Column(
@@ -760,7 +774,10 @@ class _CarDetailPageState extends State<CarDetailPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () => context.pushReplacement(
+                      '/owner-profile/${owner.id}',
+                      extra: {'fromCarId': car.id},
+                    ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppColors.primary),
                       shape: RoundedRectangleBorder(
