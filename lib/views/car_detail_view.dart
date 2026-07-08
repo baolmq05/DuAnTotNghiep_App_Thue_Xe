@@ -3,6 +3,7 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart';
 import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
 import 'package:go_router/go_router.dart';
@@ -22,11 +23,12 @@ class _CarDetailPageState extends State<CarDetailPage> {
     context.read<CarDetailViewmodel>().fetchCarDetail(id: widget.carId);
   }
 
-  bool isFavorite = false;
   int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final isFav = context.watch<FavoriteViewModel>().isFavorite(widget.carId);
+
     return Consumer<CarDetailViewmodel>(
       builder: (context, viewmodel, child) {
         // Trạng thái loading
@@ -83,14 +85,12 @@ class _CarDetailPageState extends State<CarDetailPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     IconButton(
-                      icon: isFavorite
+                      icon: isFav
                           ? const Icon(Icons.favorite)
                           : const Icon(Icons.favorite_border),
-                      color: isFavorite ? Colors.red : AppColors.primary,
+                      color: isFav ? Colors.red : AppColors.primary,
                       onPressed: () {
-                        setState(() {
-                          isFavorite = !isFavorite;
-                        });
+                        context.read<FavoriteViewModel>().toggleFavorite(carId: widget.carId);
                       },
                       padding: const EdgeInsets.all(10.0),
                       iconSize: 20.0,

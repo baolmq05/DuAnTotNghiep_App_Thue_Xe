@@ -398,9 +398,7 @@ class _ProfileViewState extends State<ProfileView> {
             icon: Icons.favorite_border_rounded,
             title: 'Xe yêu thích',
             onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Xem Xe yêu thích')));
+              context.push('/favorite');
             },
           ),
           _buildMenuItem(

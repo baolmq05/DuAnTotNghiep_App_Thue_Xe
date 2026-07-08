@@ -1,9 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../themes/app_colors.dart';
-// import '../controllers/favorite_controller.dart';
+import '../models/car_model.dart';
+import '../viewmodels/favorite_viewmodel.dart';
 
-class FavoriteView extends StatelessWidget {
+class FavoriteView extends StatefulWidget {
   const FavoriteView({super.key});
+
+  @override
+  State<FavoriteView> createState() => _FavoriteViewState();
+}
+
+class _FavoriteViewState extends State<FavoriteView> {
+  String searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FavoriteViewModel>().fetchFavorites();
+    });
+  }
+
+  String _formatPrice(num price) {
+    final value = price.toInt();
+    final formatted = value.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => '.',
+    );
+    return '$formattedđ';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,29 +82,32 @@ class FavoriteView extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: ExcludeFocus(
-                    child: Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: const TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Tìm xe trong danh sách yêu thích...',
-                          hintStyle: TextStyle(
-                            color: Colors.black38,
-                            fontSize: 13,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Colors.black38,
-                            size: 20,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 13),
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Tìm xe trong danh sách yêu thích...',
+                        hintStyle: TextStyle(
+                          color: Colors.black38,
+                          fontSize: 13,
                         ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Colors.black38,
+                          size: 20,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 11),
                       ),
                     ),
                   ),
@@ -87,52 +117,87 @@ class FavoriteView extends StatelessWidget {
           ),
           // danh sách xe yêu thích dạng lưới 2 cột
           Expanded(
-            child: GridView(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.62,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-              ),
-              children: [
-                _buildHardcodedCarCard(
-                  name: 'Toyota Camry',
-                  image:
-                      'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?q=80&w=500',
-                  discount: 'GIẢM 10%',
-                  ownerName: 'Bình',
-                  ownerAvatar:
-                      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=500',
-                  rating: '5.0',
-                  location: 'Tân Thạnh Đông, Củ...',
-                  seats: '5 chỗ',
-                  transmission: 'Số tự động',
-                  fuel: 'Xăng',
-                  trips: '1 chuyến',
-                  price: '1.000.000đ',
-                  isFavorite: "true",
-                  isDelivery: context,
-                ),
-                _buildHardcodedCarCard(
-                  name: 'Honda Civic',
-                  image:
-                      'https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?q=80&w=500',
-                  discount: 'GIẢM 6%',
-                  ownerName: 'Nam',
-                  ownerAvatar:
-                      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=500',
-                  rating: '4.0',
-                  location: 'Lê Duẩn, Hải Châu, ...',
-                  seats: '5 chỗ',
-                  transmission: 'Số tự sàn',
-                  fuel: 'Xăng',
-                  trips: '0 chuyến',
-                  price: '900.000đ',
-                  isFavorite: "true",
-                  isDelivery: context,
-                ),
-              ],
+            child: Consumer<FavoriteViewModel>(
+              builder: (context, favoriteVM, child) {
+                if (favoriteVM.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (favoriteVM.errorMessage != null) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                          const SizedBox(height: 16),
+                          Text(
+                            favoriteVM.errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => favoriteVM.fetchFavorites(),
+                            child: const Text('Thử lại'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                var cars = favoriteVM.favoriteCars;
+                if (searchQuery.isNotEmpty) {
+                  cars = cars
+                      .where((car) =>
+                          car.name.toLowerCase().contains(searchQuery.toLowerCase()))
+                      .toList();
+                }
+
+                if (cars.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.favorite_border_rounded,
+                          size: 64,
+                          color: Colors.black12,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          searchQuery.isNotEmpty
+                              ? 'Không tìm thấy xe phù hợp'
+                              : 'Danh sách yêu thích trống',
+                          style: const TextStyle(color: Colors.grey, fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.58,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                  ),
+                  itemCount: cars.length,
+                  itemBuilder: (context, index) {
+                    final car = cars[index];
+                    return GestureDetector(
+                      onTap: () {
+                        context.push('/car_detail/${car.id}');
+                      },
+                      child: _buildCarCard(context, car),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -140,25 +205,34 @@ class FavoriteView extends StatelessWidget {
     );
   }
 
-  //tạo widget cho dữ liệu xe
-  Widget _buildHardcodedCarCard({
-    required String name,
-    required String image,
-    required String discount,
-    required String ownerName,
-    required String ownerAvatar,
-    required String rating,
-    required String location,
-    required String seats,
-    required String transmission,
-    required String fuel,
-    required String trips,
-    required String price,
-    required String isFavorite,
-    required BuildContext isDelivery,
-  }) {
+  //tạo widget cho dữ liệu xe từ object Car
+  Widget _buildCarCard(BuildContext context, Car car) {
+    // Lấy ảnh thumbnail hoặc ảnh đầu tiên
+    final String image = car.images.isEmpty
+        ? 'https://via.placeholder.com/600x300'
+        : car.images.firstWhere((img) => img.isThumbnail, orElse: () => car.images.first).imageUrl;
+
+    // Tính phần trăm giảm giá
+    String discount = '';
+    if (car.unitPrice > 0 && car.discountValue > 0) {
+      final pct = ((car.discountValue / car.unitPrice) * 100).round();
+      discount = 'GIẢM $pct%';
+    }
+
+    final ownerName = car.owner?.name ?? 'Chủ xe';
+    final ownerAvatar = car.owner?.avatar ?? 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=500';
+    final rating = car.reviewsAvgRating.toStringAsFixed(1);
+    final location = car.carLocation?.location ?? car.carLocation?.address ?? 'Chưa xác định';
+    final seats = '${car.seatCount} chỗ';
+    final transmission = car.transmission.toLowerCase().contains('tự động') ||
+            car.transmission.toLowerCase().contains('auto')
+        ? 'Tự động'
+        : 'Số sàn';
+    final fuel = car.fuelType;
+    final trips = '${car.tripsCount} chuyến';
+    final price = _formatPrice(car.unitPrice - car.discountValue);
+
     return Container(
-      //
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -194,46 +268,66 @@ class FavoriteView extends StatelessWidget {
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6, 
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF4D6D),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.local_offer_outlined,
-                          color: Colors.white,
-                          size: 10,
-                        ),
-                        const SizedBox(width: 2),
-                        Text(
-                          discount,
-                          style: const TextStyle(
+                if (discount.isNotEmpty)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF4D6D),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.local_offer_outlined,
                             color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
+                            size: 10,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 2),
+                          Text(
+                            discount,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                // trái tim
+                // trái tim (nhấn vào để bỏ yêu thích)
                 Positioned(
                   top: 8,
-                  right: 10,
-                  child: Icon(
-                    Icons.favorite_rounded,
-                     color: const Color(0xFFFF4D6D),
-                    size: 20,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () {
+                      context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 2,
+                            offset: Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.favorite_rounded,
+                        color: Color(0xFFFF4D6D),
+                        size: 16,
+                      ),
+                    ),
                   ),
                 ),
                 // tên chủ xe + avatar
@@ -313,7 +407,7 @@ class FavoriteView extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            name,
+                            car.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -370,7 +464,7 @@ class FavoriteView extends StatelessWidget {
 
                     // số chỗ, hộp số, nhiên liệu
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(8),
@@ -384,7 +478,7 @@ class FavoriteView extends StatelessWidget {
                           ),
                           _buildSpecItem(
                             Icons.brightness_auto_rounded,
-                            transmission
+                            transmission,
                           ),
                           _buildSpecItem(Icons.local_gas_station_rounded, fuel),
                         ],
@@ -411,7 +505,7 @@ class FavoriteView extends StatelessWidget {
                             Text(
                               trips,
                               style: const TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -434,7 +528,7 @@ class FavoriteView extends StatelessWidget {
                                 Text(
                                   price,
                                   style: const TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.primary,
                                   ),

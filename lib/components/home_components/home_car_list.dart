@@ -1,6 +1,7 @@
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_car_card.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:go_router/go_router.dart';
@@ -103,9 +104,14 @@ class _HomeCarListState extends State<HomeCarList> {
                           },
                         ),
                         items: cars.map((car) {
+                          final isFav = context.watch<FavoriteViewModel>().isFavorite(car.id);
                           return HomeCarCard(
                             width: double.infinity,
                             car: car,
+                            isFavorite: isFav,
+                            onFavoriteTap: () {
+                              context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
+                            },
                             onTap: () {
                               context.push('/car_detail/${car.id}');
                             },
