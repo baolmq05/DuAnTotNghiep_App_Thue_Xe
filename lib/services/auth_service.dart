@@ -69,6 +69,24 @@ class AuthService extends BaseService {
     return UserModel.fromJson(response['user'] as Map<String, dynamic>);
   }
 
+  /// Đổi mật khẩu tài khoản
+  Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    final response = await store(
+      'api/auth/change-password',
+      body: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+        'new_password_confirmation': newPasswordConfirmation,
+      },
+      requiresAuth: true,
+    );
+    return response as Map<String, dynamic>;
+  }
+
   /// Đăng xuất khỏi hệ thống
   Future<void> logout() async {
     try {

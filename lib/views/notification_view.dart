@@ -308,7 +308,7 @@ class _NotificationViewState extends State<NotificationView> {
         title: const Text(
           'Thông báo',
           style: TextStyle(
-            color: AppColors.primary,
+            color: Colors.black,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),

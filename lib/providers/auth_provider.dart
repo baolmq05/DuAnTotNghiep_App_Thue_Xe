@@ -186,6 +186,39 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Đổi mật khẩu
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final res = await _authService.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        newPasswordConfirmation: newPasswordConfirmation,
+      );
+      
+      if (res['success'] == true) {
+        _errorMessage = null;
+        return true;
+      } else {
+        _errorMessage = res['message'] ?? 'Đổi mật khẩu thất bại.';
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e.toString());
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Đăng xuất
   Future<void> logout() async {
     _isLoading = true;

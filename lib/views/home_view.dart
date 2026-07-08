@@ -32,13 +32,20 @@ class _HomeViewState extends State<HomeView> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Xin chào,', style: TextStyle(fontSize: 13)),
+            Text(
+              'Xin chào,',
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+            ),
             Row(
               spacing: 5,
               children: [
                 Text(
                   'Quốc Bảo',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
                 Icon(
                   Icons.waving_hand_sharp,
@@ -118,4 +125,3 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 }
-

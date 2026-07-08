@@ -70,7 +70,7 @@ class _OrderViewState extends State<OrderView>
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+            color: Colors.black,
           ),
         ),
       ),

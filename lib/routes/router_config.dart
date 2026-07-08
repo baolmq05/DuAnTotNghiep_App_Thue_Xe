@@ -24,6 +24,7 @@ import 'package:duantotnghiep_app_thue_xe/views/support_detail_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/address_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/favorite_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/owner_profile_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/change_password_view.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -56,10 +57,7 @@ final drivioRouter = GoRouter(
         final extra = state.extra as Map<String, dynamic>?;
         final showAcceptance = extra?['showAcceptance'] as bool? ?? false;
         final onAccept = extra?['onAccept'] as VoidCallback?;
-        return PolicyView(
-          showAcceptance: showAcceptance,
-          onAccept: onAccept,
-        );
+        return PolicyView(showAcceptance: showAcceptance, onAccept: onAccept);
       },
     ),
     GoRoute(
@@ -71,6 +69,11 @@ final drivioRouter = GoRouter(
       path: '/login',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const LoginView(),
+    ),
+    GoRoute(
+      path: '/change-password',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ChangePasswordView(),
     ),
     GoRoute(
       path: '/setting',

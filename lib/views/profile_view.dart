@@ -29,7 +29,7 @@ class _ProfileViewState extends State<ProfileView> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+            color: Colors.black,
           ),
         ),
         actions: [
@@ -150,11 +150,13 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 child: CircleAvatar(
                   radius: 36,
-                  backgroundImage: user?.avatar != null && user!.avatar!.isNotEmpty
+                  backgroundImage:
+                      user?.avatar != null && user!.avatar!.isNotEmpty
                       ? NetworkImage(user.avatar!)
                       : const NetworkImage(
-                          'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
-                        ) as ImageProvider,
+                              'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
+                            )
+                            as ImageProvider,
                 ),
               ),
               const SizedBox(width: 16),
@@ -448,18 +450,17 @@ class _ProfileViewState extends State<ProfileView> {
             },
           ),
           _buildMenuItem(
-            icon: Icons.place_outlined,
-            title: 'Địa chỉ của tôi',
+            icon: Icons.lock_outline,
+            title: 'Đặt lại mật khẩu',
             onTap: () {
-              context.push('/address');
+              context.push('/change-password');
             },
           ),
           _buildMenuItem(
-            icon: Icons.support_agent,
+            icon: Icons.help_outline_rounded,
             title: 'Trung tâm hỗ trợ',
             showDivider: false,
-            onTap: (
-            ) {
+            onTap: () {
               context.go('/support');
             },
           ),

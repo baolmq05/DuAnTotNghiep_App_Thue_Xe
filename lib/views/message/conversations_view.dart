@@ -343,27 +343,26 @@ class _ConversationsViewState extends State<ConversationsView> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 20.0,
+        title: const Text(
+          'Tin nhắn',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 20.0,
-                top: 20.0,
-                bottom: 15.0,
-              ),
-              child: const Text(
-                'Tin nhắn',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
