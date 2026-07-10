@@ -27,6 +27,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   final ScrollController _scrollController = ScrollController();
   late Conversation _conv;
   bool _isTyping = false;
+  int _messageCount = 0;
 
   @override
   void initState() {
@@ -60,29 +61,30 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       }
     });
   }
+
   void _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
     _messageController.clear();
-    final userMsg = ChatMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: 'me',
-      text: text,
-      timestamp: DateTime.now(),
-      isMe: true,
-    );
-
     final chatDetailViewModel = context.read<ChatDetailViewModel>();
-    
-    // Thêm tin nhắn của người dùng vào giao diện trước để hiển thị tức thì
-    setState(() {
-      chatDetailViewModel.messages.add(userMsg);
-      _isTyping = true;
-    });
-    _scrollToBottom();
 
     if (_conv.isChatbot) {
+      final userMsg = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        senderId: 'me',
+        text: text,
+        timestamp: DateTime.now(),
+        isMe: true,
+      );
+
+      // Chatbot
+      setState(() {
+        chatDetailViewModel.messages.add(userMsg);
+        _isTyping = true;
+      });
+      _scrollToBottom();
+
       try {
         final replyText = await chatDetailViewModel.sendChatbotMessage(
           message: text,
@@ -102,7 +104,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi gửi tin nhắn chatbot: $e'),
+              content: Text('Chatbot error: $e'),
               backgroundColor: AppColors.error,
             ),
           );
@@ -116,24 +118,21 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         }
       }
     } else {
-      // Logic giả lập phản hồi cho tin nhắn thường (nếu chưa có API)
-      Timer(const Duration(seconds: 1), () {
-        if (!mounted) return;
-        setState(() {
-          _isTyping = false;
-        });
-        chatDetailViewModel.messages.add(
-          ChatMessage(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            senderId: _conv.id,
-            text: 'Dạ vâng, cảm ơn bạn đã phản hồi nhanh chóng! 😊',
-            timestamp: DateTime.now(),
-            isMe: false,
-          ),
+      try {
+        await chatDetailViewModel.sendMessage(
+          conversationId: _conv.id,
+          text: text,
         );
-        if (mounted) setState(() {});
-        _scrollToBottom();
-      });
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi gửi tin nhắn: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -232,6 +231,15 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   Widget build(BuildContext context) {
     final chatDetailViewModel = context.watch<ChatDetailViewModel>();
     final messages = chatDetailViewModel.messages;
+
+    // Auto scroll to bottom when new messages arrive
+    if (messages.length > _messageCount) {
+      _messageCount = messages.length;
+      _scrollToBottom();
+    } else if (messages.length < _messageCount) {
+      _messageCount = messages.length;
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

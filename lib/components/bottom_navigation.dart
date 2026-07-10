@@ -1,6 +1,8 @@
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavigation extends StatelessWidget {
   final int selectedIndex;
@@ -14,7 +16,11 @@ class BottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int messageCount = 5; // Số lượng tin nhắn chưa đọc (ví dụ)
+    final conversationViewModel = context.watch<ConversationViewmodel>();
+    final int messageCount = conversationViewModel.conversations.fold(
+      0,
+      (sum, conv) => sum + conv.unreadCount,
+    );
 
     return Container(
       decoration: BoxDecoration(

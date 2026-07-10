@@ -579,8 +579,17 @@ class _ConversationsViewState extends State<ConversationsView> {
                         final conv = list[index];
 
                         return InkWell(
-                          onTap: () {
-                            context.push('/chat/${conv.id}', extra: conv);
+                          onTap: () async {
+                            // Mark read locally for instant UI response
+                            context.read<ConversationViewmodel>().markAsReadLocally(conv.id);
+                            
+                            // Navigate to chat detail screen
+                            await context.push('/chat/${conv.id}', extra: conv);
+                            
+                            // Refresh list when returning
+                            if (mounted) {
+                              context.read<ConversationViewmodel>().fetchConversations();
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(

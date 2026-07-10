@@ -2,7 +2,7 @@ import 'package:duantotnghiep_app_thue_xe/services/base_service.dart';
 import 'package:duantotnghiep_app_thue_xe/models/chatbot_session_model.dart';
 
 class ChatbotService extends BaseService {
-  /// Gọi API lấy thông tin cuộc trò chuyện chatbot của người dùng hiện tại
+  /// Get chatbot session
   Future<ChatbotSession?> getChatbotSession() async {
     try {
       final response = await get('api/auth/chatbot', requiresAuth: true);
@@ -16,7 +16,7 @@ class ChatbotService extends BaseService {
     }
   }
 
-  /// Gửi tin nhắn đến chatbot và nhận về câu trả lời từ AI
+  /// Send chatbot message
   Future<String?> sendChatbotMessage({
     required String message,
     String? conversationId,
