@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http_parser/http_parser.dart';
 
 /// Lỗi phát sinh khi đi gọi API gặp chuyện.
 class ApiException implements Exception {
@@ -220,5 +221,74 @@ abstract class BaseService {
       headers: headers,
       requiresAuth: requiresAuth,
     );
+  }
+
+  Future<dynamic> uploadMultipart(
+    String endpoint, {
+    required Map<String, String> fields,
+    File? file,
+    dynamic xfile,
+    String fileField = 'image',
+    bool requiresAuth = false,
+  }) async {
+    try {
+      final uri = _buildUri(endpoint);
+
+      final headers = await _getHeaders(requiresAuth: requiresAuth);
+
+      // MultipartRequest tự thêm Content-Type, nên xóa đi để tránh lỗi.
+      headers.remove('Content-Type');
+
+      final request = http.MultipartRequest('POST', uri);
+
+      request.headers.addAll(headers); // Thêm tiêu đề vào request
+
+      request.fields.addAll(fields); // Thêm các trường dữ liệu vào request
+
+      if (xfile != null) {
+        // XFile có thể từ web hoặc mobile
+        final bytes = await xfile.readAsBytes();
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            fileField,
+            bytes,
+            filename: 'image.jpg',
+            contentType: MediaType('image', 'jpeg'),
+          ),
+        );
+      } else if (file != null) {
+        if (kIsWeb) {
+          // web đọc bytes từ file rồi gửi lên
+          final bytes = await file.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              fileField,
+              bytes,
+              filename: 'image.jpg',
+              contentType: MediaType('image', 'jpeg'),
+            ),
+          );
+        } else {
+          // mobile đọc từ đường dẫn file
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              fileField,
+              file.path,
+              contentType: MediaType('image', 'jpeg'),
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send();
+
+      final response = await http.Response.fromStream(streamedResponse);
+
+      return _processResponse(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+
+      throw ApiException(message: 'Upload Multipart lỗi: $e');
+    }
   }
 }

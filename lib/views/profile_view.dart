@@ -433,6 +433,7 @@ class _ProfileViewState extends State<ProfileView> {
             title: 'Giấy phép lái xe',
             trailing: _buildLicenseBadge(user),
             onTap: () {
+              context.push('/driver-license');
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Xem Giấy phép lái xe')),
               );
