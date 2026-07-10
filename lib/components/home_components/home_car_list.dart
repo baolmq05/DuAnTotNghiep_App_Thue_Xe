@@ -47,7 +47,9 @@ class _HomeCarListState extends State<HomeCarList> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.push('/vehicles');
+                    },
                     style: TextButton.styleFrom(
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(50, 30),

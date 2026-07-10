@@ -1,5 +1,6 @@
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeFilter extends StatefulWidget {
   const HomeFilter({super.key});
@@ -28,6 +29,15 @@ class _HomeFilterState extends State<HomeFilter> {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  String _formatBackendDateTime(DateTime date, TimeOfDay time) {
+    final year = date.year.toString().padLeft(4, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$year-$month-$day $hour:$minute:00';
   }
 
   void _showFilterModal(BuildContext context) async {
@@ -282,17 +292,18 @@ class _HomeFilterState extends State<HomeFilter> {
             ),
             child: ElevatedButton(
               onPressed: () {
-                if (_address.trim().isEmpty) {
-                  _showFilterModal(context);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Đang tìm kiếm xe tại: $_address'),
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }
+                final queryParameters = <String, String>{
+                  if (_address.trim().isNotEmpty) 'address': _address.trim(),
+                  'startDate': _formatBackendDateTime(_pickupDate, _pickupTime),
+                  'endDate': _formatBackendDateTime(_returnDate, _returnTime),
+                };
+
+                context.push(
+                  Uri(
+                    path: '/vehicles',
+                    queryParameters: queryParameters,
+                  ).toString(),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
