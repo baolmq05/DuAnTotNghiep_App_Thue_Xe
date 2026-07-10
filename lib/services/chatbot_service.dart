@@ -15,4 +15,32 @@ class ChatbotService extends BaseService {
       rethrow;
     }
   }
+
+  /// Gửi tin nhắn đến chatbot và nhận về câu trả lời từ AI
+  Future<String?> sendChatbotMessage({
+    required String message,
+    String? conversationId,
+  }) async {
+    try {
+      final Map<String, dynamic> body = {
+        'message': message,
+      };
+      if (conversationId != null) {
+        body['conversationId'] = conversationId;
+      }
+
+      final response = await store(
+        'api/auth/chatbot',
+        body: body,
+        requiresAuth: true,
+      );
+
+      if (response is String) {
+        return response;
+      }
+      return response?.toString();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

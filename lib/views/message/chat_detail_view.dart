@@ -60,8 +60,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       }
     });
   }
-
-  void _sendMessage() {
+  void _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
@@ -75,62 +74,54 @@ class _ChatDetailViewState extends State<ChatDetailView> {
     );
 
     final chatDetailViewModel = context.read<ChatDetailViewModel>();
-    chatDetailViewModel.messages.add(userMsg);
-    setState(() {});
+    
+    // Thêm tin nhắn của người dùng vào giao diện trước để hiển thị tức thì
+    setState(() {
+      chatDetailViewModel.messages.add(userMsg);
+      _isTyping = true;
+    });
     _scrollToBottom();
 
     if (_conv.isChatbot) {
-      setState(() {
-        _isTyping = true;
-      });
-      _scrollToBottom();
+      try {
+        final replyText = await chatDetailViewModel.sendChatbotMessage(
+          message: text,
+        );
 
-      Timer(const Duration(seconds: 1), () {
-        if (!mounted) return;
-        String replyText =
-            'Cảm ơn bạn đã nhắn tin. Drivio luôn sẵn sàng đồng hành cùng bạn trên mọi nẻo đường!';
-        final lowerText = text.toLowerCase();
-
-        if (lowerText.contains('giá') || lowerText.contains('bao nhiêu')) {
-          replyText =
-              'Giá thuê xe tại Drivio dao động từ 500.000đ/ngày đối với xe máy/xe ô tô nhỏ đến 1.500.000đ/ngày đối với SUV/Sedan sang trọng. Bạn muốn tham khảo dòng xe nào cụ thể không?';
-        } else if (lowerText.contains('đặt cọc') || lowerText.contains('cọc')) {
-          replyText =
-              'Để đặt cọc thuê xe, bạn có thể chuyển khoản online hoặc đặt cọc trực tiếp tại văn phòng. Mức cọc thông thường là 2.000.000đ đối với xe máy và từ 5.000.000đ đối với ô tô.';
-        } else if (lowerText.contains('thủ tục') ||
-            lowerText.contains('giấy tờ')) {
-          replyText =
-              'Thủ tục thuê xe tại Drivio rất đơn giản: Bạn chỉ cần chuẩn bị CCCD gắn chíp, Bằng lái xe hợp lệ (A1/A2 cho xe máy, B1/B2 cho ô tô) và tiền đặt cọc.';
-        }
-
-        setState(() {
-          _isTyping = false;
-        });
-        final chatDetailViewModel = context.read<ChatDetailViewModel>();
-        chatDetailViewModel.messages.add(
-          ChatMessage(
+        if (replyText != null && replyText.isNotEmpty) {
+          final botMsg = ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             senderId: 'chatbot',
             text: replyText,
             timestamp: DateTime.now(),
             isMe: false,
-          ),
-        );
-        if (mounted) setState(() {});
-        _scrollToBottom();
-      });
+          );
+          chatDetailViewModel.messages.add(botMsg);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi gửi tin nhắn chatbot: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isTyping = false;
+          });
+          _scrollToBottom();
+        }
+      }
     } else {
-      setState(() {
-        _isTyping = true;
-      });
-      _scrollToBottom();
-
+      // Logic giả lập phản hồi cho tin nhắn thường (nếu chưa có API)
       Timer(const Duration(seconds: 1), () {
         if (!mounted) return;
         setState(() {
           _isTyping = false;
         });
-        final chatDetailViewModel = context.read<ChatDetailViewModel>();
         chatDetailViewModel.messages.add(
           ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),

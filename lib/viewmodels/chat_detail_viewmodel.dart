@@ -17,14 +17,17 @@ class ChatDetailViewModel extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
   String? _errorMessage;
+  int? _chatbotSessionId;
 
   List<ChatMessage> get messages => _messages;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  int? get chatbotSessionId => _chatbotSessionId;
 
   Future<void> loadMessagesForConversation(Conversation conversation) async {
     _isLoading = true;
     _errorMessage = null;
+    _chatbotSessionId = null;
     notifyListeners();
 
     try {
@@ -33,6 +36,7 @@ class ChatDetailViewModel extends ChangeNotifier {
         _messages.clear();
 
         if (session != null) {
+          _chatbotSessionId = session.id;
           for (final item in session.messages) {
             final message = ChatMessage(
               id: item.id.toString(),
@@ -57,6 +61,22 @@ class ChatDetailViewModel extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Gửi tin nhắn đến chatbot và trả về phản hồi văn bản của AI từ Backend
+  Future<String?> sendChatbotMessage({required String message}) async {
+    try {
+      _errorMessage = null;
+      final responseText = await _chatbotService.sendChatbotMessage(
+        message: message,
+        conversationId: _chatbotSessionId?.toString(),
+      );
+      return responseText;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
     }
   }
 }
