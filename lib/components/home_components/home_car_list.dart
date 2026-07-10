@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/app_toast.dart';
 
 class HomeCarList extends StatefulWidget {
   const HomeCarList({super.key});
@@ -113,6 +114,19 @@ class _HomeCarListState extends State<HomeCarList> {
                             isFavorite: isFav,
                             onFavoriteTap: () {
                               context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
+                              if (isFav) {
+                                AppToast.show(
+                                  context,
+                                  message: "Đã xóa xe khỏi danh sách yêu thích",
+                                  type: ToastType.info,
+                                );
+                              } else {
+                                AppToast.show(
+                                  context,
+                                  message: "Đã thêm xe vào danh sách yêu thích thành công!",
+                                  type: ToastType.success,
+                                );
+                              }
                             },
                             onTap: () {
                               context.push('/car_detail/${car.id}');
