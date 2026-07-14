@@ -139,6 +139,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
               _buildImageCarousel(imageUrls),
               const SizedBox(height: 20.0),
               _buildCarInfoHeader(car),
+              const SizedBox(height: 12.0),
+              _buildLocationSection(car),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Divider(
@@ -229,15 +231,41 @@ class _CarDetailPageState extends State<CarDetailPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 10.0),
-              Text(
-                'Giảm giá: ${car.discountValue}đ',
-                style: const TextStyle(fontSize: 16.0),
-              ),
+              if ((double.tryParse(car.discountValue) ?? 0) > 0) ...[
+                const SizedBox(height: 10.0),
+                Text(
+                  'Giảm giá: ${formatPrice(car.discountValue)}đ',
+                  style: const TextStyle(fontSize: 16.0),
+                ),
+              ],
             ],
           ),
         ),
       ],
+    );
+  }
+
+  // ==================== Location Section ====================
+  Widget _buildLocationSection(Car_Detail car) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.location_on, color: AppColors.primary, size: 20),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              car.carLocation.address,
+              style: const TextStyle(
+                fontSize: 14.0,
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -615,11 +643,11 @@ class _CarDetailPageState extends State<CarDetailPage> {
           const SizedBox(height: 12),
           _buildTermItem(
             Icons.info_outline,
-            'Giới hạn quãng đường: Tối đa ${car.usageLimit.maxDailyDistance}km/ngày, phụ trội ${car.usageLimit.extraDistanceFee}đ/km.',
+            'Giới hạn quãng đường: Tối đa ${car.usageLimit.maxDailyDistance}km/ngày, phụ trội ${formatPrice(car.usageLimit.extraDistanceFee)}đ/km.',
           ),
           _buildTermItem(
             Icons.local_shipping_outlined,
-            'Giao xe tận nơi: Tối đa ${car.deliveryOption.maxDistance}km, miễn phí ${car.deliveryOption.freeDistance}km đầu, phí ${car.deliveryOption.feeDistance}đ/km.',
+            'Giao xe tận nơi: Tối đa ${car.deliveryOption.maxDistance}km, miễn phí ${car.deliveryOption.freeDistance}km đầu, phí ${formatPrice(car.deliveryOption.feeDistance.toString())}đ/km.',
           ),
           _buildTermItem(
             Icons.description_outlined,
@@ -848,7 +876,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: formatPrice(car.unitPrice),
+                        text: formatPriceWithUnit(car.unitPrice),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

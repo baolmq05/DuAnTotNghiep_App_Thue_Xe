@@ -25,7 +25,7 @@ class CarService extends BaseService {
   }
 
   Future<Car_Detail> getCarDetail({required int id}) async {
-    final response = await get('/api/cars/6');
+    final response = await get('/api/cars/$id');
 
     print('=== CAR DETAIL RAW RESPONSE ===');
     print(response);
