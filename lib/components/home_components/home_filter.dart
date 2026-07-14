@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:duantotnghiep_app_thue_xe/services/goong_map_service.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -355,6 +357,11 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
   late DateTime _returnDate;
   late TimeOfDay _returnTime;
 
+  final GoongMapService _goongMapService = GoongMapService();
+  List<String> _suggestions = [];
+  bool _isLoadingSuggestions = false;
+  Timer? _debounceTimer;
+
   @override
   void initState() {
     super.initState();
@@ -367,8 +374,33 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _addressController.dispose();
     super.dispose();
+  }
+
+  void _onAddressChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      if (query.trim().isEmpty) {
+        setState(() {
+          _suggestions = [];
+        });
+        return;
+      }
+
+      setState(() {
+        _isLoadingSuggestions = true;
+      });
+
+      final suggestions = await _goongMapService.getSuggestions(query);
+
+      setState(() {
+        _suggestions = suggestions;
+        _isLoadingSuggestions = false;
+      });
+    });
   }
 
   String _formatDate(DateTime date) {
@@ -580,6 +612,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
             const SizedBox(height: 8),
             TextFormField(
               controller: _addressController,
+              onChanged: _onAddressChanged,
               decoration: InputDecoration(
                 hintText: 'Nhập thành phố, quận huyện...',
                 prefixIcon: const Icon(
@@ -588,7 +621,12 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                 ),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear, color: Colors.grey),
-                  onPressed: () => _addressController.clear(),
+                  onPressed: () {
+                    _addressController.clear();
+                    setState(() {
+                      _suggestions = [];
+                    });
+                  },
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -609,6 +647,65 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                 fillColor: AppColors.card,
               ),
             ),
+            if (_isLoadingSuggestions)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              )
+            else if (_suggestions.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _suggestions.length > 4 ? 4 : _suggestions.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final suggestion = _suggestions[index];
+                    return ListTile(
+                      dense: true,
+                      leading: const Icon(
+                        Icons.location_on_outlined,
+                        color: AppColors.primary,
+                        size: 18,
+                      ),
+                      title: Text(
+                        suggestion,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _addressController.text = suggestion;
+                          _suggestions = [];
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
             const SizedBox(height: 20),
 
             // Section 2: Thời gian nhận xe & trả xe

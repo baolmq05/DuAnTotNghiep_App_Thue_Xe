@@ -33,14 +33,14 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Xin chào,',
+              'Drivio,',
               style: TextStyle(fontSize: 13, color: Colors.black54),
             ),
             Row(
               spacing: 5,
               children: [
                 Text(
-                  'Quốc Bảo',
+                  'xin chào',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
