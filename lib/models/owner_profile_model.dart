@@ -25,10 +25,10 @@ class OwnerProfile {
 
   factory OwnerProfile.fromJson(Map<String, dynamic> json) {
     var reviewList = json['reviews'] as List? ?? [];
-    List<OwnerReview> parsedReviews = reviewList.map((r) => OwnerReview.fromJson(r)).toList();
+    List<OwnerReview> parsedReviews = reviewList.where((r) => r != null).map((r) => OwnerReview.fromJson(r as Map<String, dynamic>)).toList();
 
     var carList = json['cars'] as List? ?? [];
-    List<Car> parsedCars = carList.map((c) => Car.fromJson(c)).toList();
+    List<Car> parsedCars = carList.where((c) => c != null).map((c) => Car.fromJson(c as Map<String, dynamic>)).toList();
 
     return OwnerProfile(
       id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
@@ -39,7 +39,7 @@ class OwnerProfile {
       tripsCount: json['trips_count'] is int
           ? json['trips_count']
           : int.tryParse(json['trips_count']?.toString() ?? '') ?? 0,
-      joinDate: json['join_date']?.toString() ?? '',
+      joinDate: json['join_date']?.toString() ?? json['joinDate']?.toString() ?? '',
       reviews: parsedReviews,
       cars: parsedCars,
     );
@@ -48,6 +48,7 @@ class OwnerProfile {
 
 class OwnerReview {
   final int id;
+  final int reviewerId;
   final String reviewerName;
   final String? reviewerAvatar;
   final double rating;
@@ -56,6 +57,7 @@ class OwnerReview {
 
   OwnerReview({
     required this.id,
+    required this.reviewerId,
     required this.reviewerName,
     this.reviewerAvatar,
     required this.rating,
@@ -66,6 +68,9 @@ class OwnerReview {
   factory OwnerReview.fromJson(Map<String, dynamic> json) {
     return OwnerReview(
       id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      reviewerId: json['reviewer_id'] is int 
+          ? json['reviewer_id'] 
+          : int.tryParse(json['reviewer_id']?.toString() ?? '') ?? 0,
       reviewerName: json['reviewer_name']?.toString() ?? '',
       reviewerAvatar: json['reviewer_avatar']?.toString(),
       rating: double.tryParse(json['rating']?.toString() ?? '0.0') ?? 0.0,

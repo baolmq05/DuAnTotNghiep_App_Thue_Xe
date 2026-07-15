@@ -700,8 +700,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pushReplacement(
-                    '/owner-profile/${owner.id}',
+                  onTap: () => context.pushReplacement( 
+                    '/owner-profile/${owner.id}?isOwner=true',
                     extra: {'fromCarId': car.id},
                   ),
                   child: CircleAvatar(
@@ -718,7 +718,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
                 Expanded(
                   child: GestureDetector(
                     onTap: () => context.pushReplacement(
-                      '/owner-profile/${owner.id}',
+                      '/owner-profile/${owner.id}?isOwner=true',
                       extra: {'fromCarId': car.id},
                     ),
                     behavior: HitTestBehavior.opaque,
@@ -803,7 +803,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => context.pushReplacement(
-                      '/owner-profile/${owner.id}',
+                      '/owner-profile/${owner.id}?isOwner=true',
                       extra: {'fromCarId': car.id},
                     ),
                     style: OutlinedButton.styleFrom(

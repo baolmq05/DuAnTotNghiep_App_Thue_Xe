@@ -17,7 +17,6 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart'
 import 'package:duantotnghiep_app_thue_xe/viewmodels/address_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/policy_viewmodel.dart';
-import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_profile_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 
 void main() {
@@ -49,7 +48,6 @@ class DrivioApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AddressViewModel()),
         ChangeNotifierProvider(create: (context) => CarDetailViewmodel()),
         ChangeNotifierProvider(create: (context) => PolicyViewModel()),
-        ChangeNotifierProvider(create: (context) => OwnerProfileViewModel()),
         ChangeNotifierProvider(create: (context) => FavoriteViewModel()),
       ],
       child: MaterialApp.router(

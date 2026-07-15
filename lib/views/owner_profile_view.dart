@@ -10,11 +10,13 @@ import 'package:provider/provider.dart';
 class OwnerProfileView extends StatefulWidget {
   final int ownerId;
   final int? fromCarId;
+  final bool isOwner;
 
   const OwnerProfileView({
     super.key,
     required this.ownerId,
     this.fromCarId,
+    this.isOwner = true, // mặc định chế độ xem chủ xe
   });
 
   @override
@@ -27,16 +29,31 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
     super.initState();
     // Gọi ViewModel để tải dữ liệu chủ xe sau khi dựng khung hình
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OwnerProfileViewModel>(context, listen: false)
-          .fetchOwnerProfile(widget.ownerId);
+      Provider.of<OwnerProfileViewModel>(
+        context,
+        listen: false,
+      ).fetchOwnerProfile(ownerId: widget.ownerId, isOwner: widget.isOwner);
     });
   }
 
+  // Tự động chạy lại API khi bấm chuyển ID hoặc vai trò (isOwner)
+  @override
+  void didUpdateWidget(covariant OwnerProfileView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ownerId != widget.ownerId || oldWidget.isOwner != widget.isOwner) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<OwnerProfileViewModel>(context, listen: false)
+            .fetchOwnerProfile(ownerId: widget.ownerId, isOwner: widget.isOwner);
+      });
+    }
+  }
+
   void _goBack(BuildContext context) {
-    if (widget.fromCarId != null) {
-      context.pushReplacement('/car_detail/${widget.fromCarId}');
-    } else if (Navigator.canPop(context)) {
-      Navigator.pop(context);
+    // Kiểm tra xem trong lịch sử router còn trang nào để quay lại không
+    if (context.canPop()) {
+      context.pop(); 
+    } else if (widget.fromCarId != null) {
+      context.go('/car_detail/${widget.fromCarId}');
     } else {
       context.go('/home');
     }
@@ -44,6 +61,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final bool currentIsOwner = widget.isOwner;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -54,9 +72,9 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => _goBack(context),
         ),
-        title: const Text(
-          'Thông tin chủ xe',
-          style: TextStyle(
+        title: Text(
+          currentIsOwner ? 'Thông tin chủ xe' : 'Hồ sơ khách thuê',
+          style: const TextStyle(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -67,17 +85,17 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
       body: Consumer<OwnerProfileViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(
-                    color: AppColors.primary,
-                  ),
+                  CircularProgressIndicator(color: AppColors.primary),
                   SizedBox(height: 16),
                   Text(
-                    'Đang tải thông tin chủ xe...',
-                    style: TextStyle(
+                    currentIsOwner
+                        ? 'Đang tải thông tin chủ xe...'
+                        : 'Đang tải hồ sơ khách thuê...',
+                    style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 14,
                     ),
@@ -111,7 +129,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: () {
-                        viewModel.fetchOwnerProfile(widget.ownerId);
+                        viewModel.fetchOwnerProfile(
+                          ownerId: widget.ownerId,
+                          isOwner: widget.isOwner,
+                        );
                       },
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Thử lại'),
@@ -131,10 +152,12 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
 
           final profile = viewModel.ownerProfile;
           if (profile == null) {
-            return const Center(
+            return Center(
               child: Text(
-                'Không tìm thấy thông tin chủ xe.',
-                style: TextStyle(
+                currentIsOwner
+                    ? 'Không tìm thấy thông tin chủ xe'
+                    : 'Không tìm thấy hồ sơ khách thuê',
+                style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 14,
                 ),
@@ -148,17 +171,26 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 1. Header cá nhân chủ xe
-                _buildOwnerHeader(profile),
+                _buildOwnerHeader(profile, currentIsOwner),
 
-                const Divider(height: 24, thickness: 1, color: AppColors.border),
+                const Divider(
+                  height: 24,
+                  thickness: 1,
+                  color: AppColors.border,
+                ),
 
                 // 2. Danh sách đánh giá
-                _buildReviewsSection(context, viewModel),
+                _buildReviewsSection(context, viewModel, currentIsOwner),
 
-                const Divider(height: 24, thickness: 1, color: AppColors.border),
-
-                // 3. Danh sách xe
-                _buildCarsSection(context, profile),
+                // 3. Danh sách xe (nếu là chủ xe)
+                if (currentIsOwner) ...[
+                  const Divider(
+                    height: 24,
+                    thickness: 1,
+                    color: AppColors.border,
+                  ),
+                  _buildCarsSection(context, profile),
+                ],
 
                 const SizedBox(height: 32),
               ],
@@ -171,7 +203,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
 
   // ==================== WIDGETS BUILDERS ====================
 
-  Widget _buildOwnerHeader(OwnerProfile profile) {
+  Widget _buildOwnerHeader(OwnerProfile profile, bool currentIsOwner) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -192,7 +224,11 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                       ? NetworkImage(profile.avatar!)
                       : null,
                   child: profile.avatar == null
-                      ? const Icon(Icons.person, size: 40, color: AppColors.textSecondary)
+                      ? const Icon(
+                          Icons.person,
+                          size: 40,
+                          color: AppColors.textSecondary,
+                        )
                       : null,
                 ),
               ),
@@ -250,7 +286,11 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.star_rounded, color: Colors.amber, size: 24),
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                          size: 24,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           profile.rating.toString(),
@@ -273,17 +313,17 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   ],
                 ),
                 // Đường sọc đứng phân chia
-                Container(
-                  height: 32,
-                  width: 1,
-                  color: AppColors.border,
-                ),
+                Container(height: 32, width: 1, color: AppColors.border),
                 // Số chuyến
                 Column(
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.directions_car_rounded, color: AppColors.primary, size: 22),
+                        const Icon(
+                          Icons.directions_car_rounded,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           '${profile.tripsCount}',
@@ -296,9 +336,9 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Chuyến đi',
-                      style: TextStyle(
+                    Text(
+                      currentIsOwner ? 'Chuyến đi' : 'Chuyến thuê',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
                       ),
@@ -313,10 +353,15 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
     );
   }
 
-  Widget _buildReviewsSection(BuildContext context, OwnerProfileViewModel viewModel) {
-    final profile = viewModel.ownerProfile!;
-    final totalReviews = profile.reviews.length;
-    final displayList = profile.reviews.take(viewModel.visibleReviewsCount).toList();
+  Widget _buildReviewsSection(
+    BuildContext context,
+    OwnerProfileViewModel viewModel,
+    bool currentIsOwner
+  ) {
+    final totalReviews = viewModel.reviews.length;
+    final displayList = viewModel.reviews
+        .take(viewModel.visibleReviewsCount)
+        .toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -327,7 +372,9 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Đánh giá từ khách hàng ($totalReviews)',
+                currentIsOwner
+                    ? 'Đánh giá từ khách hàng ($totalReviews)'
+                    : 'Đánh giá từ chủ xe ($totalReviews)',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -337,12 +384,14 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
             ],
           ),
           const SizedBox(height: 12),
-          if (profile.reviews.isEmpty)
-            const Padding(
+          if (viewModel.reviews.isEmpty)
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 24.0),
               child: Center(
                 child: Text(
-                  'Chủ xe này chưa có đánh giá nào.',
+                  currentIsOwner
+                      ? 'Chủ xe này chưa có đánh giá nào'
+                      : 'Người thuê này chưa có đánh giá nào',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13,
@@ -368,15 +417,26 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundColor: AppColors.card,
-                          backgroundImage: review.reviewerAvatar != null
-                              ? NetworkImage(review.reviewerAvatar!)
-                              : null,
-                          child: review.reviewerAvatar == null
-                              ? const Icon(Icons.person, size: 18, color: AppColors.textSecondary)
-                              : null,
+                        GestureDetector(
+                          onTap: () {
+                            context.push(
+                              '/owner-profile/${review.reviewerId}?isOwner=${!currentIsOwner}',
+                            );
+                          },
+                          child: CircleAvatar(
+                            radius: 18,
+                            backgroundColor: AppColors.card,
+                            backgroundImage: review.reviewerAvatar != null
+                                ? NetworkImage(review.reviewerAvatar!)
+                                : null,
+                            child: review.reviewerAvatar == null
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 18,
+                                    color: AppColors.textSecondary,
+                                  )
+                                : null,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -442,7 +502,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     onPressed: () {
                       viewModel.loadMoreReviews();
                     },
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 18,
+                    ),
                     label: const Text('Xem thêm đánh giá'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
@@ -450,7 +513,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
+                      ),
                     ),
                   ),
                 ),
@@ -483,7 +549,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
               ),
               if (cars.isNotEmpty)
                 TextButton(
-                  onPressed: () => _showAllCarsBottomSheet(context, cars),
+                  onPressed: () => _showAllCarsBottomSheet(context, cars, profile.name),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                     minimumSize: const Size(60, 30),
@@ -508,17 +574,15 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
             child: Center(
               child: Text(
                 'Chủ xe này chưa đăng ký xe nào.',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
-                ),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
               ),
             ),
           )
         else
           // Danh sách xe dạng cuộn ngang
           SizedBox(
-            height: 425, // Tăng chiều cao để đủ hiển thị HomeCarCard mà không bị tràn (Overflow)
+            height:
+                425, // Tăng chiều cao để đủ hiển thị HomeCarCard mà không bị tràn (Overflow)
             child: ListView.builder(
               physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
@@ -543,7 +607,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
   }
 
   // Hiển thị danh sách toàn bộ xe trong Bottom Sheet
-  void _showAllCarsBottomSheet(BuildContext context, List<Car> cars) {
+  void _showAllCarsBottomSheet(BuildContext context, List<Car> cars, String ownerName) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -571,12 +635,15 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Tất cả xe của ${viewModelName(context)}',
+                        'Tất cả xe của $ownerName',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -594,12 +661,18 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4.0,
+                      vertical: 8.0,
+                    ),
                     itemCount: cars.length,
                     itemBuilder: (context, index) {
                       final car = cars[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 4.0,
+                        ),
                         child: HomeCarCard(
                           width: double.infinity,
                           car: car,
@@ -621,7 +694,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
   }
 
   String viewModelName(BuildContext context) {
-    final profile = Provider.of<OwnerProfileViewModel>(context, listen: false).ownerProfile;
+    final profile = Provider.of<OwnerProfileViewModel>(
+      context,
+      listen: false,
+    ).ownerProfile;
     return profile?.name ?? '';
   }
 }

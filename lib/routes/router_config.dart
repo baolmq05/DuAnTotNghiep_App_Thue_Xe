@@ -25,6 +25,8 @@ import 'package:duantotnghiep_app_thue_xe/views/address_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/vehicle_list_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/favorite_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/owner_profile_view.dart';
+import 'package:provider/provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_profile_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/views/change_password_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/driver_license_view.dart';
 
@@ -184,7 +186,16 @@ final drivioRouter = GoRouter(
         final id = int.tryParse(idStr) ?? 0;
         final extra = state.extra as Map<String, dynamic>?;
         final fromCarId = extra?['fromCarId'] as int?;
-        return OwnerProfileView(ownerId: id, fromCarId: fromCarId);
+        final isOwnerStr = state.uri.queryParameters['isOwner'];
+        final isOwner = isOwnerStr == null ? true : (isOwnerStr == 'true');
+        return ChangeNotifierProvider(
+          create: (_) => OwnerProfileViewModel(),
+          child: OwnerProfileView(
+            ownerId: id,
+            fromCarId: fromCarId,
+            isOwner: isOwner,
+          ),
+        );
       },
     ),
 
