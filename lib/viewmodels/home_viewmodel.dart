@@ -32,7 +32,10 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _carService.getCars();
+      final data = await _carService.getCars(queryParameters: {
+        'sort_by': 'featured',
+        'limit': '10',
+      });
       _cars = data;
     } catch (e) {
       debugPrint(e.toString());
