@@ -7,6 +7,7 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart';
 import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
 import 'package:go_router/go_router.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 
 class CarDetailPage extends StatefulWidget {
   final int carId;
@@ -21,6 +22,9 @@ class _CarDetailPageState extends State<CarDetailPage> {
   void initState() {
     super.initState();
     context.read<CarDetailViewmodel>().fetchCarDetail(id: widget.carId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FavoriteViewModel>().fetchFavorites();
+    });
   }
 
   int currentIndex = 0;
@@ -89,8 +93,29 @@ class _CarDetailPageState extends State<CarDetailPage> {
                           ? const Icon(Icons.favorite)
                           : const Icon(Icons.favorite_border),
                       color: isFav ? Colors.red : AppColors.primary,
-                      onPressed: () {
-                        context.read<FavoriteViewModel>().toggleFavorite(carId: widget.carId);
+                      onPressed: () async {
+                        // gọi hàm toggleFavorite từ FavoriteViewModel để thêm hoặc xóa xe khỏi danh sách yêu thích
+                        await context.read<FavoriteViewModel>().toggleFavorite(
+                          carId: widget.carId,
+                        );
+
+                        // sd toast để thông báo kết quả
+                        if (mounted) {
+                          if (isFav) {
+                            AppToast.show(
+                              context,
+                              message: "Đã xóa xe khỏi danh sách yêu thích",
+                              type: ToastType.info,
+                            );
+                          } else {
+                            AppToast.show(
+                              context,
+                              message:
+                                  "Đã thêm xe vào danh sách yêu thích thành công!",
+                              type: ToastType.success,
+                            );
+                          }
+                        }
                       },
                       padding: const EdgeInsets.all(10.0),
                       iconSize: 20.0,
@@ -700,7 +725,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () => context.pushReplacement( 
+                  onTap: () => context.pushReplacement(
                     '/owner-profile/${owner.id}?isOwner=true',
                     extra: {'fromCarId': car.id},
                   ),

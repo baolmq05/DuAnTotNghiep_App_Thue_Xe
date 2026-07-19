@@ -22,6 +22,7 @@ class _HomeCarListState extends State<HomeCarList> {
 
   @override
   Widget build(BuildContext context) {
+    final favoriteVM = context.watch<FavoriteViewModel>();
     return Consumer<HomeViewModel>(
       builder: (context, homeVM, _) {
         final cars = homeVM.cars;
@@ -107,7 +108,7 @@ class _HomeCarListState extends State<HomeCarList> {
                           },
                         ),
                         items: cars.map((car) {
-                          final isFav = context.watch<FavoriteViewModel>().isFavorite(car.id);
+                          final isFav = favoriteVM.isFavorite(car.id);
                           return HomeCarCard(
                             width: double.infinity,
                             car: car,

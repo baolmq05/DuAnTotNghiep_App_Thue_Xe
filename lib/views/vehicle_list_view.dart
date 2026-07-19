@@ -7,14 +7,12 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../widgets/app_toast.dart';
 
 class VehicleListView extends StatefulWidget {
   final Map<String, String> queryParameters;
 
-  const VehicleListView({
-    super.key,
-    this.queryParameters = const {},
-  });
+  const VehicleListView({super.key, this.queryParameters = const {}});
 
   @override
   State<VehicleListView> createState() => _VehicleListViewState();
@@ -207,13 +205,7 @@ class _VehicleListViewState extends State<VehicleListView> {
 
   DateTime? _combineDateAndTime(DateTime? date, TimeOfDay? time) {
     if (date == null || time == null) return null;
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 
   DateTime? _parseDateTimeValue(String value) {
@@ -238,7 +230,10 @@ class _VehicleListViewState extends State<VehicleListView> {
     final lower = rawAddress.toLowerCase();
 
     // Check for common cities in Vietnam
-    if (lower.contains('hồ chí minh') || lower.contains('hcm') || lower.contains('sài gòn') || lower.contains('sai gon')) {
+    if (lower.contains('hồ chí minh') ||
+        lower.contains('hcm') ||
+        lower.contains('sài gòn') ||
+        lower.contains('sai gon')) {
       return 'Hồ Chí Minh';
     }
     if (lower.contains('hà nội') || lower.contains('ha noi')) {
@@ -259,13 +254,20 @@ class _VehicleListViewState extends State<VehicleListView> {
     if (lower.contains('hải phòng') || lower.contains('hai phong')) {
       return 'Hải Phòng';
     }
-    if (lower.contains('vũng tàu') || lower.contains('bà rịa') || lower.contains('vung tau') || lower.contains('ba ria')) {
+    if (lower.contains('vũng tàu') ||
+        lower.contains('bà rịa') ||
+        lower.contains('vung tau') ||
+        lower.contains('ba ria')) {
       return 'Vũng Tàu';
     }
-    if (lower.contains('nha trang') || lower.contains('khánh hòa') || lower.contains('khanh hoa')) {
+    if (lower.contains('nha trang') ||
+        lower.contains('khánh hòa') ||
+        lower.contains('khanh hoa')) {
       return 'Khánh Hòa';
     }
-    if (lower.contains('đà lạt') || lower.contains('lâm đồng') || lower.contains('lam dong')) {
+    if (lower.contains('đà lạt') ||
+        lower.contains('lâm đồng') ||
+        lower.contains('lam dong')) {
       return 'Lâm Đồng';
     }
 
@@ -274,7 +276,13 @@ class _VehicleListViewState extends State<VehicleListView> {
     if (segments.isNotEmpty) {
       final lastSegment = segments.last.trim();
       String cleaned = lastSegment
-          .replaceFirst(RegExp(r'^(TP\.|TP|Thành phố|Tỉnh|Thành Phố)\s+', caseSensitive: false), '')
+          .replaceFirst(
+            RegExp(
+              r'^(TP\.|TP|Thành phố|Tỉnh|Thành Phố)\s+',
+              caseSensitive: false,
+            ),
+            '',
+          )
           .trim();
       if (cleaned.isNotEmpty) {
         return cleaned;
@@ -295,8 +303,16 @@ class _VehicleListViewState extends State<VehicleListView> {
     if (c.contains(q) || q.contains(c)) return true;
 
     // 2. City-based check
-    final qIsHCM = q.contains('hồ chí minh') || q.contains('hcm') || q.contains('sài gòn') || q.contains('sai gon');
-    final cIsHCM = c.contains('hồ chí minh') || c.contains('hcm') || c.contains('sài gòn') || c.contains('sai gon');
+    final qIsHCM =
+        q.contains('hồ chí minh') ||
+        q.contains('hcm') ||
+        q.contains('sài gòn') ||
+        q.contains('sai gon');
+    final cIsHCM =
+        c.contains('hồ chí minh') ||
+        c.contains('hcm') ||
+        c.contains('sài gòn') ||
+        c.contains('sai gon');
     if (qIsHCM && cIsHCM) return true;
 
     final qIsHN = q.contains('hà nội') || q.contains('ha noi');
@@ -308,10 +324,29 @@ class _VehicleListViewState extends State<VehicleListView> {
     if (qIsDN && cIsDN) return true;
 
     // 3. Segment match (excluding common words)
-    final qSegments = q.split(RegExp(r'[,.\-\s]+')).map((s) => s.trim()).where((s) => s.length >= 3).toList();
-    final cSegments = c.split(RegExp(r'[,.\-\s]+')).map((s) => s.trim()).where((s) => s.length >= 3).toList();
+    final qSegments = q
+        .split(RegExp(r'[,.\-\s]+'))
+        .map((s) => s.trim())
+        .where((s) => s.length >= 3)
+        .toList();
+    final cSegments = c
+        .split(RegExp(r'[,.\-\s]+'))
+        .map((s) => s.trim())
+        .where((s) => s.length >= 3)
+        .toList();
 
-    const stopWords = {'quận', 'huyện', 'tỉnh', 'thành', 'phố', 'phường', 'đường', 'viet', 'nam', 'việt'};
+    const stopWords = {
+      'quận',
+      'huyện',
+      'tỉnh',
+      'thành',
+      'phố',
+      'phường',
+      'đường',
+      'viet',
+      'nam',
+      'việt',
+    };
 
     for (final qs in qSegments) {
       if (stopWords.contains(qs)) continue;
@@ -344,7 +379,8 @@ class _VehicleListViewState extends State<VehicleListView> {
       queryParameters['endDate'] = _formatBackendDateTime(returnDateTime);
     }
 
-    if (_selectedSeatCount != null && RegExp(r'^\d+$').hasMatch(_selectedSeatCount!)) {
+    if (_selectedSeatCount != null &&
+        RegExp(r'^\d+$').hasMatch(_selectedSeatCount!)) {
       queryParameters['seat_count'] = _selectedSeatCount!;
     }
 
@@ -379,7 +415,8 @@ class _VehicleListViewState extends State<VehicleListView> {
     // Apply local fuzzy matching for address
     if (_address.isNotEmpty) {
       cars = cars.where((car) {
-        final carAddress = car.carLocation?.address ?? car.carLocation?.location ?? '';
+        final carAddress =
+            car.carLocation?.address ?? car.carLocation?.location ?? '';
         return _isAddressMatch(_address, carAddress);
       }).toList();
     }
@@ -387,7 +424,8 @@ class _VehicleListViewState extends State<VehicleListView> {
     if (_searchQuery.isNotEmpty) {
       final search = _searchQuery.toLowerCase();
       cars = cars.where((car) {
-        final location = car.carLocation?.address ?? car.carLocation?.location ?? '';
+        final location =
+            car.carLocation?.address ?? car.carLocation?.location ?? '';
         return car.name.toLowerCase().contains(search) ||
             location.toLowerCase().contains(search) ||
             car.fuelType.toLowerCase().contains(search);
@@ -415,7 +453,9 @@ class _VehicleListViewState extends State<VehicleListView> {
         if (fuel == 'điện') {
           return carFuel.contains('điện') || carFuel.contains('electric');
         } else if (fuel == 'xăng') {
-          return carFuel.contains('xăng') || carFuel.contains('gasoline') || carFuel.contains('petrol');
+          return carFuel.contains('xăng') ||
+              carFuel.contains('gasoline') ||
+              carFuel.contains('petrol');
         } else if (fuel == 'dầu') {
           return carFuel.contains('dầu') || carFuel.contains('diesel');
         }
@@ -576,7 +616,10 @@ class _VehicleListViewState extends State<VehicleListView> {
                   onTap: _showFilterSheet,
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -587,18 +630,26 @@ class _VehicleListViewState extends State<VehicleListView> {
                           offset: const Offset(0, 4),
                         ),
                       ],
-                      border: Border.all(color: AppColors.border.withOpacity(0.5)),
+                      border: Border.all(
+                        color: AppColors.border.withOpacity(0.5),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.search_rounded, color: AppColors.primary, size: 24),
+                        const Icon(
+                          Icons.search_rounded,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _address.isNotEmpty ? _address : 'Tất cả địa điểm',
+                                _address.isNotEmpty
+                                    ? _address
+                                    : 'Tất cả địa điểm',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -644,7 +695,10 @@ class _VehicleListViewState extends State<VehicleListView> {
             SliverToBoxAdapter(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   spacing: 8,
                   children: [
@@ -758,7 +812,10 @@ class _VehicleListViewState extends State<VehicleListView> {
                   },
                   decoration: InputDecoration(
                     hintText: 'Tìm theo tên xe, địa điểm, từ khóa...',
-                    hintStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    hintStyle: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     prefixIcon: const Icon(
@@ -780,15 +837,22 @@ class _VehicleListViewState extends State<VehicleListView> {
                           ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border.withOpacity(0.5)),
+                      borderSide: BorderSide(
+                        color: AppColors.border.withOpacity(0.5),
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border.withOpacity(0.5)),
+                      borderSide: BorderSide(
+                        color: AppColors.border.withOpacity(0.5),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.2),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.2,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -802,16 +866,25 @@ class _VehicleListViewState extends State<VehicleListView> {
             // Result count chip info
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
                     Chip(
-                      avatar: const Icon(Icons.directions_car_outlined, size: 16, color: AppColors.primary),
+                      avatar: const Icon(
+                        Icons.directions_car_outlined,
+                        size: 16,
+                        color: AppColors.primary,
+                      ),
                       label: Text('${filteredCars.length} xe phù hợp'),
                       backgroundColor: Colors.white,
-                      side: BorderSide(color: AppColors.primary.withOpacity(0.12)),
+                      side: BorderSide(
+                        color: AppColors.primary.withOpacity(0.12),
+                      ),
                       labelStyle: const TextStyle(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
@@ -820,7 +893,11 @@ class _VehicleListViewState extends State<VehicleListView> {
                     ),
                     if (_activeFiltersCount > 0)
                       ActionChip(
-                        avatar: const Icon(Icons.clear_all_rounded, size: 16, color: Colors.red),
+                        avatar: const Icon(
+                          Icons.clear_all_rounded,
+                          size: 16,
+                          color: Colors.red,
+                        ),
                         label: const Text('Xóa tất cả bộ lọc'),
                         onPressed: () {
                           setState(() {
@@ -974,7 +1051,26 @@ class _VehicleListViewState extends State<VehicleListView> {
                           car: car,
                           isFavorite: favoriteVM.isFavorite(car.id),
                           onFavoriteTap: () {
+                            final currentlyFavorite = favoriteVM.isFavorite(
+                              car.id,
+                            );
                             favoriteVM.toggleFavorite(carId: car.id, car: car);
+                            if (context.mounted) {
+                              if (currentlyFavorite) {
+                                AppToast.show(
+                                  context,
+                                  message: "Đã xóa xe khỏi danh sách yêu thích",
+                                  type: ToastType.info,
+                                );
+                              } else {
+                                AppToast.show(
+                                  context,
+                                  message:
+                                      "Đã thêm xe vào danh sách yêu thích thành công!",
+                                  type: ToastType.success,
+                                );
+                              }
+                            }
                           },
                           onTap: () {
                             context.push('/car_detail/${car.id}');

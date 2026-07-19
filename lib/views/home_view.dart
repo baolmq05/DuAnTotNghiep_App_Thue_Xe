@@ -5,6 +5,7 @@ import 'package:duantotnghiep_app_thue_xe/components/home_components/home_insura
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_promotion.dart';
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_rent_out_banner.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class _HomeViewState extends State<HomeView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HomeViewModel>().fetchHomeData();
+      context.read<FavoriteViewModel>().fetchFavorites();
     });
   }
 
