@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
-import 'package:duantotnghiep_app_thue_xe/utils/connectivity_helper.dart';
-import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -15,15 +13,20 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
+  // Biến này cho biết đang kiểm tra kết nối hay không, dùng để disable nút thử lại.
   bool _isChecking = false;
+  // Biến này quyết định có hiển thị dialog cảnh báo không có mạng hay không.
   bool _showNoInternet = false;
 
   @override
   void initState() {
     super.initState();
-    _checkConnection();
+    // Tạm ngưng hoạt động check kết nối bằng cách giữ code trong khối comment.
+    // _checkConnection();
+    _proceedToApp();
   }
 
+  /*
   Future<void> _checkConnection() async {
     setState(() {
       _isChecking = true;
@@ -48,14 +51,16 @@ class _SplashViewState extends State<SplashView> {
       );
     }
   }
+  */
 
+  // Hàm chuyển sang màn hình tiếp theo sau khi kiểm tra kết nối thành công.
   void _proceedToApp() {
-    // Wait for 1.5 seconds to show splash illustration before navigating
+    // Chờ 1.5 giây để người dùng thấy splash trước khi điều hướng.
     Future.delayed(const Duration(milliseconds: 1500), () async {
       if (!mounted) return;
       final authProvider = context.read<AuthProvider>();
       final isLoggedIn = await authProvider.tryAutoLogin();
-      
+
       if (mounted) {
         if (isLoggedIn) {
           context.go('/home');
@@ -179,7 +184,9 @@ class _SplashViewState extends State<SplashView> {
 
                   // Starting up text
                   Text(
-                    _isChecking ? 'Đang kiểm tra kết nối...' : 'Đang khởi động...',
+                    _isChecking
+                        ? 'Đang kiểm tra kết nối...'
+                        : 'Đang khởi động...',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white70,
@@ -225,7 +232,9 @@ class _SplashViewState extends State<SplashView> {
                             Container(
                               padding: const EdgeInsets.all(16.0),
                               decoration: const BoxDecoration(
-                                color: Color(0xFFFEE3CE), // AppColors.accentSurface
+                                color: Color(
+                                  0xFFFEE3CE,
+                                ), // AppColors.accentSurface
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -238,7 +247,9 @@ class _SplashViewState extends State<SplashView> {
                             const Text(
                               'Không có kết nối Internet',
                               style: TextStyle(
-                                color: Color(0xFF1F2937), // AppColors.textPrimary
+                                color: Color(
+                                  0xFF1F2937,
+                                ), // AppColors.textPrimary
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -248,7 +259,9 @@ class _SplashViewState extends State<SplashView> {
                             const Text(
                               'Vui lòng kết nối Internet để tiếp tục sử dụng ứng dụng Drivio.',
                               style: TextStyle(
-                                color: Color(0xFF6B7280), // AppColors.textSecondary
+                                color: Color(
+                                  0xFF6B7280,
+                                ), // AppColors.textSecondary
                                 fontSize: 14.0,
                                 height: 1.5,
                               ),
@@ -263,10 +276,16 @@ class _SplashViewState extends State<SplashView> {
                                       SystemNavigator.pop();
                                     },
                                     style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: Color(0xFFE5E7EB)), // AppColors.border
-                                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                      side: const BorderSide(
+                                        color: Color(0xFFE5E7EB),
+                                      ), // AppColors.border
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0,
+                                      ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10.0),
+                                        borderRadius: BorderRadius.circular(
+                                          10.0,
+                                        ),
                                       ),
                                     ),
                                     child: const Text(
@@ -282,14 +301,20 @@ class _SplashViewState extends State<SplashView> {
                                 const SizedBox(width: 12.0),
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: _isChecking ? null : _checkConnection,
+                                    onPressed: _isChecking ? null : null,
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF286874), // AppColors.primary
+                                      backgroundColor: const Color(
+                                        0xFF286874,
+                                      ), // AppColors.primary
                                       foregroundColor: Colors.white,
                                       elevation: 0,
-                                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0,
+                                      ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10.0),
+                                        borderRadius: BorderRadius.circular(
+                                          10.0,
+                                        ),
                                       ),
                                     ),
                                     child: _isChecking
@@ -298,7 +323,10 @@ class _SplashViewState extends State<SplashView> {
                                             width: 18.0,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2.0,
-                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.white,
+                                                  ),
                                             ),
                                           )
                                         : const Text(
