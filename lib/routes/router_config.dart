@@ -25,6 +25,7 @@ import 'package:duantotnghiep_app_thue_xe/views/address_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/vehicle_list_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/favorite_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/owner_profile_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/booking_car_view.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_profile_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/views/change_password_view.dart';
@@ -176,6 +177,13 @@ final drivioRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         return VehicleListView(queryParameters: state.uri.queryParameters);
+      },
+    ),
+    GoRoute(
+      path: '/booking-car',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        return const BookingCarView();
       },
     ),
     GoRoute(
