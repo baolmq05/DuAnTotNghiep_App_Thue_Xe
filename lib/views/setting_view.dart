@@ -61,15 +61,6 @@ class SettingView extends StatelessWidget {
                   },
                 ),
                 _buildMenuItem(
-                  icon: Icons.language_outlined,
-                  title: 'Ngôn ngữ',
-                  trailing: Text(
-                    'Tiếng Việt',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                  ),
-                  onTap: () {},
-                ),
-                _buildMenuItem(
                   icon: Icons.dark_mode_outlined,
                   title: 'Giao diện tối',
                   showChevron: false,
@@ -111,7 +102,9 @@ class SettingView extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.help_outline,
                   title: 'Trung tâm trợ giúp',
-                  onTap: () {},
+                  onTap: () {
+                    context.push('/support');
+                  },
                 ),
                 _buildMenuItem(
                   icon: Icons.note_alt_outlined,
