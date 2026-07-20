@@ -76,7 +76,11 @@ class Notification {
       isRead:
           json['is_read'] == 1 ||
           json['is_read'] == true ||
-          json['is_read'] == '1',
+          json['is_read'] == '1' ||
+          json['isRead'] == 1 ||
+          json['isRead'] == true ||
+          json['isRead'] == '1' ||
+          json['read_at'] != null,
       userId: (json['user_id']).toString(),
       createdAt: parseDate(json['created_at'] ?? json['date']),
     );

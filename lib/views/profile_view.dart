@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
@@ -33,49 +34,31 @@ class _ProfileViewState extends State<ProfileView> {
           ),
         ),
         actions: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_none_rounded),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Tính năng thông báo đang được phát triển'),
-                    ),
-                  );
-                },
-                iconSize: 26,
-                color: AppColors.primary,
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 1.5),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '2',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+          Consumer<NotificationViewModel>(
+            builder: (context, notificationVM, child) {
+              final unreadCount = notificationVM.unreadCount;
+              return Badge(
+                isLabelVisible: unreadCount > 0,
+                label: Text(
+                  unreadCount > 99 ? '99+' : '$unreadCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-            ],
+                backgroundColor: AppColors.error,
+                offset: const Offset(-4, 4),
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_none_rounded),
+                  onPressed: () {
+                    context.push('/notification');
+                  },
+                  iconSize: 26,
+                  color: AppColors.primary,
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),

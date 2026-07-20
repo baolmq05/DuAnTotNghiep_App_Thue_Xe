@@ -427,7 +427,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Điều khoản sử dụng',
+                      text: 'Chính sách & quy định',
                       style: TextStyle(
                         color: colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
@@ -448,7 +448,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          context.push('/policy');
+                          context.push('/privacy-policy');
                         },
                     ),
                   ],

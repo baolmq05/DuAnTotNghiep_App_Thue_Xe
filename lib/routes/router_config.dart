@@ -31,6 +31,8 @@ import 'package:duantotnghiep_app_thue_xe/views/change_password_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/driver_license_view.dart';
 
 
+import 'package:duantotnghiep_app_thue_xe/views/privacy_policy_view.dart';
+
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -64,6 +66,11 @@ final drivioRouter = GoRouter(
         final onAccept = extra?['onAccept'] as VoidCallback?;
         return PolicyView(showAcceptance: showAcceptance, onAccept: onAccept);
       },
+    ),
+    GoRoute(
+      path: '/privacy-policy',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PrivacyPolicyView(),
     ),
     GoRoute(
       path: '/register',
