@@ -15,6 +15,8 @@ class NotificationViewModel extends ChangeNotifier {
 
   List<notification_model.Notification> get allNotifications =>
       _allNotifications;
+  int get unreadCount =>
+      _allNotifications.where((item) => !item.isRead).length;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 

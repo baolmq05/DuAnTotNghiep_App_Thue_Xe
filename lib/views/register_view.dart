@@ -472,18 +472,7 @@ class _RegisterViewState extends State<RegisterView> {
                       Checkbox(
                         value: policyViewModel.isAccepted,
                         onChanged: (value) {
-                          if (value == true) {
-                            // Mở trang chính sách khi người dùng bấm chọn đồng ý (chưa tích)
-                            context.push('/policy', extra: {
-                              'showAcceptance': true,
-                              'onAccept': () {
-                                policyViewModel.setAccepted(true);
-                              }
-                            });
-                          } else {
-                            // Bỏ chọn trực tiếp nếu đã tích trước đó
-                            policyViewModel.setAccepted(false);
-                          }
+                          policyViewModel.setAccepted(value ?? false);
                         },
                         activeColor: colorScheme.primary,
                       ),

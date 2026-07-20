@@ -6,6 +6,7 @@ import 'package:duantotnghiep_app_thue_xe/components/home_components/home_promot
 import 'package:duantotnghiep_app_thue_xe/components/home_components/home_rent_out_banner.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,7 @@ class _HomeViewState extends State<HomeView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HomeViewModel>().fetchHomeData();
       context.read<FavoriteViewModel>().fetchFavorites();
+      context.read<NotificationViewModel>().loadNotifications();
     });
   }
 
@@ -60,44 +62,30 @@ class _HomeViewState extends State<HomeView> {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.all(12),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    context.push('/notification');
-                  },
-                  icon: const Icon(Icons.notifications_none_outlined),
-                ),
-
-                Positioned(
-                  right: 2,
-                  top: 2,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    constraints: const BoxConstraints(
-                      minWidth: 15,
-                      minHeight: 15,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "3",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+            padding: const EdgeInsets.only(right: 12),
+            child: Consumer<NotificationViewModel>(
+              builder: (context, notificationVM, child) {
+                final unreadCount = notificationVM.unreadCount;
+                return Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text(
+                    unreadCount > 99 ? '99+' : '$unreadCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
+                  backgroundColor: Colors.red,
+                  offset: const Offset(-4, 4),
+                  child: IconButton(
+                    onPressed: () {
+                      context.push('/notification');
+                    },
+                    icon: const Icon(Icons.notifications_none_outlined),
+                  ),
+                );
+              },
             ),
           ),
         ],

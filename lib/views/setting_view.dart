@@ -56,7 +56,9 @@ class SettingView extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.notifications_none_rounded,
                   title: 'Thông báo',
-                  onTap: () {},
+                  onTap: () {
+                    context.push('/notification');
+                  },
                 ),
                 _buildMenuItem(
                   icon: Icons.language_outlined,
@@ -113,13 +115,17 @@ class SettingView extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   icon: Icons.note_alt_outlined,
-                  title: 'Điều khoản sử dụng',
-                  onTap: () {},
+                  title: 'Chính sách & quy định ',
+                  onTap: () {
+                    context.push('/policy');
+                  },
                 ),
                 _buildMenuItem(
                   icon: Icons.policy_outlined,
                   title: 'Chính sách bảo mật',
-                  onTap: () {},
+                  onTap: () {
+                    context.push('/privacy-policy');
+                  },
                 ),
                 _buildMenuItem(
                   icon: Icons.info_outline,
