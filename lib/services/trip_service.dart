@@ -29,4 +29,35 @@ class TripService extends BaseService {
       rethrow;
     }
   }
+
+  // Tạo chuyến đi mới
+  Future<Map<String, dynamic>> createTrip(
+    Map<String, dynamic> bookingData,
+  ) async {
+    try {
+      final response = await store(
+        'api/trips',
+        body: bookingData,
+        requiresAuth: true,
+      );
+
+      if (response != null) {
+        return {
+          'success': response['success'] ?? false,
+          'message': response['message'] ?? 'Xử lý thành công',
+          'data': response['data'] != null
+              ? TripModel.fromJson(response['data'])
+              : null,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Không nhận được phản hồi từ hệ thống.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi tạo yêu cầu thuê xe: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }

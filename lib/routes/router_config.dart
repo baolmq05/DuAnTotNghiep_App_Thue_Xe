@@ -28,10 +28,9 @@ import 'package:duantotnghiep_app_thue_xe/views/owner_profile_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/booking_car_view.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_profile_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/trip_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/views/change_password_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/driver_license_view.dart';
-
-
 import 'package:duantotnghiep_app_thue_xe/views/privacy_policy_view.dart';
 
 // Khởi tạo các Global Navigator Keys
@@ -187,10 +186,14 @@ final drivioRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/booking-car',
+      path: '/booking-car/:id',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
-        return const BookingCarView();
+        final carId = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+        return ChangeNotifierProvider(
+          create: (_) => TripViewModel(),
+          child: BookingCarView(carId: carId),
+        );
       },
     ),
     GoRoute(

@@ -922,7 +922,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Handle booking action
+                context.push('/booking-car/${car.id}');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,

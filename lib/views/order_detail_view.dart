@@ -45,8 +45,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
   }
 
   int _calculateDays(DateTime start, DateTime end) {
-    final difference = end.difference(start).inDays;
-    return difference <= 0 ? 1 : difference;
+    final diffMinutes = end.difference(start).inMinutes;
+    final days = (diffMinutes / 1440).ceil();
+    return days <= 0 ? 1 : days;
   }
 
   @override

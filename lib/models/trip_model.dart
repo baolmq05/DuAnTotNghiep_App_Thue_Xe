@@ -33,15 +33,16 @@ class TripModel {
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
     return TripModel(
-      id: json['id'],
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       cost: double.tryParse(json['cost']?.toString() ?? '0') ?? 0.0,
-      discountAmount: double.tryParse(json['discount_amount']?.toString() ?? '0') ?? 0.0,
-      status: json['status'],
-      tripType: json['trip_type'],
+      discountAmount:
+          double.tryParse(json['discount_amount']?.toString() ?? '0') ?? 0.0,
+      status: json['status'] is int ? json['status'] : int.tryParse(json['status']?.toString() ?? '') ?? 0,
+      tripType: json['trip_type'] is int ? json['trip_type'] : int.tryParse(json['trip_type']?.toString() ?? '') ?? 0,
       startAt: DateTime.parse(json['start_at']),
       endAt: DateTime.parse(json['end_at']),
-      carId: json['car_id'],
-      userId: json['user_id'],
+      carId: json['car_id'] is int ? json['car_id'] : int.tryParse(json['car_id']?.toString() ?? '') ?? 0,
+      userId: json['user_id'] is int ? json['user_id'] : int.tryParse(json['user_id']?.toString() ?? '') ?? 0,
       deliveryAddress: json['delivery_address'],
       deliveryLocation: json['delivery_location'],
       statusText: json['status_text'],
@@ -56,14 +57,22 @@ class TripModel {
       return statusText!;
     }
     switch (status) {
-      case 0: return 'Chờ duyệt';
-      case 1: return 'Chờ thanh toán';
-      case 2: return 'Đã xác nhận';
-      case 3: return 'Đang di chuyển';
-      case 4: return 'Hoàn tất';
-      case 5: return 'Người thuê hủy';
-      case 6: return 'Chủ xe hủy';
-      default: return 'Không xác định';
+      case 0:
+        return 'Chờ duyệt';
+      case 1:
+        return 'Chờ thanh toán';
+      case 2:
+        return 'Đã xác nhận';
+      case 3:
+        return 'Đang di chuyển';
+      case 4:
+        return 'Hoàn tất';
+      case 5:
+        return 'Người thuê hủy';
+      case 6:
+        return 'Chủ xe hủy';
+      default:
+        return 'Không xác định';
     }
   }
 }
@@ -83,7 +92,7 @@ class CarModel {
   final List<CarImageModel> images;
   final CarLocationModel? carLocation;
   final OwnerModel? owner;
-
+  final CarDeliveryOptionModel? deliveryOption;
   CarModel({
     required this.id,
     required this.name,
@@ -99,18 +108,22 @@ class CarModel {
     required this.images,
     this.carLocation,
     this.owner,
+    this.deliveryOption,
   });
 
   factory CarModel.fromJson(Map<String, dynamic> json) {
     var imagesList = json['images'] as List? ?? [];
-    List<CarImageModel> parsedImages = imagesList.map((i) => CarImageModel.fromJson(i)).toList();
+    List<CarImageModel> parsedImages = imagesList
+        .map((i) => CarImageModel.fromJson(i))
+        .toList();
 
     return CarModel(
       id: json['id'],
       name: json['name'] ?? '',
       licensePlate: json['license_plate'] ?? '',
       unitPrice: double.tryParse(json['unit_price']?.toString() ?? '0') ?? 0.0,
-      discountValue: double.tryParse(json['discount_value']?.toString() ?? '0') ?? 0.0,
+      discountValue:
+          double.tryParse(json['discount_value']?.toString() ?? '0') ?? 0.0,
       description: json['description'],
       rentalTerms: json['rental_terms'],
       seatCount: int.tryParse(json['seat_count']?.toString() ?? '5') ?? 5,
@@ -118,8 +131,13 @@ class CarModel {
       transmission: json['transmission'],
       userId: json['user_id'] ?? 0,
       images: parsedImages,
-      carLocation: json['car_location'] != null ? CarLocationModel.fromJson(json['car_location']) : null,
+      carLocation: json['car_location'] != null
+          ? CarLocationModel.fromJson(json['car_location'])
+          : null,
       owner: json['owner'] != null ? OwnerModel.fromJson(json['owner']) : null,
+      deliveryOption: json['delivery_option'] != null 
+          ? CarDeliveryOptionModel.fromJson(json['delivery_option']) 
+          : null,
     );
   }
 
@@ -155,18 +173,16 @@ class CarLocationModel {
   final int id;
   final String? address;
   final String? city;
+  final String? location;
 
-  CarLocationModel({
-    required this.id,
-    this.address,
-    this.city,
-  });
+  CarLocationModel({required this.id, this.address, this.city, this.location});
 
   factory CarLocationModel.fromJson(Map<String, dynamic> json) {
     return CarLocationModel(
       id: json['id'],
       address: json['address'],
       city: json['city'],
+      location: json['location'],
     );
   }
 }
@@ -193,6 +209,35 @@ class OwnerModel {
       email: json['email'],
       phone: json['phone'],
       avatar: json['avatar'],
+    );
+  }
+}
+
+class CarDeliveryOptionModel {
+  final int id;
+  final double maxDistance; // max_distance
+  final double feeDistance; // fee_distance
+  final double freeDistance; // free_distance
+  final int status;
+
+  CarDeliveryOptionModel({
+    required this.id,
+    required this.maxDistance,
+    required this.feeDistance,
+    required this.freeDistance,
+    required this.status,
+  });
+
+  factory CarDeliveryOptionModel.fromJson(Map<String, dynamic> json) {
+    return CarDeliveryOptionModel(
+      id: json['id'] ?? 0,
+      maxDistance:
+          double.tryParse(json['max_distance']?.toString() ?? '0') ?? 0.0,
+      feeDistance:
+          double.tryParse(json['fee_distance']?.toString() ?? '0') ?? 0.0,
+      freeDistance:
+          double.tryParse(json['free_distance']?.toString() ?? '0') ?? 0.0,
+      status: json['status'] ?? 1,
     );
   }
 }

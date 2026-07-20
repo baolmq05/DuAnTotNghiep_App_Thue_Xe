@@ -1,45 +1,714 @@
+import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import '../themes/app_colors.dart';
+import '../models/trip_model.dart';
+import '../viewmodels/trip_viewmodel.dart';
+import '../services/car_service.dart';
+import '../services/goong_map_service.dart';
+import '../services/promotion_service.dart';
+import '../services/base_service.dart';
+import '../widgets/app_toast.dart';
 
 class BookingCarView extends StatefulWidget {
-  const BookingCarView({super.key});
+  final int carId; // Nhận duy nhất ID xe từ trang chi tiết truyền sang
+
+  const BookingCarView({super.key, required this.carId});
 
   @override
   State<BookingCarView> createState() => _BookingCarViewState();
 }
 
 class _BookingCarViewState extends State<BookingCarView> {
-  // Khởi tạo dữ liệu mẫu
-  final String carName = "VinFast VF8 2024";
-  final double carRating = 5.0;
-  final int totalTrips = 42;
-  final String carImageUrl =
-      'https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=400';
+  final String goongMaptilesKey = "lvcebA0VIPS4ZP4omHIRxH...";
+  final String goongApiKey = "Gmptoo7f9LZDC6Mrcib9N...";
 
-  final double pricePerDay = 1000000;
-  final int totalDays = 2;
-  final double discountAmount = 200000;
-  final double totalAmount = 1800000;
+  CarModel? car;
+  bool isPageLoading = true;
+  List<TripModel> carActiveTrips = [];
+  List<Map<String, String>> _suggestions = [];
+  final MapController _mapController = MapController();
 
-  DateTime startDate = DateTime(2026, 7, 20, 21, 0);
-  DateTime endDate = DateTime(2026, 7, 22, 20, 0);
+  // --- BIẾN THỜI GIAN ĐÃ ĐƯỢC CHUYỂN THÀNH STATE ĐỂ KHÁCH TỰ CHỌN ---
+  DateTime? startDate;
+  DateTime? endDate;
 
   bool isDeliveryToLocation = false;
-  String promoCode = "WELCOME150K";
   bool isTermsAgreed = true;
+  bool isCalculatingMap = false;
 
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _promoController = TextEditingController();
+
+  int totalDays = 0;
+  double baseRentalPrice = 0.0;
+  double carDiscountTotal = 0.0;
+
+  double? carLatitude;
+  double? carLongitude;
+
+  double? customerLatitude;
+  double? customerLongitude;
+  double distanceInKm = 0.0;
+  double promoDiscount = 0.0;
+
+  // Hàm hiển thị thông báo lỗi dạng Toast
   final List<BoxShadow> _cardShadow = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.02),
+      color: Colors.black.withValues(alpha: 0.02),
       blurRadius: 10,
       offset: const Offset(0, 4),
     ),
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _promoController.text = "";
+
+    // Khởi tạo thời gian mẫu và mặc định cho khách hàng khi mở trang đặt xe lần đầu tiên
+    // Khách hàng có thể đổi lại mốc thời gian này bằng nút bấm chọn lịch
+    final now = DateTime.now();
+    startDate = DateTime(now.year, now.month, now.day + 1, 9, 0);
+    endDate = DateTime(now.year, now.month, now.day + 3, 17, 0);
+
+    _updateTotalDays();
+    _fetchCarDetailFromServer();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _applyPromoCode(showFeedback: false);
+    });
+  }
+
+  // Hàm tính toán số ngày dựa trên mốc startDate và endDate hiện tại
+  void _updateTotalDays() {
+    if (startDate != null && endDate != null) {
+      int diffMinutes = endDate!.difference(startDate!).inMinutes;
+      totalDays = (diffMinutes / 1440).ceil();
+      if (totalDays < 1) totalDays = 1;
+
+      // Tính lại giá xe theo số ngày mới
+      if (car != null) {
+        baseRentalPrice = car!.unitPrice * totalDays;
+        carDiscountTotal = car!.discountValue * totalDays;
+
+        if (_promoController.text.isNotEmpty && promoDiscount > 0.0) {
+          _applyPromoCode(showFeedback: false);
+        }
+      }
+    }
+  }
+
+  // Sự kiện khi người dùng chọn xong thời gian mới từ bộ lịch (DatePicker/Modal)
+  void onDateTimeChanged(DateTime newStart, DateTime newEnd) {
+    setState(() {
+      startDate = newStart;
+      endDate = newEnd;
+      _updateTotalDays(); // Tính toán lại toàn bộ bảng giá tiền lập tức
+    });
+  }
+
+  // Kiểm tra xem xe có bận trong khoảng thời gian start-end hay không
+  bool _isCarBusy(DateTime start, DateTime end) {
+    for (var trip in carActiveTrips) {
+      if (start.isBefore(trip.endAt) && end.isAfter(trip.startAt)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Lấy chuyến đi đang bận trùng với khoảng thời gian start-end nếu có
+  TripModel? _getOverlappingTrip(DateTime start, DateTime end) {
+    for (var trip in carActiveTrips) {
+      if (start.isBefore(trip.endAt) && end.isAfter(trip.startAt)) {
+        return trip;
+      }
+    }
+    return null;
+  }
+
+  // Hàm hiển thị thông báo lỗi dạng Toast
+  Future<void> _selectPickupDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: startDate ?? DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: Localizations.override(
+            context: context,
+            locale: const Locale('vi', 'VN'),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    if (pickedDate == null) return;
+
+    DateTime newStart = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      startDate?.hour ?? 9,
+      startDate?.minute ?? 0,
+    );
+
+    // Nếu thời gian mặc định/đang chọn nằm ở quá khứ so với thời điểm hiện tại
+    if (newStart.isBefore(DateTime.now())) {
+      // Tự động đẩy giờ nhận lên cách hiện tại 1 tiếng
+      final suggested = DateTime.now().add(const Duration(hours: 1));
+      newStart = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        suggested.hour,
+        0, // Làm tròn phút về 00
+      );
+
+      // Nếu sau khi điều chỉnh vẫn bị quá khứ (ví dụ chọn ngày hôm trước)
+      if (newStart.isBefore(DateTime.now())) {
+        _showToastError('Thời gian nhận xe không thể ở quá khứ!');
+        return;
+      }
+    }
+
+    DateTime tempEnd = endDate ?? newStart.add(const Duration(days: 2));
+    if (tempEnd.isBefore(newStart)) {
+      tempEnd = newStart.add(const Duration(days: 2));
+    }
+
+    final overlapping = _getOverlappingTrip(newStart, tempEnd);
+    if (overlapping != null) {
+      final formatter = DateFormat('HH:mm dd/MM');
+      _showToastError(
+        'Xe đã có lịch bận từ ${formatter.format(overlapping.startAt)} đến ${formatter.format(overlapping.endAt)}!',
+      );
+      return;
+    }
+
+    setState(() {
+      startDate = newStart;
+      endDate = tempEnd;
+      _updateTotalDays();
+    });
+  }
+
+  // hàm chọn giờ nhận xe
+  Future<void> _selectPickupTime() async {
+    if (!mounted) return;
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: startDate?.hour ?? 9,
+        minute: startDate?.minute ?? 0,
+      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: Localizations.override(
+            context: context,
+            locale: const Locale('vi', 'VN'),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    if (pickedTime == null) return;
+
+    final newStart = DateTime(
+      startDate?.year ?? DateTime.now().year,
+      startDate?.month ?? DateTime.now().month,
+      startDate?.day ?? DateTime.now().day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    if (newStart.isBefore(DateTime.now())) {
+      _showToastError('Thời gian nhận xe không thể ở quá khứ!');
+      return;
+    }
+
+    DateTime tempEnd = endDate ?? newStart.add(const Duration(days: 2));
+    if (tempEnd.isBefore(newStart)) {
+      tempEnd = newStart.add(const Duration(days: 2));
+    }
+
+    final overlapping = _getOverlappingTrip(newStart, tempEnd);
+    if (overlapping != null) {
+      final formatter = DateFormat('HH:mm dd/MM');
+      _showToastError(
+        'Xe đã có lịch bận từ ${formatter.format(overlapping.startAt)} đến ${formatter.format(overlapping.endAt)}!',
+      );
+      return;
+    }
+
+    setState(() {
+      startDate = newStart;
+      endDate = tempEnd;
+      _updateTotalDays();
+    });
+  }
+
+  // hàm chọn ngày trả xe
+  Future<void> _selectReturnDate() async {
+    if (startDate == null) {
+      _showToastError('Vui lòng chọn ngày nhận xe trước!');
+      return;
+    }
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: endDate ?? startDate!.add(const Duration(days: 2)),
+      firstDate: startDate!,
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: Localizations.override(
+            context: context,
+            locale: const Locale('vi', 'VN'),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    if (pickedDate == null) return;
+
+    final newEnd = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      endDate?.hour ?? 17,
+      endDate?.minute ?? 0,
+    );
+
+    if (newEnd.isBefore(startDate!)) {
+      _showToastError('Thời gian trả xe phải sau thời gian nhận xe!');
+      return;
+    }
+
+    final overlapping = _getOverlappingTrip(startDate!, newEnd);
+    if (overlapping != null) {
+      final formatter = DateFormat('HH:mm dd/MM');
+      _showToastError(
+        'Xe đã có lịch bận từ ${formatter.format(overlapping.startAt)} đến ${formatter.format(overlapping.endAt)}!',
+      );
+      return;
+    }
+
+    setState(() {
+      endDate = newEnd;
+      _updateTotalDays();
+    });
+  }
+
+  Future<void> _selectReturnTime() async {
+    if (startDate == null) {
+      _showToastError('Vui lòng chọn ngày nhận xe trước!');
+      return;
+    }
+
+    if (!mounted) return;
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: endDate?.hour ?? 17,
+        minute: endDate?.minute ?? 0,
+      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: Localizations.override(
+            context: context,
+            locale: const Locale('vi', 'VN'),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    if (pickedTime == null) return;
+
+    final newEnd = DateTime(
+      endDate?.year ?? DateTime.now().year,
+      endDate?.month ?? DateTime.now().month,
+      endDate?.day ?? DateTime.now().day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    if (newEnd.isBefore(startDate!)) {
+      _showToastError('Thời gian trả xe phải sau thời gian nhận xe!');
+      return;
+    }
+
+    final overlapping = _getOverlappingTrip(startDate!, newEnd);
+    if (overlapping != null) {
+      final formatter = DateFormat('HH:mm dd/MM');
+      _showToastError(
+        'Xe đã có lịch bận từ ${formatter.format(overlapping.startAt)} đến ${formatter.format(overlapping.endAt)}!',
+      );
+      return;
+    }
+
+    setState(() {
+      endDate = newEnd;
+      _updateTotalDays();
+    });
+  }
+
+  void _updateMapView() {
+    if (customerLatitude != null && customerLongitude != null) {
+      _mapController.move(LatLng(customerLatitude!, customerLongitude!), 13);
+    } else if (carLatitude != null && carLongitude != null) {
+      _mapController.move(LatLng(carLatitude!, carLongitude!), 13);
+    }
+  }
+
+  Future<void> _fetchCarDetailFromServer() async {
+    try {
+      // 1. Gọi API lấy xe từ Laravel (Ví dụ)
+      final response = await CarService().get('/api/cars/${widget.carId}');
+
+      List<TripModel> activeTrips = [];
+      try {
+        final List? rawTrips = response['data']['trips'] as List?;
+        if (rawTrips != null) {
+          activeTrips = rawTrips
+              .map((json) => TripModel.fromJson(json))
+              .toList();
+        }
+      } catch (_) {}
+
+      if (activeTrips.isEmpty) {
+        try {
+          final tripsResponse = await CarService().get(
+            '/api/trips?car_id=${widget.carId}',
+            requiresAuth: true,
+          );
+          if (tripsResponse != null && tripsResponse['success'] == true) {
+            final rawData = tripsResponse['data'];
+            List dataList = [];
+            if (rawData is List) {
+              dataList = rawData;
+            } else if (rawData is Map) {
+              final booked = rawData['booked'] as List? ?? [];
+              final owner = rawData['owner'] as List? ?? [];
+              dataList = [...booked, ...owner];
+            }
+            activeTrips = dataList
+                .map((json) => TripModel.fromJson(json))
+                .toList();
+          }
+        } catch (_) {}
+      }
+
+      if (activeTrips.isEmpty) {
+        try {
+          final tripsResponse = await CarService().get(
+            '/api/cars/${widget.carId}/trips',
+            requiresAuth: true,
+          );
+          if (tripsResponse != null && tripsResponse['success'] == true) {
+            final List dataList = tripsResponse['data'] as List? ?? [];
+            activeTrips = dataList
+                .map((json) => TripModel.fromJson(json))
+                .toList();
+          }
+        } catch (_) {}
+      }
+
+      setState(() {
+        car = CarModel.fromJson(response['data']);
+        carActiveTrips = activeTrips
+            .where((t) => t.status != 5 && t.status != 6)
+            .toList();
+        _updateTotalDays();
+
+        if (car != null && car!.carLocation?.location != null) {
+          final coords = car!.carLocation!.location!.split(',');
+          if (coords.length == 2) {
+            // Gán thẳng vị trí thực tế của chủ xe đăng ký từ database vào State
+            carLatitude = double.tryParse(coords[0].trim());
+            carLongitude = double.tryParse(coords[1].trim());
+          }
+        }
+        isPageLoading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _updateMapView());
+    } catch (e) {
+      setState(() => isPageLoading = false);
+      _showToastError('Lỗi tải vị trí xe.');
+    }
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    _addressController.dispose();
+    _promoController.dispose();
+    super.dispose();
+  }
+
+  double get calculatedDeliveryFee {
+    // Quy tắc tính phí giao xe:
+    // - Dưới freeDistance km (thường 5km): Miễn phí
+    // - Từ freeDistance đến maxDistance km: Tính phí theo từng km nguyên vượt quá
+    //   (làm tròn lên), đơn giá feeDistance đ/km (thường 50.000đ/km)
+    // - Quá maxDistance km (thường 10km): Không cho phép đặt
+    if (!isDeliveryToLocation || car == null) return 0.0;
+    final option = car!.deliveryOption;
+    if (option == null) return 0.0;
+
+    final double freeDist = option.freeDistance
+        .toDouble(); // Ngưỡng miễn phí (km)
+    final double feeDist = option.feeDistance
+        .toDouble(); // Đơn giá mỗi km vượt ngưỡng (VNĐ)
+
+    if (distanceInKm <= freeDist) {
+      return 0.0; // Miễn phí
+    }
+
+    // Tính phí theo khoảng cách thực tế vượt quá ngưỡng miễn phí và ko làm tròn
+    final double chargeableKm = double.parse(
+      (distanceInKm - freeDist).toStringAsFixed(1),
+    );
+    final double rawFee = chargeableKm * feeDist;
+    // Làm tròn đến 1.000đ gần nhất cho gọn
+    return (rawFee / 1000).round() * 1000.0;
+  }
+
+  double get totalAmount {
+    double finalCost =
+        baseRentalPrice -
+        carDiscountTotal +
+        calculatedDeliveryFee -
+        promoDiscount;
+    return finalCost < 0 ? 0.0 : finalCost;
+  }
+
+  double get totalDiscountAmount => carDiscountTotal + promoDiscount;
+
+  double _calculateDistance(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
+    const p = 0.017453292519943295; // math.pi / 180
+    final a =
+        0.5 -
+        math.cos((lat2 - lat1) * p) / 2 +
+        math.cos(lat1 * p) *
+            math.cos(lat2 * p) *
+            (1 - math.cos((lon2 - lon1) * p)) /
+            2;
+    return 12742 * math.asin(math.sqrt(a)); // 2 * R; R = 6371 km
+  }
+
+  Future<void> _applyPromoCode({bool showFeedback = true}) async {
+    final codeText = _promoController.text.trim();
+    if (codeText.isEmpty) {
+      if (showFeedback) _showToastError('Vui lòng nhập mã giảm giá!');
+      return;
+    }
+
+    if (startDate == null || endDate == null || car == null) {
+      if (showFeedback) _showToastError('Vui lòng chọn thời gian thuê trước!');
+      return;
+    }
+
+    try {
+      final data = await PromotionService().checkPromotion(
+        code: codeText,
+        startAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(startDate!),
+        endAt: DateFormat('yyyy-MM-dd HH:mm:ss').format(endDate!),
+        carId: car!.id,
+        deliveryFee: calculatedDeliveryFee,
+      );
+
+      setState(() {
+        promoDiscount = (data['discount_amount'] as num).toDouble();
+      });
+
+      if (showFeedback) {
+        if (!mounted) return;
+        AppToast.show(
+          context,
+          message:
+              'Áp dụng mã $codeText thành công! Giảm ${_formatCurrency(promoDiscount)}',
+          type: ToastType.success,
+        );
+      }
+    } catch (e) {
+      setState(() {
+        promoDiscount = 0.0;
+      });
+      if (showFeedback) {
+        String errorMsg = 'Mã giảm giá không hợp lệ hoặc đã hết hạn!';
+        if (e is ApiException) {
+          errorMsg = e.message;
+        }
+        _showToastError(errorMsg);
+      }
+    }
+  }
+
+  Future<void> _verifyAddressFromPlaceId(
+    String placeId,
+    String formattedAddress,
+  ) async {
+    setState(() {
+      isCalculatingMap = true;
+    });
+
+    try {
+      final latLng = await GoongMapService().getPlaceLatLng(placeId);
+      if (latLng != null) {
+        setState(() {
+          _addressController.text = formattedAddress;
+          customerLatitude = latLng['lat'];
+          customerLongitude = latLng['lng'];
+
+          if (carLatitude != null && carLongitude != null) {
+            final rawDistance = _calculateDistance(
+              carLatitude!,
+              carLongitude!,
+              customerLatitude!,
+              customerLongitude!,
+            );
+            distanceInKm = double.parse(rawDistance.toStringAsFixed(1));
+          } else {
+            distanceInKm = 0.0;
+          }
+
+          isCalculatingMap = false;
+        });
+        _updateMapView();
+      } else {
+        _showToastError('Không tìm thấy vị trí tương ứng.');
+        setState(() => isCalculatingMap = false);
+      }
+    } catch (e) {
+      _showToastError('Lỗi tính toán khoảng cách.');
+      setState(() => isCalculatingMap = false);
+    }
+  }
+
+  // --- HÀM TÌM ĐỊA CHỈ THẬT QUA GOONG MAPS (ĐÃ BỎ GEOLOCATOR) ---
+  Future<void> _searchAndVerifyAddress(String addressInput) async {
+    if (addressInput.isEmpty) return;
+
+    setState(() {
+      isCalculatingMap = true;
+    });
+
+    final String url =
+        "https://rsapi.goong.io/Geocode?address=${Uri.encodeComponent(addressInput)}&api_key=$goongApiKey";
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['results'] != null && data['results'].isNotEmpty) {
+          // 1. Lấy chuỗi địa chỉ định dạng chuẩn từ Goong Maps
+          final String formattedAddress =
+              data['results'][0]['formatted_address'];
+          final location = data['results'][0]['geometry']['location'];
+
+          setState(() {
+            // Điền địa chỉ chuẩn vào ô nhập liệu cho đẹp mắt
+            _addressController.text = formattedAddress;
+            customerLatitude = double.parse(location['lat'].toString());
+            customerLongitude = double.parse(location['lng'].toString());
+
+            if (carLatitude != null && carLongitude != null) {
+              final rawDistance = _calculateDistance(
+                carLatitude!,
+                carLongitude!,
+                customerLatitude!,
+                customerLongitude!,
+              );
+              distanceInKm = double.parse(rawDistance.toStringAsFixed(1));
+            } else {
+              distanceInKm = 0.0;
+            }
+
+            isCalculatingMap = false;
+          });
+          _updateMapView();
+        } else {
+          _showToastError('Không tìm thấy vị trí tương ứng.');
+          setState(() => isCalculatingMap = false);
+        }
+      }
+    } catch (e) {
+      _showToastError('Lỗi kiểm tra vị trí: $e');
+      setState(() => isCalculatingMap = false);
+    }
+  }
+
+  void _showToastError(String message) {
+    if (!mounted) return;
+    AppToast.show(context, message: message, type: ToastType.error);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bool isTablet = MediaQuery.of(context).size.width > 600;
+    final tripViewModel = Provider.of<TripViewModel>(context);
+
+    if (isPageLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
+    if (car == null) {
+      return Scaffold(
+        body: const Center(
+          child: Text('Không tìm thấy dữ liệu xe. Vui lòng thử lại!'),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.card,
@@ -55,15 +724,11 @@ class _BookingCarViewState extends State<BookingCarView> {
         centerTitle: true,
         backgroundColor: AppColors.background,
         elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: AppColors.border, height: 1),
-        ),
         leading: IconButton(
           icon: const Icon(
-            Icons.close,
+            Icons.arrow_back,
             color: AppColors.textSecondary,
-            size: 24,
+            size: 20,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -77,7 +742,7 @@ class _BookingCarViewState extends State<BookingCarView> {
             ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
+                horizontal: 12.0,
                 vertical: 20.0,
               ),
               child: Column(
@@ -85,7 +750,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                 children: [
                   _buildCarInfoCard(),
                   const SizedBox(height: 16),
-                  _buildRentalTimeCard(),
+                  _buildRentalTimeCard(), // Khối hiển thị & chọn thời gian thuê xe
                   const SizedBox(height: 16),
                   _buildDeliveryMethodCard(),
                   const SizedBox(height: 16),
@@ -99,15 +764,13 @@ class _BookingCarViewState extends State<BookingCarView> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomActionBar(isTablet),
+      bottomNavigationBar: _buildBottomActionBar(isTablet, tripViewModel),
     );
   }
 
-  // HÀM BUILD CÁC CARD GIAO DIỆN
-
   Widget _buildCarInfoCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
@@ -118,7 +781,7 @@ class _BookingCarViewState extends State<BookingCarView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
-              carImageUrl,
+              car!.getFirstImageUrl(),
               width: 95,
               height: 70,
               fit: BoxFit.cover,
@@ -130,7 +793,7 @@ class _BookingCarViewState extends State<BookingCarView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  carName,
+                  car!.name,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -145,17 +808,17 @@ class _BookingCarViewState extends State<BookingCarView> {
                       color: AppColors.warning,
                       size: 18,
                     ),
-                    Text(
-                      ' $carRating ',
-                      style: const TextStyle(
+                    const Text(
+                      ' 5.0 ',
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const Text(
-                      '•  chuyến • Miễn thế chấp',
-                      style: TextStyle(
+                    Text(
+                      '• Ghế: ${car!.seatCount} • Biển: ${car!.licensePlate}',
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
                       ),
@@ -169,12 +832,12 @@ class _BookingCarViewState extends State<BookingCarView> {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    'Tự động',
-                    style: TextStyle(
+                  child: Text(
+                    car!.transmission ?? 'Tự động',
+                    style: const TextStyle(
                       fontSize: 11,
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -189,11 +852,9 @@ class _BookingCarViewState extends State<BookingCarView> {
     );
   }
 
-  // HÀM BUILD CARD THỜI GIAN THUÊ XE
   Widget _buildRentalTimeCard() {
-    final DateFormat formatter = DateFormat('HH:mm, dd/MM');
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
@@ -222,24 +883,75 @@ class _BookingCarViewState extends State<BookingCarView> {
             ],
           ),
           const SizedBox(height: 16),
+          // NHẬN XE row
+          const Text(
+            'NHẬN XE',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
-              _buildTimeInputBox('NHẬN XE', formatter.format(startDate)),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: AppColors.card,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 14,
-                  color: AppColors.textSecondary,
+              Expanded(
+                flex: 3,
+                child: _buildSubInputBox(
+                  startDate != null
+                      ? DateFormat('dd/MM/yyyy').format(startDate!)
+                      : 'Chọn ngày',
+                  Icons.calendar_today_rounded,
+                  _selectPickupDate,
                 ),
               ),
-              const SizedBox(width: 12),
-              _buildTimeInputBox('TRẢ XE', formatter.format(endDate)),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: _buildSubInputBox(
+                  startDate != null
+                      ? DateFormat('HH:mm').format(startDate!)
+                      : 'Chọn giờ',
+                  Icons.access_time_rounded,
+                  _selectPickupTime,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // TRẢ XE row
+          const Text(
+            'TRẢ XE',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: _buildSubInputBox(
+                  endDate != null
+                      ? DateFormat('dd/MM/yyyy').format(endDate!)
+                      : 'Chọn ngày',
+                  Icons.calendar_today_rounded,
+                  _selectReturnDate,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: _buildSubInputBox(
+                  endDate != null
+                      ? DateFormat('HH:mm').format(endDate!)
+                      : 'Chọn giờ',
+                  Icons.access_time_rounded,
+                  _selectReturnTime,
+                ),
+              ),
             ],
           ),
         ],
@@ -247,32 +959,27 @@ class _BookingCarViewState extends State<BookingCarView> {
     );
   }
 
-  // HÀM BUILD HỘP NHẬP THỜI GIAN
-  Widget _buildTimeInputBox(String label, String time) {
-    return Expanded(
+  // --- HÀM XÂY DỰNG Ô NHẬP LIỆU NHỎ (DÙNG CHO NGÀY & GIỜ) ---
+  Widget _buildSubInputBox(String text, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppColors.border),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Icon(icon, size: 14, color: AppColors.primary),
+            const SizedBox(width: 6),
             Text(
-              label,
+              text,
               style: const TextStyle(
-                fontSize: 10,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              time,
-              style: const TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
@@ -283,10 +990,13 @@ class _BookingCarViewState extends State<BookingCarView> {
     );
   }
 
-  // HÀM BUILD CARD HÌNH THỨC NHẬN XE
+  // --- HÀM XÂY DỰNG KHỐI CHỌN HÌNH THỨC NHẬN XE ---
   Widget _buildDeliveryMethodCard() {
+    double maxDist = car!.deliveryOption?.maxDistance ?? 10.0;
+    bool isTooFar = isDeliveryToLocation && (distanceInKm > maxDist);
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
@@ -330,20 +1040,86 @@ class _BookingCarViewState extends State<BookingCarView> {
               ),
             ],
           ),
+          if (!isDeliveryToLocation) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_on_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Địa chỉ nhận xe',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          car?.carLocation?.address ??
+                              'Đang cập nhật địa chỉ...',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (isDeliveryToLocation) ...[
             const SizedBox(height: 14),
             TextField(
+              controller: _addressController,
+              onChanged: (value) async {
+                if (value.trim().isEmpty) {
+                  setState(() => _suggestions = []);
+                  return;
+                }
+                final suggestions = await GoongMapService()
+                    .getSuggestionsWithPlaceId(value);
+                setState(() {
+                  _suggestions = suggestions;
+                });
+              },
+              onSubmitted: (value) async {
+                setState(() => _suggestions = []);
+                await _searchAndVerifyAddress(value);
+              },
               decoration: InputDecoration(
                 hintText: 'Nhập địa chỉ nhận xe...',
-                hintStyle: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
-                prefixIcon: const Icon(
-                  Icons.map_rounded,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
+                prefixIcon: isCalculatingMap
+                    ? const Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.map_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
@@ -367,13 +1143,276 @@ class _BookingCarViewState extends State<BookingCarView> {
                 ),
               ),
             ),
+            if (_suggestions.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 200),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: _cardShadow,
+                ),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount: _suggestions.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1, color: AppColors.border),
+                  itemBuilder: (context, index) {
+                    final suggestion = _suggestions[index];
+                    final desc = suggestion['description'] ?? '';
+                    final pid = suggestion['place_id'] ?? '';
+                    return ListTile(
+                      dense: true,
+                      leading: const Icon(
+                        Icons.location_on_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
+                      title: Text(
+                        desc,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      onTap: () async {
+                        _addressController.text = desc;
+                        setState(() {
+                          _suggestions = [];
+                        });
+                        if (pid.isNotEmpty) {
+                          await _verifyAddressFromPlaceId(pid, desc);
+                        } else {
+                          await _searchAndVerifyAddress(desc);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Khoảng cách: $distanceInKm km',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  'Giới hạn giao xe: ${maxDist.toInt()} km',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            if (isTooFar) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Vị trí quá xa! Chủ xe này chỉ nhận giao xe dưới ${maxDist.toInt()} km.',
+                      style: const TextStyle(
+                        color: AppColors.error,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            // Hiển thị phí giao xe ước tính ngay trong section chọn địa chỉ
+            if (distanceInKm > 0 && !isTooFar) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: calculatedDeliveryFee == 0
+                      ? AppColors.success.withValues(alpha: 0.08)
+                      : AppColors.secondary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: calculatedDeliveryFee == 0
+                        ? AppColors.success.withValues(alpha: 0.4)
+                        : AppColors.secondary.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          calculatedDeliveryFee == 0
+                              ? Icons.check_circle_outline_rounded
+                              : Icons.electric_car_outlined,
+                          size: 16,
+                          color: calculatedDeliveryFee == 0
+                              ? AppColors.success
+                              : AppColors.secondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Phí giao xe',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: calculatedDeliveryFee == 0
+                                ? AppColors.success
+                                : AppColors.textPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      calculatedDeliveryFee == 0
+                          ? 'Miễn phí'
+                          : _formatCurrency(calculatedDeliveryFee),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: calculatedDeliveryFee == 0
+                            ? AppColors.success
+                            : AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            Container(
+              height: 250,
+              width: double.infinity,
+              margin: const EdgeInsets.only(top: 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: LatLng(
+                      carLatitude ?? 10.7760,
+                      carLongitude ?? 106.7009,
+                    ),
+                    initialZoom: 13,
+                    interactionOptions: const InteractionOptions(
+                      flags:
+                          InteractiveFlag.drag |
+                          InteractiveFlag.pinchZoom |
+                          InteractiveFlag.doubleTapZoom,
+                    ),
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        if (carLatitude != null && carLongitude != null)
+                          Marker(
+                            point: LatLng(carLatitude!, carLongitude!),
+                            width: 80,
+                            height: 80,
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.directions_car_filled_rounded,
+                                  color: AppColors.primary,
+                                  size: 30,
+                                ),
+                                Card(
+                                  margin: EdgeInsets.only(top: 2),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    ),
+                                    child: Text(
+                                      'Vị trí xe',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (customerLatitude != null &&
+                            customerLongitude != null)
+                          Marker(
+                            point: LatLng(
+                              customerLatitude!,
+                              customerLongitude!,
+                            ),
+                            width: 80,
+                            height: 80,
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.person_pin_circle_rounded,
+                                  color: AppColors.success,
+                                  size: 30,
+                                ),
+                                Card(
+                                  margin: EdgeInsets.only(top: 2),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 2,
+                                    ),
+                                    child: Text(
+                                      'Điểm nhận',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ],
       ),
     );
   }
 
-  // HÀM BUILD NÚT CHỌN HÌNH THỨC NHẬN XE
+  // --- HÀM XÂY DỰNG NÚT CHỌN HÌNH THỨC NHẬN XE (TẠI VỊ TRÍ XE HOẶC GIAO TẬN NƠI) ---
   Widget _buildDeliveryButton(bool isForLocation, String title, IconData icon) {
     bool isSelected = isForLocation == isDeliveryToLocation;
     return Expanded(
@@ -419,10 +1458,10 @@ class _BookingCarViewState extends State<BookingCarView> {
     );
   }
 
-  // HÀM BUILD CARD MÃ GIẢM GIÁ
+  // --- HÀM XÂY DỰNG KHỐI NHẬP MÃ KHUYẾN MÃI ---
   Widget _buildPromoCodeCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
@@ -455,18 +1494,12 @@ class _BookingCarViewState extends State<BookingCarView> {
             children: [
               Expanded(
                 child: TextField(
+                  controller: _promoController,
                   decoration: InputDecoration(
-                    hintText: promoCode.isEmpty
-                        ? 'Nhập mã của bạn...'
-                        : promoCode,
-                    hintStyle: TextStyle(
-                      color: promoCode.isEmpty
-                          ? AppColors.textSecondary
-                          : AppColors.textPrimary,
+                    hintText: 'Nhập mã khuyến mãi...',
+                    hintStyle: const TextStyle(
+                      color: AppColors.textSecondary,
                       fontSize: 14,
-                      fontWeight: promoCode.isEmpty
-                          ? FontWeight.normal
-                          : FontWeight.bold,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -488,7 +1521,7 @@ class _BookingCarViewState extends State<BookingCarView> {
               ),
               const SizedBox(width: 12),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () => _applyPromoCode(showFeedback: true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryDark,
                   elevation: 0,
@@ -516,10 +1549,10 @@ class _BookingCarViewState extends State<BookingCarView> {
     );
   }
 
-  // HÀM BUILD CARD BẢNG TÍNH GIÁ CHI TIẾT
+  // --- HÀM XÂY DỰNG KHỐI HIỂN THỊ BẢNG TÍNH GIÁ CHI TIẾT ---
   Widget _buildPriceBreakdownCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
@@ -540,29 +1573,46 @@ class _BookingCarViewState extends State<BookingCarView> {
           const SizedBox(height: 16),
           _buildPriceRow(
             'Đơn giá thuê',
-            '${_formatCurrency(pricePerDay)}/ngày',
+            '${_formatCurrency(car!.unitPrice)}/ngày',
           ),
           const SizedBox(height: 12),
           _buildPriceRow(
             'Tổng tiền thuê ($totalDays ngày)',
-            _formatCurrency(totalDays * pricePerDay),
+            _formatCurrency(baseRentalPrice),
           ),
           const SizedBox(height: 12),
-          _buildPriceRow(
-            'Chương trình giảm giá',
-            '-${_formatCurrency(discountAmount)}',
-            isDiscount: true,
-          ),
+          if (isDeliveryToLocation)
+            _buildPriceRow(
+              'Phí giao xe tận nơi',
+              calculatedDeliveryFee == 0
+                  ? 'Miễn phí'
+                  : _formatCurrency(calculatedDeliveryFee),
+              isFree: calculatedDeliveryFee == 0,
+            ),
+          if (car!.discountValue > 0)
+            _buildPriceRow(
+              'Giảm giá từ chủ xe',
+              '-${_formatCurrency(carDiscountTotal)}',
+              isDiscount: true,
+            ),
+          if (promoDiscount > 0)
+            _buildPriceRow(
+              'Mã voucher giảm thêm',
+              '-${_formatCurrency(promoDiscount)}',
+              isDiscount: true,
+            ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Divider(height: 1, thickness: 1, color: AppColors.border),
           ),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppColors.accentSurface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+              border: Border.all(
+                color: AppColors.secondary.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -586,15 +1636,17 @@ class _BookingCarViewState extends State<BookingCarView> {
                         color: AppColors.primaryDark,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Tiết kiệm ${_formatCurrency(discountAmount)}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.success,
+                    if (totalDiscountAmount > 0) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tiết kiệm ${_formatCurrency(totalDiscountAmount)}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.success,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],
@@ -605,7 +1657,7 @@ class _BookingCarViewState extends State<BookingCarView> {
     );
   }
 
-// HÀM BUILD HÀNG GIÁ TRONG BẢNG TÍNH GIÁ
+  // --- HÀM XÂY DỰNG HÀNG HIỂN THỊ GIÁ TRONG BẢNG TÍNH GIÁ ---
   Widget _buildPriceRow(
     String label,
     String value, {
@@ -644,15 +1696,15 @@ class _BookingCarViewState extends State<BookingCarView> {
     return formatter.format(amount);
   }
 
-// HÀM BUILD THANH HÀNH ĐỘNG DƯỚI CÙNG
-  Widget _buildBottomActionBar(bool isTablet) {
+  // -- HÀM XÂY DỰNG THANH HÀNH ĐỘNG Ở CUỐI MÀN HÌNH (NÚT ĐẶT XE) ---
+  Widget _buildBottomActionBar(bool isTablet, TripViewModel tripViewModel) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.background,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -698,12 +1750,144 @@ class _BookingCarViewState extends State<BookingCarView> {
                   ],
                 ),
                 const SizedBox(height: 8),
-
-                // Nút Đặt xe lớn áp dụng màu Primary của hãng
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: isTermsAgreed ? () {} : null,
+                    onPressed: tripViewModel.isLoading
+                        ? null
+                        : () async {
+                            if (!isTermsAgreed) {
+                              _showToastError(
+                                'Bạn cần đồng ý với Chính sách hủy chuyến của ứng dụng.',
+                              );
+                              return;
+                            }
+                            if (startDate == null || endDate == null) {
+                              _showToastError(
+                                'Vui lòng chọn ngày nhận và trả xe trước!',
+                              );
+                              return;
+                            }
+                            if (startDate!.isBefore(DateTime.now())) {
+                              _showToastError(
+                                'Thời gian nhận xe không thể ở quá khứ!',
+                              );
+                              return;
+                            }
+                            if (endDate!.isBefore(startDate!)) {
+                              _showToastError(
+                                'Thời gian trả xe phải sau thời gian nhận xe!',
+                              );
+                              return;
+                            }
+                            if (_isCarBusy(startDate!, endDate!)) {
+                              final overlapping = _getOverlappingTrip(
+                                startDate!,
+                                endDate!,
+                              );
+                              if (overlapping != null) {
+                                final formatter = DateFormat('HH:mm dd/MM');
+                                _showToastError(
+                                  'Xe đã có lịch bận từ ${formatter.format(overlapping.startAt)} đến ${formatter.format(overlapping.endAt)}!',
+                                );
+                              } else {
+                                _showToastError(
+                                  'Xe đã có lịch bận trong thời gian này!',
+                                );
+                              }
+                              return;
+                            }
+                            if (isDeliveryToLocation) {
+                              if (_addressController.text.trim().isEmpty) {
+                                _showToastError(
+                                  'Vui lòng nhập địa chỉ nhận xe!',
+                                );
+                                return;
+                              }
+                              if (isCalculatingMap) {
+                                _showToastError(
+                                  'Đang tính toán khoảng cách giao xe, vui lòng đợi...',
+                                );
+                                return;
+                              }
+                              double maxDist =
+                                  car!.deliveryOption?.maxDistance ?? 10.0;
+                              if (distanceInKm > maxDist) {
+                                _showToastError(
+                                  'Vị trí giao xe quá xa. Vui lòng chọn vị trí dưới ${maxDist.toInt()} km.',
+                                );
+                                return;
+                              }
+                            }
+
+                            Map<String, dynamic> requestBody = {
+                              'car_id': car!.id,
+                              'trip_type': 0,
+                              'status': 0,
+                              'start_at': DateFormat(
+                                'yyyy-MM-dd HH:mm:ss',
+                              ).format(startDate!),
+                              'end_at': DateFormat(
+                                'yyyy-MM-dd HH:mm:ss',
+                              ).format(endDate!),
+                              'cost':
+                                  baseRentalPrice +
+                                  calculatedDeliveryFee, // Tổng tiền thuê + phí giao xe (chưa trừ giảm giá)
+                              'discount_amount': totalDiscountAmount,
+                              'delivery_address': isDeliveryToLocation
+                                  ? _addressController.text
+                                  : null,
+                              'delivery_location': isDeliveryToLocation
+                                  ? "$customerLatitude,$customerLongitude"
+                                  : null,
+                              'promo_code': _promoController.text.isNotEmpty
+                                  ? _promoController.text
+                                  : null,
+                              'delivery_fee': calculatedDeliveryFee,
+                            };
+
+                            bool isSuccess = await tripViewModel.bookingCar(
+                              requestBody,
+                            );
+                            if (!mounted) return;
+                            if (isSuccess) {
+                              AppToast.show(
+                                context,
+                                message:
+                                    'Gửi yêu cầu thuê xe thành công! Vui lòng chờ chủ xe duyệt.',
+                                type: ToastType.success,
+                              );
+                              Navigator.pop(context);
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: AppColors.error,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text('Đặt xe thất bại'),
+                                    ],
+                                  ),
+                                  content: Text(tripViewModel.errorMessage),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text(
+                                        'Đóng',
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       disabledBackgroundColor: AppColors.border,
@@ -713,15 +1897,24 @@ class _BookingCarViewState extends State<BookingCarView> {
                       ),
                       elevation: 0,
                     ),
-                    child: Text(
-                      'GỬI YÊU CẦU ĐẶT XE (${_formatCurrency(totalAmount)})',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.background,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+                    child: tripViewModel.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'GỬI YÊU CẦU ĐẶT XE (${_formatCurrency(totalAmount)})',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.background,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
                   ),
                 ),
               ],
