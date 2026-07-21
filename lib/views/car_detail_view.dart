@@ -176,7 +176,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
               _buildSpecSection(car),
               const SizedBox(height: 24.0),
               _buildAmenitiesSection(car),
-              const SizedBox(height: 24.0),
+              const SizedBox(height: 10.0),
               _buildHostSection(car),
               const SizedBox(height: 24.0),
               _buildDescriptionSection(car),
@@ -196,7 +196,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
 
   // ==================== Car Info Header ====================
   Widget _buildCarInfoHeader(Car_Detail car) {
-    final rating = car.reviewsAvgRating ?? '0';
+    final rating = car.reviewsAvgRating?.toStringAsFixed(1) ?? '0';
     final tripsCount = car.tripsCount;
 
     return Row(
@@ -481,7 +481,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
               crossAxisSpacing: 12,
-              mainAxisSpacing: 16,
+              mainAxisSpacing: 8,
               childAspectRatio: 0.8,
             ),
             padding: EdgeInsets.zero,
@@ -764,13 +764,13 @@ class _CarDetailPageState extends State<CarDetailPage> {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          owner.phone ?? '',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
+                        // Text(
+                        //   owner.phone ?? '',
+                        //   style: const TextStyle(
+                        //     fontSize: 12,
+                        //     color: AppColors.textSecondary,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
@@ -783,7 +783,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
                         const Icon(Icons.star, color: Colors.amber, size: 16),
                         const SizedBox(width: 4),
                         Text(
-                          '${car.reviewsAvgRating ?? '0'} (${car.tripsCount})',
+                          '${car.reviewsAvgRating?.toStringAsFixed(1) ?? '0'} (${car.tripsCount})',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -793,71 +793,6 @@ class _CarDetailPageState extends State<CarDetailPage> {
                       ],
                     ),
                   ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.chat_bubble_outline_rounded,
-                      size: 18,
-                      color: AppColors.primary,
-                    ),
-                    label: const Text(
-                      'Nhắn tin',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => context.pushReplacement(
-                      '/owner-profile/${owner.id}?isOwner=true',
-                      extra: {'fromCarId': car.id},
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Xem trang chủ xe',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 12,
-                          color: AppColors.primary,
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),

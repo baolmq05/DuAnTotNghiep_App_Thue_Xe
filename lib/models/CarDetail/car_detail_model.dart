@@ -32,7 +32,7 @@ class Car_Detail {
   final int status;
   final String createdAt;
   final String updatedAt;
-  final String? reviewsAvgRating;
+  final double? reviewsAvgRating;
   final int tripsCount;
   final CarLocation carLocation;
   final CarBrand carBrand;
@@ -81,7 +81,9 @@ class Car_Detail {
 
   factory Car_Detail.fromJson(Map<String, dynamic> json) {
     return Car_Detail(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       name: json['name']?.toString() ?? '',
       licensePlate: json['license_plate']?.toString() ?? '',
       VIN: json['vin']?.toString() ?? '',
@@ -120,7 +122,9 @@ class Car_Detail {
           : int.tryParse(json['status']?.toString() ?? '') ?? 0,
       createdAt: json['created_at']?.toString() ?? '',
       updatedAt: json['updated_at']?.toString() ?? '',
-      reviewsAvgRating: json['reviews_avg_rating']?.toString(),
+      reviewsAvgRating: json['reviews_avg_rating'] == null
+          ? null
+          : double.tryParse(json['reviews_avg_rating'].toString()),
       tripsCount: json['trips_count'] is int
           ? json['trips_count']
           : int.tryParse(json['trips_count']?.toString() ?? '') ?? 0,
@@ -132,13 +136,13 @@ class Car_Detail {
       owner: CarOwner.fromJson(json['owner'] ?? {}),
       images: json['images'] != null
           ? (json['images'] as List<dynamic>)
-              .map((e) => CarImage.fromJson(e))
-              .toList()
+                .map((e) => CarImage.fromJson(e))
+                .toList()
           : [],
       features: json['features'] != null
           ? (json['features'] as List<dynamic>)
-              .map((e) => CarFeature.fromJson(e))
-              .toList()
+                .map((e) => CarFeature.fromJson(e))
+                .toList()
           : [],
     );
   }
