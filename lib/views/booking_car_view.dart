@@ -14,6 +14,7 @@ import '../services/goong_map_service.dart';
 import '../services/promotion_service.dart';
 import '../services/base_service.dart';
 import '../widgets/app_toast.dart';
+import 'package:go_router/go_router.dart';
 
 class BookingCarView extends StatefulWidget {
   final int carId; // Nhận duy nhất ID xe từ trang chi tiết truyền sang
@@ -41,6 +42,7 @@ class _BookingCarViewState extends State<BookingCarView> {
   bool isDeliveryToLocation = false;
   bool isTermsAgreed = true;
   bool isCalculatingMap = false;
+  bool hasDistanceError = false;
 
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _promoController = TextEditingController();
@@ -486,15 +488,11 @@ class _BookingCarViewState extends State<BookingCarView> {
   }
 
   double get calculatedDeliveryFee {
-    // Quy tắc tính phí giao xe:
-    // - Dưới freeDistance km (thường 5km): Miễn phí
-    // - Từ freeDistance đến maxDistance km: Tính phí theo từng km nguyên vượt quá
-    //   (làm tròn lên), đơn giá feeDistance đ/km (thường 50.000đ/km)
-    // - Quá maxDistance km (thường 10km): Không cho phép đặt
+    // Nếu không giao xe đến địa chỉ khách hàng hoặc chưa có dữ liệu xe thì phí giao luôn là 0
     if (!isDeliveryToLocation || car == null) return 0.0;
     final option = car!.deliveryOption;
     if (option == null) return 0.0;
-
+    // Nếu chưa có dữ liệu khoảng cách thì phí giao luôn là 0
     final double freeDist = option.freeDistance
         .toDouble(); // Ngưỡng miễn phí (km)
     final double feeDist = option.feeDistance
@@ -509,7 +507,7 @@ class _BookingCarViewState extends State<BookingCarView> {
       (distanceInKm - freeDist).toStringAsFixed(1),
     );
     final double rawFee = chargeableKm * feeDist;
-    // Làm tròn đến 1.000đ gần nhất cho gọn
+    // Làm tròn đến 1.000đ gần nhất
     return (rawFee / 1000).round() * 1000.0;
   }
 
@@ -522,25 +520,10 @@ class _BookingCarViewState extends State<BookingCarView> {
     return finalCost < 0 ? 0.0 : finalCost;
   }
 
+  // tổng tiền giảm =  tiền giảm thuê xe + tiền mã giảm giá
   double get totalDiscountAmount => carDiscountTotal + promoDiscount;
 
-  double _calculateDistance(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2,
-  ) {
-    const p = 0.017453292519943295; // math.pi / 180
-    final a =
-        0.5 -
-        math.cos((lat2 - lat1) * p) / 2 +
-        math.cos(lat1 * p) *
-            math.cos(lat2 * p) *
-            (1 - math.cos((lon2 - lon1) * p)) /
-            2;
-    return 12742 * math.asin(math.sqrt(a)); // 2 * R; R = 6371 km
-  }
-
+  // Áp dụng mã giảm giá
   Future<void> _applyPromoCode({bool showFeedback = true}) async {
     final codeText = _promoController.text.trim();
     if (codeText.isEmpty) {
@@ -589,44 +572,67 @@ class _BookingCarViewState extends State<BookingCarView> {
     }
   }
 
+  // Xác minh địa chỉ từ ID địa điểm và thông báo
   Future<void> _verifyAddressFromPlaceId(
     String placeId,
     String formattedAddress,
   ) async {
     setState(() {
       isCalculatingMap = true;
+      hasDistanceError = false;
     });
 
     try {
       final latLng = await GoongMapService().getPlaceLatLng(placeId);
       if (latLng != null) {
+        final cLat = latLng['lat'];
+        final cLng = latLng['lng'];
+        double dist = 0.0;
+        bool errorOccurred = false;
+
+        if (carLatitude != null &&
+            carLongitude != null &&
+            cLat != null &&
+            cLng != null) {
+          final drivingDist = await GoongMapService().getDrivingDistance(
+            carLatitude!,
+            carLongitude!,
+            cLat,
+            cLng,
+          );
+          if (drivingDist != null) {
+            dist = drivingDist;
+          } else {
+            _showToastError(
+              'Không thể lấy khoảng cách lái xe, vui lòng thử lại!',
+            );
+            dist = 0.0;
+            errorOccurred = true;
+          }
+        }
+
         setState(() {
           _addressController.text = formattedAddress;
-          customerLatitude = latLng['lat'];
-          customerLongitude = latLng['lng'];
-
-          if (carLatitude != null && carLongitude != null) {
-            final rawDistance = _calculateDistance(
-              carLatitude!,
-              carLongitude!,
-              customerLatitude!,
-              customerLongitude!,
-            );
-            distanceInKm = double.parse(rawDistance.toStringAsFixed(1));
-          } else {
-            distanceInKm = 0.0;
-          }
-
+          customerLatitude = cLat;
+          customerLongitude = cLng;
+          distanceInKm = double.parse(dist.toStringAsFixed(1));
+          hasDistanceError = errorOccurred;
           isCalculatingMap = false;
         });
         _updateMapView();
       } else {
         _showToastError('Không tìm thấy vị trí tương ứng.');
-        setState(() => isCalculatingMap = false);
+        setState(() {
+          hasDistanceError = true;
+          isCalculatingMap = false;
+        });
       }
     } catch (e) {
       _showToastError('Lỗi tính toán khoảng cách.');
-      setState(() => isCalculatingMap = false);
+      setState(() {
+        hasDistanceError = true;
+        isCalculatingMap = false;
+      });
     }
   }
 
@@ -636,6 +642,7 @@ class _BookingCarViewState extends State<BookingCarView> {
 
     setState(() {
       isCalculatingMap = true;
+      hasDistanceError = false;
     });
 
     final String url =
@@ -651,36 +658,53 @@ class _BookingCarViewState extends State<BookingCarView> {
           final String formattedAddress =
               data['results'][0]['formatted_address'];
           final location = data['results'][0]['geometry']['location'];
+          final cLat = double.parse(location['lat'].toString());
+          final cLng = double.parse(location['lng'].toString());
+          double dist = 0.0;
+          bool errorOccurred = false;
+
+          if (carLatitude != null && carLongitude != null) {
+            final drivingDist = await GoongMapService().getDrivingDistance(
+              carLatitude!,
+              carLongitude!,
+              cLat,
+              cLng,
+            );
+            if (drivingDist != null) {
+              dist = drivingDist;
+            } else {
+              _showToastError(
+                'Không thể lấy khoảng cách lái xe, vui lòng thử lại!',
+              );
+              dist = 0.0;
+              errorOccurred = true;
+            }
+          }
 
           setState(() {
             // Điền địa chỉ chuẩn vào ô nhập liệu cho đẹp mắt
             _addressController.text = formattedAddress;
-            customerLatitude = double.parse(location['lat'].toString());
-            customerLongitude = double.parse(location['lng'].toString());
-
-            if (carLatitude != null && carLongitude != null) {
-              final rawDistance = _calculateDistance(
-                carLatitude!,
-                carLongitude!,
-                customerLatitude!,
-                customerLongitude!,
-              );
-              distanceInKm = double.parse(rawDistance.toStringAsFixed(1));
-            } else {
-              distanceInKm = 0.0;
-            }
-
+            customerLatitude = cLat;
+            customerLongitude = cLng;
+            distanceInKm = double.parse(dist.toStringAsFixed(1));
+            hasDistanceError = errorOccurred;
             isCalculatingMap = false;
           });
           _updateMapView();
         } else {
           _showToastError('Không tìm thấy vị trí tương ứng.');
-          setState(() => isCalculatingMap = false);
+          setState(() {
+            hasDistanceError = true;
+            isCalculatingMap = false;
+          });
         }
       }
     } catch (e) {
       _showToastError('Lỗi kiểm tra vị trí: $e');
-      setState(() => isCalculatingMap = false);
+      setState(() {
+        hasDistanceError = true;
+        isCalculatingMap = false;
+      });
     }
   }
 
@@ -769,85 +793,92 @@ class _BookingCarViewState extends State<BookingCarView> {
   }
 
   Widget _buildCarInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: _cardShadow,
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              car!.getFirstImageUrl(),
-              width: 95,
-              height: 70,
-              fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        if (car != null) {
+          context.push('/car_detail/${car!.id}');
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: _cardShadow,
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                car!.getFirstImageUrl(),
+                width: 95,
+                height: 70,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  car!.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.star_rounded,
-                      color: AppColors.warning,
-                      size: 18,
-                    ),
-                    const Text(
-                      ' 5.0 ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Text(
-                      '• Ghế: ${car!.seatCount} • Biển: ${car!.licensePlate}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    car!.transmission ?? 'Tự động',
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    car!.name,
                     style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.primary,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        color: AppColors.warning,
+                        size: 18,
+                      ),
+                      const Text(
+                        ' 5.0 ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '• Ghế: ${car!.seatCount} • Biển: ${car!.licensePlate}',
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      car!.transmission ?? 'Tự động',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -872,7 +903,7 @@ class _BookingCarViewState extends State<BookingCarView> {
               ),
               SizedBox(width: 8),
               Text(
-                'THỜI GIAN THUÊ',
+                'Thời gian thuê',
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -885,7 +916,7 @@ class _BookingCarViewState extends State<BookingCarView> {
           const SizedBox(height: 16),
           // NHẬN XE row
           const Text(
-            'NHẬN XE',
+            'Nhận xe',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -921,7 +952,7 @@ class _BookingCarViewState extends State<BookingCarView> {
           const SizedBox(height: 14),
           // TRẢ XE row
           const Text(
-            'TRẢ XE',
+            'Trả xe',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -1014,7 +1045,7 @@ class _BookingCarViewState extends State<BookingCarView> {
               ),
               SizedBox(width: 8),
               Text(
-                'HÌNH THỨC NHẬN XE',
+                'Hình thức nhận xe',
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -1087,6 +1118,50 @@ class _BookingCarViewState extends State<BookingCarView> {
             ),
           ],
           if (isDeliveryToLocation) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_on_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Vị trí xe hiện tại',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          car?.carLocation?.address ??
+                              'Đang cập nhật địa chỉ...',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 14),
             TextField(
               controller: _addressController,
@@ -1479,7 +1554,7 @@ class _BookingCarViewState extends State<BookingCarView> {
               ),
               SizedBox(width: 8),
               Text(
-                'MÃ GIẢM GIÁ',
+                'Mã giảm giá',
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -1562,7 +1637,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'BẢNG TÍNH GIÁ CHI TIẾT',
+            'Bảng tính giá chi tiết',
             style: TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
@@ -1810,6 +1885,12 @@ class _BookingCarViewState extends State<BookingCarView> {
                                 );
                                 return;
                               }
+                              if (hasDistanceError) {
+                                _showToastError(
+                                  'Không thể tính toán khoảng cách lái xe từ địa chỉ này, vui lòng nhập/chọn lại địa chỉ khác!',
+                                );
+                                return;
+                              }
                               double maxDist =
                                   car!.deliveryOption?.maxDistance ?? 10.0;
                               if (distanceInKm > maxDist) {
@@ -1907,7 +1988,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                             ),
                           )
                         : Text(
-                            'GỬI YÊU CẦU ĐẶT XE (${_formatCurrency(totalAmount)})',
+                            'Gửi yêu cầu đặt xe',
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,

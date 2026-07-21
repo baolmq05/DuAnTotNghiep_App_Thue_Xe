@@ -90,4 +90,34 @@ class GoongMapService {
     }
     return null;
   }
+
+  // lấy khoảng cách thực tế (đường xe) từ Goong Distance Matrix API
+  Future<double?> getDrivingDistance(double originLat, double originLng, double destLat, double destLng) async {
+    final url = Uri.parse(
+      'https://rsapi.goong.io/DistanceMatrix'
+      '?origins=$originLat,$originLng'
+      '&destinations=$destLat,$destLng'
+      '&vehicle=car'
+      '&api_key=$_apiKey',
+    );
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['rows'] != null && data['rows'].isNotEmpty) {
+          final elements = data['rows'][0]['elements'];
+          if (elements != null && elements.isNotEmpty && elements[0]['status'] == 'OK') {
+            final distanceValue = elements[0]['distance']?['value'];
+            if (distanceValue != null) {
+              return (distanceValue as num).toDouble() / 1000.0;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('GoongMapService getDrivingDistance Error: $e');
+    }
+    return null;
+  }
 }
