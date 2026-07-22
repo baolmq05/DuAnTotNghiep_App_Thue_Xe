@@ -661,49 +661,51 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
             else if (_suggestions.isNotEmpty)
               Container(
                 margin: const EdgeInsets.only(top: 8),
+                constraints: const BoxConstraints(maxHeight: 200), // Giới hạn chiều cao để danh sách tự cuộn gọn gàng
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.border),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _suggestions.length > 4 ? 4 : _suggestions.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final suggestion = _suggestions[index];
-                    return ListTile(
-                      dense: true,
-                      leading: const Icon(
-                        Icons.location_on_outlined,
-                        color: AppColors.primary,
-                        size: 18,
-                      ),
-                      title: Text(
-                        suggestion,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textPrimary,
+                child: Scrollbar(
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    // Hiển thị toàn bộ gợi ý mà Goong Map trả về để người dùng cuộn xem
+                    itemCount: _suggestions.length,
+                    itemBuilder: (context, index) {
+                      final suggestion = _suggestions[index];
+                      return ListTile(
+                        dense: true,
+                        leading: const Icon(
+                          Icons.location_on_outlined,
+                          color: AppColors.primary,
+                          size: 18,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          _addressController.text = suggestion;
-                          _suggestions = [];
-                        });
-                      },
-                    );
-                  },
+                        title: Text(
+                          suggestion,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _addressController.text = suggestion;
+                            _suggestions = [];
+                          });
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             const SizedBox(height: 20),
