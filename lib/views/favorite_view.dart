@@ -178,22 +178,19 @@ class _FavoriteViewState extends State<FavoriteView> {
                   );
                 }
 
-                return GridView.builder(
+                return ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.58,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                  ),
                   itemCount: cars.length,
                   itemBuilder: (context, index) {
                     final car = cars[index];
-                    return GestureDetector(
-                      onTap: () {
-                        context.push('/car_detail/${car.id}');
-                      },
-                      child: _buildCarCard(context, car),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GestureDetector(
+                        onTap: () {
+                          context.push('/car_detail/${car.id}');
+                        },
+                        child: _buildCarCard(context, car),
+                      ),
                     );
                   },
                 );
@@ -205,7 +202,6 @@ class _FavoriteViewState extends State<FavoriteView> {
     );
   }
 
-  //tạo widget cho dữ liệu xe từ object Car
   Widget _buildCarCard(BuildContext context, Car car) {
     // Lấy ảnh thumbnail hoặc ảnh đầu tiên
     final String image = car.images.isEmpty
@@ -233,6 +229,7 @@ class _FavoriteViewState extends State<FavoriteView> {
     final price = _formatPrice(car.unitPrice - car.discountValue);
 
     return Container(
+      height: 140,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -247,161 +244,164 @@ class _FavoriteViewState extends State<FavoriteView> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            // ảnh và các thông tin nằm trên ảnh (giảm giá, trái tim, tên chủ xe + avatar)
-            Stack(
-              children: [
-                Image.network(
-                  image,
-                  height: 105,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 105,
-                    color: Colors.grey.shade200,
-                    child: const Icon(
-                      Icons.directions_car_rounded,
-                      color: Colors.grey,
-                      size: 36,
+            // Left side: Image and overlays
+            SizedBox(
+              width: 130,
+              height: double.infinity,
+              child: Stack(
+                children: [
+                  Image.network(
+                    image,
+                    width: 130,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 130,
+                      height: double.infinity,
+                      color: Colors.grey.shade200,
+                      child: const Icon(
+                        Icons.directions_car_rounded,
+                        color: Colors.grey,
+                        size: 36,
+                      ),
                     ),
                   ),
-                ),
-                if (discount.isNotEmpty)
+                  if (discount.isNotEmpty)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF4D6D),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.local_offer_outlined,
+                              color: Colors.white,
+                              size: 10,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              discount,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  // Owner avatar + name overlay
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    bottom: 6,
+                    left: 6,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
-                        vertical: 4,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF4D6D),
-                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.black.withOpacity(0.55),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.local_offer_outlined,
-                            color: Colors.white,
-                            size: 10,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.network(
+                              ownerAvatar,
+                              width: 12,
+                              height: 12,
+                              fit: BoxFit.cover,
+                              errorBuilder: (c, e, s) => const Icon(
+                                Icons.account_circle,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 2),
+                          const SizedBox(width: 4),
                           Text(
-                            discount,
+                            ownerName,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 9,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                // trái tim (nhấn vào để bỏ yêu thích)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () {
-                      context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 2,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.favorite_rounded,
-                        color: Color(0xFFFF4D6D),
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                // tên chủ xe + avatar
-                Positioned(
-                  bottom: 6,
-                  right: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.55),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
+                ],
+              ),
+            ),
+            // Right side: Info details
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top row: "Giao xe tận nơi" & Heart Icon
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            ownerAvatar,
-                            width: 12,
-                            height: 12,
-                            fit: BoxFit.cover,
-                            errorBuilder: (c, e, s) => const Icon(
-                              Icons.account_circle,
-                              color: Colors.white,
-                              size: 12,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(115, 227, 242, 253),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'Giao xe tận nơi',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          ownerName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
+                        GestureDetector(
+                          onTap: () {
+                            context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 2,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.favorite_rounded,
+                              color: Color(0xFFFF4D6D),
+                              size: 18,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            ),
-
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // giao xe tận nơi
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(115, 227, 242, 253),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'Giao xe tận nơi',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    // tên xe + đánh giá sao
+                    const SizedBox(height: 4),
+                    // Name & Rating
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -411,12 +411,13 @@ class _FavoriteViewState extends State<FavoriteView> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                           ),
                         ),
+                        const SizedBox(width: 4),
                         Row(
                           children: [
                             const Icon(
@@ -436,9 +437,8 @@ class _FavoriteViewState extends State<FavoriteView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 3),
-
-                    // vị trí xe
+                    const SizedBox(height: 4),
+                    // Location
                     Row(
                       children: [
                         const Icon(
@@ -460,87 +460,48 @@ class _FavoriteViewState extends State<FavoriteView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-
-                    // số chỗ, hộp số, nhiên liệu
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(8),
+                    const SizedBox(height: 4),
+                    // Specifications: e.g. "4 chỗ • Số tự động • Xăng"
+                    Text(
+                      '$seats • $transmission • $fuel',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade600,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildSpecItem(
-                            Icons.airline_seat_recline_normal_rounded,
-                            seats,
-                          ),
-                          _buildSpecItem(
-                            Icons.brightness_auto_rounded,
-                            transmission,
-                          ),
-                          _buildSpecItem(Icons.local_gas_station_rounded, fuel),
-                        ],
-                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const Spacer(),
-
-                    // thuê xe theo chuyến + giá tiền
+                    // Bottom Row: Trips and Rent Price
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Đã chạy',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.black45,
-                              ),
-                            ),
-                            const SizedBox(height: 1),
-                            Text(
-                              trips,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'Đã chạy $trips',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.black54,
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
                           children: [
-                            const Text(
-                              'GIÁ TỪ',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.black45,
+                            Text(
+                              price,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
                               ),
                             ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                Text(
-                                  price,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                                const Text(
-                                  '/ngày',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    color: Colors.black45,
-                                  ),
-                                ),
-                              ],
+                            const Text(
+                              '/ngày',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.black45,
+                              ),
                             ),
                           ],
                         ),
@@ -556,22 +517,4 @@ class _FavoriteViewState extends State<FavoriteView> {
     );
   }
 
-  // Widget hỗ trợ vẽ nhanh Icon thông số kỹ thuật
-  Widget _buildSpecItem(IconData icon, String value) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: Colors.black45),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 9,
-            color: Colors.black45,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
 }
