@@ -48,23 +48,6 @@ class _HomeCarListState extends State<HomeCarList> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  // TextButton(
-                  //   onPressed: () {
-                  //     context.push('/vehicles');
-                  //   },
-                  //   style: TextButton.styleFrom(
-                  //     padding: EdgeInsets.zero,
-                  //     minimumSize: const Size(50, 30),
-                  //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  //   ),
-                  //   child: const Text(
-                  //     'Xem tất cả',
-                  //     style: TextStyle(
-                  //       color: AppColors.primary,
-                  //       fontWeight: FontWeight.w600,
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             ),
@@ -98,40 +81,52 @@ class _HomeCarListState extends State<HomeCarList> {
                           ),
                           autoPlayCurve: Curves.fastOutSlowIn,
                           enlargeCenterPage: true,
-                          enlargeFactor: 0.15,
-                          viewportFraction: 0.9,
-                          enableInfiniteScroll: true,
+                          enlargeFactor: 0.18,
+                          viewportFraction: 0.88,
+                          enableInfiniteScroll: false,
                           onPageChanged: (index, reason) {
                             setState(() {
                               _currentIndex = index;
                             });
                           },
                         ),
-                        items: cars.map((car) {
+                        items: cars.asMap().entries.map((entry) {
+                          final int index = entry.key;
+                          final car = entry.value;
                           final isFav = favoriteVM.isFavorite(car.id);
-                          return HomeCarCard(
-                            width: double.infinity,
-                            car: car,
-                            isFavorite: isFav,
-                            onFavoriteTap: () {
-                              context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
-                              if (isFav) {
-                                AppToast.show(
-                                  context,
-                                  message: "Đã xóa xe khỏi danh sách yêu thích",
-                                  type: ToastType.info,
-                                );
-                              } else {
-                                AppToast.show(
-                                  context,
-                                  message: "Đã thêm xe vào danh sách yêu thích thành công!",
-                                  type: ToastType.success,
-                                );
-                              }
-                            },
-                            onTap: () {
-                              context.push('/car_detail/${car.id}');
-                            },
+                          final double translationOffset = cars.length > 1
+                              ? -0.06818 * (1.0 - index / (cars.length - 1))
+                              : -0.06818;
+                          return FractionalTranslation(
+                            translation: Offset(translationOffset, 0),
+                            child: HomeCarCard(
+                              width: double.infinity,
+                              car: car,
+                              isFavorite: isFav,
+                              onFavoriteTap: () {
+                                context
+                                    .read<FavoriteViewModel>()
+                                    .toggleFavorite(carId: car.id, car: car);
+                                if (isFav) {
+                                  AppToast.show(
+                                    context,
+                                    message:
+                                        "Đã xóa xe khỏi danh sách yêu thích",
+                                    type: ToastType.info,
+                                  );
+                                } else {
+                                  AppToast.show(
+                                    context,
+                                    message:
+                                        "Đã thêm xe vào danh sách yêu thích thành công!",
+                                    type: ToastType.success,
+                                  );
+                                }
+                              },
+                              onTap: () {
+                                context.push('/car_detail/${car.id}');
+                              },
+                            ),
                           );
                         }).toList(),
                       ),
