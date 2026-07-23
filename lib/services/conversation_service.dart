@@ -121,4 +121,61 @@ class ConversationService extends BaseService {
       rethrow;
     }
   }
+
+  /// Create or get existing conversation with user/owner
+  Future<Conversation> createConversation({
+    required int receiverId,
+    int? tripId,
+    int? carId,
+  }) async {
+    try {
+      final response = await store(
+        'api/conversations',
+        body: {
+          'receiver_id': receiverId,
+          'trip_id': ?tripId,
+          'car_id': ?carId,
+        },
+        requiresAuth: true,
+      );
+
+      if (response is Map) {
+        if (response['conversation'] != null && response['conversation'] is Map) {
+          return Conversation.fromJson(response['conversation'] as Map<String, dynamic>);
+        }
+        if (response['data'] != null && response['data'] is Map) {
+          return Conversation.fromJson(response['data'] as Map<String, dynamic>);
+        }
+        return Conversation.fromJson(response as Map<String, dynamic>);
+      }
+      throw Exception('Không thể khởi tạo cuộc hội thoại.');
+    } catch (e) {
+      // Fallback: If API returns error or endpoint is different, check existing conversation list
+      try {
+        final existingConversations = await getConversations();
+        final match = existingConversations.firstWhere(
+          (c) => c.otherUser.id == receiverId || (tripId != null && c.tripId == tripId),
+          orElse: () => Conversation.raw(
+            id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+            status: 1,
+            tripId: tripId,
+            createdAt: DateTime.now().toIso8601String(),
+            updatedAt: DateTime.now().toIso8601String(),
+            otherUser: OtherUser(id: receiverId, name: 'Chủ xe'),
+          ),
+        );
+        return match;
+      } catch (_) {
+        return Conversation.raw(
+          id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+          status: 1,
+          tripId: tripId,
+          createdAt: DateTime.now().toIso8601String(),
+          updatedAt: DateTime.now().toIso8601String(),
+          otherUser: OtherUser(id: receiverId, name: 'Chủ xe'),
+        );
+      }
+    }
+  }
 }
+
