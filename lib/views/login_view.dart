@@ -354,39 +354,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               const SizedBox(height: 12.0),
 
-              // Social Login - Facebook Button
-              OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(54.0),
-                  side: BorderSide(color: colorScheme.outline, width: 1.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  backgroundColor: Colors.white,
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/facebook_logo.svg',
-                      height: 24.0,
-                      width: 24.0,
-                    ),
-                    const SizedBox(width: 12.0),
-                    Text(
-                      'Tiếp tục với Facebook',
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32.0),
+              //  const SizedBox(height: 32.0),
 
               // Navigation to Register
               Row(
