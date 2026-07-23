@@ -369,46 +369,10 @@ class _ProfileViewState extends State<ProfileView> {
       child: Column(
         children: [
           _buildMenuItem(
-            icon: Icons.assignment_outlined,
-            title: 'Đơn thuê của tôi',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Xem Đơn thuê của tôi')),
-              );
-            },
-          ),
-          _buildMenuItem(
             icon: Icons.favorite_border_rounded,
             title: 'Xe yêu thích',
             onTap: () {
               context.push('/favorite');
-            },
-          ),
-          _buildMenuItem(
-            icon: Icons.local_offer_outlined,
-            title: 'Mã giảm giá',
-            trailing: Container(
-              padding: const EdgeInsets.all(5),
-              decoration: const BoxDecoration(
-                color: Color(0xFFE08244),
-                shape: BoxShape.circle,
-              ),
-              constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-              child: const Center(
-                child: Text(
-                  '3',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Xem Mã giảm giá')));
             },
           ),
           _buildMenuItem(
@@ -419,15 +383,6 @@ class _ProfileViewState extends State<ProfileView> {
               context.push('/driver-license');
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Xem Giấy phép lái xe')),
-              );
-            },
-          ),
-          _buildMenuItem(
-            icon: Icons.payment_outlined,
-            title: 'Phương thức thanh toán',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Xem Phương thức thanh toán')),
               );
             },
           ),
