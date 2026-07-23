@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../themes/app_colors.dart';
 import '../models/trip_model.dart';
 import '../viewmodels/order_detail_viewmodel.dart';
+import '../services/conversation_service.dart';
+import '../models/conversation_model.dart';
 import 'package:provider/provider.dart';
 
 class OrderDetailView extends StatefulWidget {
@@ -14,6 +16,8 @@ class OrderDetailView extends StatefulWidget {
 }
 
 class _OrderDetailViewState extends State<OrderDetailView> {
+  bool _isCreatingChat = false;
+
   @override
   void initState() {
     super.initState();
@@ -111,7 +115,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             pinned: true,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.go('/orders'),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/orders');
+                }
+              },
             ),
             title: const Text(
               'Chi tiết đơn hàng',
@@ -133,13 +143,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         Icons.headset_mic_outlined,
                         color: Colors.white,
                       ),
-                      onPressed: () {},
+                      onPressed: () => context.push('/support'),
                     ),
                     IconButton(
                       constraints: const BoxConstraints(),
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.more_horiz, color: Colors.white),
-                      onPressed: () {},
+                      onPressed: () => _showOptionBottomSheet(context, trip),
                     ),
                   ],
                 ),
@@ -159,7 +169,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         if (car != null) _buildCarCard(car),
                         const SizedBox(height: 20),
                         if (car != null && car.owner != null)
-                          _buildOwnerCard(car.owner!),
+                          _buildOwnerCard(trip, car.owner!),
                         const SizedBox(height: 20),
                         _buildTimeCard(trip),
                         const SizedBox(height: 20),
@@ -189,7 +199,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           top: 10,
           bottom: MediaQuery.of(context).padding.bottom + 10,
         ),
-        child: _buildBottomActionButtons(),
+        child: _buildBottomActionButtons(trip),
       ),
     );
   }
@@ -236,39 +246,55 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '#RT${trip.id}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '#RT${trip.id}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Đặt ngày ${_formatDate(trip.startAt)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      'Đặt ngày ${_formatDate(trip.startAt)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    _formatPrice(trip.cost),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        _formatPrice(trip.cost),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Đặt cọc: ${_formatPrice(trip.cost)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      'Đặt cọc: ${_formatPrice(trip.cost)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -366,8 +392,14 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildOwnerCard(OwnerModel owner) {
-    final avatarUrl = owner.avatar ?? 'https://picsum.photos/100';
+  Widget _buildOwnerCard(TripModel trip, OwnerModel owner) {
+    String? avatarUrl = owner.avatar;
+    if (avatarUrl != null && avatarUrl.isNotEmpty && !avatarUrl.startsWith('http')) {
+      avatarUrl = 'http://10.0.2.2:8000/storage/$avatarUrl';
+    }
+
+    // Nút nhắn tin chỉ hiển thị khi đơn hàng đã thanh toán (status >= 2 và <= 4)
+    final bool isPaid = trip.status >= 2 && trip.status <= 4;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -388,77 +420,111 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           const SizedBox(height: 13),
           Row(
             children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: NetworkImage(avatarUrl),
-                onBackgroundImageError: (exception, stackTrace) {},
+              GestureDetector(
+                onTap: () => context.push('/owner-profile/${owner.id}?isOwner=true'),
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
+                      ? NetworkImage(avatarUrl)
+                      : null,
+                  onBackgroundImageError: (avatarUrl != null && avatarUrl.isNotEmpty)
+                      ? (exception, stackTrace) {}
+                      : null,
+                  child: (avatarUrl == null || avatarUrl.isEmpty)
+                      ? const Icon(Icons.person, color: AppColors.textSecondary, size: 28)
+                      : null,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      owner.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          color: AppColors.primary,
-                          size: 16,
+                child: GestureDetector(
+                  onTap: () => context.push('/owner-profile/${owner.id}?isOwner=true'),
+                  behavior: HitTestBehavior.opaque,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        owner.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
                         ),
-                        const Text(
-                          ' 4.9 ',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '(86 đánh giá)',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            color: AppColors.primary,
+                            size: 16,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const Text(
+                            ' 4.9 ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '(86 đánh giá)',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.chat_bubble_outline,
-                        color: AppColors.primary,
+                  // Nút nhắn tin: Chỉ xuất hiện khi đơn hàng đã thanh toán
+                  if (isPaid) ...[
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
-                      onPressed: () {},
-                      hoverColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
+                      child: IconButton(
+                        icon: _isCreatingChat
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.chat_bubble_outline,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                        onPressed: _isCreatingChat
+                            ? null
+                            : () => _handleStartChat(trip, owner),
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
+                    const SizedBox(width: 10),
+                  ],
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.call, color: AppColors.primary),
-                      onPressed: () {},
+                      icon: const Icon(Icons.call, color: AppColors.primary, size: 20),
+                      onPressed: () => _showPhoneDialog(owner),
                       hoverColor: Colors.transparent,
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
@@ -618,9 +684,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           ),
           const Divider(height: 24),
           _buildPriceRow(
-            'Tiền thuê xe ($rentalDays ngày x ${_formatPrice(unitPrice)})',
-            _formatPrice(subtotal),
+            'Tiền thuê xe',
+            _formatPrice(unitPrice),
           ),
+          _buildPriceRow('Số ngày', '$rentalDays ngày'),
           _buildPriceRow('Phí giao xe', _formatPrice(0)),
           _buildPriceRow('Phí vệ sinh', _formatPrice(0)),
           if (trip.discountAmount > 0)
@@ -633,20 +700,29 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Tổng cộng',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
+              const Expanded(
+                child: Text(
+                  'Tổng cộng',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
                 ),
               ),
-              Text(
-                _formatPrice(trip.cost),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    _formatPrice(trip.cost),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -655,13 +731,22 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Đã thanh toán (đặt cọc)',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              const Expanded(
+                child: Text(
+                  'Đã thanh toán (đặt cọc)',
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                ),
               ),
-              Text(
-                _formatPrice(trip.cost),
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    _formatPrice(trip.cost),
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  ),
+                ),
               ),
             ],
           ),
@@ -676,12 +761,24 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.textPrimary)),
-          Text(
-            value,
-            style: TextStyle(
-              color: isDiscount ? AppColors.success : AppColors.textPrimary,
-              fontWeight: isDiscount ? FontWeight.bold : FontWeight.normal,
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: isDiscount ? AppColors.success : AppColors.textPrimary,
+                  fontWeight: isDiscount ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
             ),
           ),
         ],
@@ -834,20 +931,24 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Widget _buildBottomActionButtons() {
+  Widget _buildBottomActionButtons(TripModel trip) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildActionItem(Icons.assignment_outlined, 'Biên bản\nnhận xe'),
+        _buildActionItem(
+          Icons.assignment_outlined,
+          'Biên bản\nnhận xe',
+          onTap: () => _showPickupReportDialog(trip),
+        ),
         _buildActionItem(
           Icons.assignment_turned_in_outlined,
           'Biên bản\ntrả xe',
+          onTap: () => _showReturnReportDialog(trip),
         ),
-        _buildActionItem(Icons.headset_mic_outlined, 'Liên hệ\nhỗ trợ'),
         _buildActionItem(
-          Icons.gpp_bad_outlined,
-          'Báo cáo\nsự cố',
-          isDanger: true,
+          Icons.headset_mic_outlined,
+          'Liên hệ\nhỗ trợ',
+          onTap: () => context.push('/support'),
         ),
       ],
     );
@@ -857,39 +958,377 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     IconData icon,
     String label, {
     bool isDanger = false,
+    VoidCallback? onTap,
   }) {
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isDanger ? AppColors.error : AppColors.border,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          color: AppColors.card,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isDanger ? AppColors.error : AppColors.textPrimary,
-              size: 20,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isDanger ? AppColors.error : AppColors.border,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 10,
+            borderRadius: BorderRadius.circular(8),
+            color: AppColors.card,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
                 color: isDanger ? AppColors.error : AppColors.textPrimary,
+                size: 20,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: isDanger ? AppColors.error : AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleStartChat(TripModel trip, OwnerModel owner) async {
+    if (_isCreatingChat) return;
+    setState(() => _isCreatingChat = true);
+
+    try {
+      final conversationService = ConversationService();
+      var conv = await conversationService.createConversation(
+        receiverId: owner.id,
+        tripId: trip.id,
+        carId: trip.carId,
+      );
+
+      // Nếu API trả về otherUser có tên mặc định/trống hoặc ID = 0, đồng bộ lại từ thông tin của owner (chủ xe)
+      if (conv.otherUser.id == 0 || conv.otherUser.name == 'Người dùng' || conv.otherUser.name.isEmpty) {
+        conv = Conversation.raw(
+          id: conv.id,
+          status: conv.status,
+          tripId: conv.tripId,
+          createdAt: conv.createdAt,
+          updatedAt: conv.updatedAt,
+          otherUser: OtherUser(
+            id: owner.id,
+            name: owner.name,
+            avatar: owner.avatar,
+          ),
+          car: conv.car,
+          lastMessageObj: conv.lastMessageObj,
+          unreadCount: conv.unreadCount,
+        );
+      }
+
+      if (!mounted) return;
+      context.push('/chat/${conv.id}', extra: conv);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Không thể tạo đoạn chat: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCreatingChat = false);
+      }
+    }
+  }
+
+  void _showPhoneDialog(OwnerModel owner) {
+    final phone = (owner.phone != null && owner.phone!.isNotEmpty)
+        ? owner.phone!
+        : 'Chưa cập nhật số điện thoại';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: const [
+            Icon(Icons.call, color: AppColors.primary),
+            SizedBox(width: 8),
+            Text('Số điện thoại chủ xe', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Chủ xe: ${owner.name}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.phone_android, color: AppColors.primary, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SelectableText(
+                      phone,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOptionBottomSheet(BuildContext context, TripModel trip) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.headset_mic_outlined, color: AppColors.primary),
+              title: const Text('Liên hệ trung tâm hỗ trợ'),
+              onTap: () {
+                Navigator.pop(context);
+                context.push('/support');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.article_outlined, color: AppColors.primary),
+              title: const Text('Chính sách & Quy định thuê xe'),
+              onTap: () {
+                Navigator.pop(context);
+                context.push('/policy');
+              },
+            ),
+            if (trip.car?.owner != null)
+              ListTile(
+                leading: const Icon(Icons.person_outline, color: AppColors.primary),
+                title: const Text('Xem hồ sơ chủ xe'),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push('/owner-profile/${trip.car!.owner!.id}?isOwner=true');
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPickupReportDialog(TripModel trip) {
+    final car = trip.car;
+    final addressText = car?.carLocation?.address ?? car?.carLocation?.city ?? 'Điểm hẹn giao xe';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).padding.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Biên bản nhận xe',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(height: 20),
+            _buildReportDetailRow('Mã đơn hàng:', '#RT${trip.id}'),
+            _buildReportDetailRow('Tên xe:', car?.name ?? 'Xe tự lái'),
+            _buildReportDetailRow('Biển số xe:', car?.licensePlate ?? 'N/A'),
+            _buildReportDetailRow('Thời gian nhận:', '${_formatDate(trip.startAt)} ${_formatDateTime(trip.startAt)}'),
+            _buildReportDetailRow('Địa điểm nhận:', addressText),
+            _buildReportDetailRow('Tình trạng xe:', 'Xe đã vệ sinh sạch sẻ, đầy đủ giấy tờ'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: const [
+                  Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Quý khách vui lòng quay video/chụp ảnh ngoại thất xe khi làm thủ tục nhận xe.',
+                      style: TextStyle(fontSize: 12, color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text('Đã hiểu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showReturnReportDialog(TripModel trip) {
+    final car = trip.car;
+    final addressText = car?.carLocation?.address ?? car?.carLocation?.city ?? 'Điểm hẹn trả xe';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).padding.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Biên bản trả xe',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(height: 20),
+            _buildReportDetailRow('Mã đơn hàng:', '#RT${trip.id}'),
+            _buildReportDetailRow('Tên xe:', car?.name ?? 'Xe tự lái'),
+            _buildReportDetailRow('Biển số xe:', car?.licensePlate ?? 'N/A'),
+            _buildReportDetailRow('Thời gian trả:', '${_formatDate(trip.endAt)} ${_formatDateTime(trip.endAt)}'),
+            _buildReportDetailRow('Địa điểm trả:', addressText),
+            _buildReportDetailRow('Hạng mục bàn giao:', 'Chìa khóa xe, Đăng ký xe, Bảo hiểm'),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: const [
+                  Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 20),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Vui lòng dọn dẹp hành lý cá nhân và kiểm tra bình nhiên liệu trước khi bàn giao lại chìa khóa.',
+                      style: TextStyle(fontSize: 12, color: Colors.brown),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text('Đã hiểu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReportDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(
+              label,
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }
