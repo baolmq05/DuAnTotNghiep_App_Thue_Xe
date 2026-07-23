@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../themes/app_colors.dart';
 import 'package:go_router/go_router.dart';
@@ -55,6 +57,86 @@ class _OrderViewState extends State<OrderView>
 
   String _formatDateRange(DateTime start, DateTime end) {
     return '${_formatDate(start)} - ${_formatDate(end)}';
+  }
+
+  String _getLocationText(TripModel trip) {
+    if (trip.deliveryAddress != null &&
+        trip.deliveryAddress!.trim().isNotEmpty) {
+      return trip.deliveryAddress!.trim();
+    }
+    if (trip.deliveryLocation != null &&
+        trip.deliveryLocation!.trim().isNotEmpty) {
+      return trip.deliveryLocation!.trim();
+    }
+    final carLoc = trip.car?.carLocation;
+    if (carLoc != null) {
+      final List<String> parts = [];
+      if (carLoc.address != null && carLoc.address!.trim().isNotEmpty) {
+        parts.add(carLoc.address!.trim());
+      }
+      if (carLoc.city != null && carLoc.city!.trim().isNotEmpty) {
+        if (parts.isEmpty ||
+            !parts.last.toLowerCase().contains(
+              carLoc.city!.trim().toLowerCase(),
+            )) {
+          parts.add(carLoc.city!.trim());
+        }
+      }
+      if (parts.isNotEmpty) {
+        return parts.join(', ');
+      }
+      if (carLoc.location != null && carLoc.location!.trim().isNotEmpty) {
+        return carLoc.location!.trim();
+      }
+    }
+    return "TP. Hồ Chí Minh";
+  }
+
+  Widget _buildCarImageWidget(String? rawUrl) {
+    const double size = 120.0;
+    const String fallback = "https://picsum.photos/300/200";
+
+    if (rawUrl == null || rawUrl.trim().isEmpty) {
+      return Image.network(
+        fallback,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      );
+    }
+
+    final url = rawUrl.trim();
+    if (url.startsWith('assets/') || url.startsWith('lib/assets/')) {
+      return Image.asset(
+        url,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Image.network(
+          fallback,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    String fullUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      final base = (!kIsWeb && Platform.isAndroid)
+          ? 'http://10.0.2.2:8000'
+          : 'http://127.0.0.1:8000';
+      fullUrl = url.startsWith('/') ? '$base$url' : '$base/$url';
+    }
+
+    return Image.network(
+      fullUrl,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          Image.network(fallback, width: size, height: size, fit: BoxFit.cover),
+    );
   }
 
   @override
@@ -166,12 +248,8 @@ class _OrderViewState extends State<OrderView>
 
   Widget _buildOrderItem(TripModel trip) {
     final carName = trip.car?.name ?? 'Chưa xác định';
-    final imageUrl =
-        trip.car?.getFirstImageUrl() ?? "https://picsum.photos/300/200";
-    final locationText =
-        trip.car?.carLocation?.address ??
-        trip.car?.carLocation?.city ??
-        "TP. Hồ Chí Minh";
+    final imageUrl = trip.car?.getFirstImageUrl();
+    final locationText = _getLocationText(trip);
 
     // Xử lý màu sắc cho trạng thái
     Color statusBgColor;
@@ -225,18 +303,7 @@ class _OrderViewState extends State<OrderView>
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(14),
-                child: Image.network(
-                  imageUrl,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Image.network(
-                    "https://picsum.photos/300/200",
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                child: _buildCarImageWidget(imageUrl),
               ),
               const SizedBox(width: 14),
               Expanded(

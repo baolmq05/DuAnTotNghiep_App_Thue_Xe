@@ -12,6 +12,7 @@ class OrderViewModel extends ChangeNotifier {
   final List<TripModel> _filteredTrips = [];
   bool _isLoading = true;
   String _errorMessage = '';
+  int _currentTabIndex = 0;
 
   List<TripModel> get allTrips => _allTrips;
   List<TripModel> get filteredTrips => _filteredTrips;
@@ -25,11 +26,25 @@ class OrderViewModel extends ChangeNotifier {
 
     try {
       final trips = await _tripService.getMyTrips();
+
+      final enrichedTrips = await Future.wait(trips.map((trip) async {
+        try {
+          final detail = await _tripService.getTripDetail(trip.id);
+          if (detail != null && detail.car != null) {
+            return detail;
+          }
+        } catch (e) {
+          debugPrint('Lỗi fetch detail cho trip ${trip.id}: $e');
+        }
+        return trip;
+      }));
+
       _allTrips.clear();
-      _allTrips.addAll(trips);
+      _allTrips.addAll(enrichedTrips);
       _isLoading = false;
-      notifyListeners();
-    } catch (_) {
+      filterTrips(_currentTabIndex);
+    } catch (e) {
+      debugPrint('Lỗi fetchTrips: $e');
       _isLoading = false;
       _errorMessage = 'Không thể tải danh sách đơn hàng. Vui lòng thử lại!';
       notifyListeners();
@@ -37,6 +52,7 @@ class OrderViewModel extends ChangeNotifier {
   }
 
   void filterTrips(int tabIndex) {
+    _currentTabIndex = tabIndex;
     _filteredTrips.clear();
 
     if (tabIndex == 0) {
