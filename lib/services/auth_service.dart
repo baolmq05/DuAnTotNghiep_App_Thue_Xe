@@ -66,7 +66,7 @@ class AuthService extends BaseService {
       },
       requiresAuth: true,
     );
-    return UserModel.fromJson(response['user'] as Map<String, dynamic>);
+    return UserModel.fromJson(response as Map<String, dynamic>);
   }
 
   /// Đổi mật khẩu tài khoản

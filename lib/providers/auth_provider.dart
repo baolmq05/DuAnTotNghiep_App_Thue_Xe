@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:duantotnghiep_app_thue_xe/models/user_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/auth_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/owner_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -36,7 +38,7 @@ class AuthProvider extends ChangeNotifier {
       final res = await _authService.login(email, password);
       _token = res['access_token'] as String;
       await _authService.saveToken(_token!);
-      _user = UserModel.fromJson(res['user'] as Map<String, dynamic>);
+      await fetchProfile();
       _errorMessage = null;
       return true;
     } catch (e) {
@@ -83,7 +85,7 @@ class AuthProvider extends ChangeNotifier {
       );
       _token = res['access_token'] as String;
       await _authService.saveToken(_token!);
-      _user = UserModel.fromJson(res['user'] as Map<String, dynamic>);
+      await fetchProfile();
       _errorMessage = null;
       return true;
     } catch (e) {
@@ -119,23 +121,21 @@ class AuthProvider extends ChangeNotifier {
       _token = tokenInfo['access_token'] as String;
       await _authService.saveToken(_token!);
 
-      UserModel registeredUser = UserModel.fromJson(
-        res['user'] as Map<String, dynamic>,
-      );
+      await fetchProfile();
 
       // Nếu có số điện thoại, tiến hành cập nhật qua profile
       if (phone != null && phone.isNotEmpty) {
         try {
-          registeredUser = await _authService.updateProfile(
+          await _authService.updateProfile(
             name: name,
             phone: phone,
           );
+          await fetchProfile();
         } catch (_) {
           // Bỏ qua lỗi cập nhật sđt nếu đăng ký chính thành công
         }
       }
 
-      _user = registeredUser;
       _errorMessage = null;
       return true;
     } catch (e) {
@@ -160,7 +160,7 @@ class AuthProvider extends ChangeNotifier {
 
       _token = savedToken;
       // Lấy thông tin cá nhân từ server để xác thực token hợp lệ
-      _user = await _authService.getProfile();
+      await fetchProfile();
       _errorMessage = null;
       return true;
     } catch (_) {
@@ -175,11 +175,86 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Tải lại thông tin cá nhân
+  /// Tải lại thông tin cá nhân (bao gồm cả số chuyến đi và số sao từ đánh giá)
   Future<void> fetchProfile() async {
     if (!isAuthenticated) return;
     try {
-      _user = await _authService.getProfile();
+      final profileUser = await _authService.getProfile();
+      int tripsCount = profileUser.tripsCount;
+      double rating = profileUser.rating;
+
+      // 1. Tải danh sách chuyến đi thực tế từ API my-trips
+      try {
+        final trips = await TripService().getMyTrips();
+        if (trips.isNotEmpty) {
+          final completed = trips.where((t) {
+            final st = (t.statusText ?? '').toLowerCase();
+            return t.status == 4 || st.contains('hoàn') || st.contains('thành') || st.contains('xong');
+          }).length;
+
+          if (completed > 0) {
+            tripsCount = completed;
+          } else {
+            final activeOrDone = trips.where((t) => t.status != 5 && t.status != 6).length;
+            tripsCount = activeOrDone > 0 ? activeOrDone : trips.length;
+          }
+        }
+      } catch (e) {
+        debugPrint('Lỗi fetch trips trong profile: $e');
+      }
+
+      // 2. Tải đánh giá thực tế (reviews) của tài khoản và tính trung bình cộng số sao
+      try {
+        final reviewData = await OwnerProfileService().fetchProfileReviews(
+          targetId: profileUser.id,
+          isOwner: false,
+        );
+        if (reviewData != null) {
+          final List reviewsList = reviewData['reviews'] as List? ?? [];
+          if (reviewsList.isNotEmpty) {
+            double totalStars = 0.0;
+            int validCount = 0;
+            for (var r in reviewsList) {
+              final rVal = double.tryParse(r['rating']?.toString() ?? r['stars']?.toString() ?? '') ?? 0.0;
+              if (rVal > 0) {
+                totalStars += rVal;
+                validCount++;
+              }
+            }
+            if (validCount > 0) {
+              rating = totalStars / validCount;
+            } else if (reviewData['rating'] != null) {
+              rating = double.tryParse(reviewData['rating'].toString()) ?? 0.0;
+            }
+          } else if (reviewData['rating'] != null) {
+            rating = double.tryParse(reviewData['rating'].toString()) ?? 0.0;
+          }
+
+          if (reviewData['trips_count'] != null) {
+            final tc = int.tryParse(reviewData['trips_count'].toString()) ?? 0;
+            if (tc > 0) tripsCount = tc;
+          }
+        }
+      } catch (e) {
+        debugPrint('Lỗi fetch reviews trong profile: $e');
+      }
+
+      _user = UserModel(
+        id: profileUser.id,
+        name: profileUser.name,
+        email: profileUser.email,
+        phone: profileUser.phone,
+        avatar: profileUser.avatar,
+        gender: profileUser.gender,
+        dob: profileUser.dob,
+        status: profileUser.status,
+        roleId: profileUser.roleId,
+        walletId: profileUser.walletId,
+        drivingLicenseId: profileUser.drivingLicenseId,
+        drivingLicense: profileUser.drivingLicense,
+        tripsCount: tripsCount,
+        rating: rating,
+      );
       notifyListeners();
     } catch (_) {
       // Có lỗi thì giữ thông tin cũ hoặc xử lý sau
