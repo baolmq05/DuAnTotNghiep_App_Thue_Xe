@@ -192,6 +192,8 @@ class HomeCarCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
 
           // Features List
