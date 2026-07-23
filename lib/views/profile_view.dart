@@ -15,6 +15,14 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().fetchProfile();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
 
@@ -105,7 +113,27 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
+  ImageProvider _getAvatarImage(String? avatar) {
+    if (avatar != null && avatar.trim().isNotEmpty) {
+      if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+        return NetworkImage(avatar);
+      }
+      if (avatar.startsWith('assets/') || avatar.startsWith('lib/assets/')) {
+        return AssetImage(avatar);
+      }
+    }
+    return const NetworkImage(
+      'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
+    );
+  }
+
   Widget _buildProfileCard(UserModel? user) {
+    final String displayName = (user?.name != null && user!.name.trim().isNotEmpty)
+        ? user.name
+        : 'Khách hàng';
+    final int tripsCount = user?.tripsCount ?? 0;
+    final double rating = user?.rating ?? 5.0;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -133,13 +161,7 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 child: CircleAvatar(
                   radius: 36,
-                  backgroundImage:
-                      user?.avatar != null && user!.avatar!.isNotEmpty
-                      ? NetworkImage(user.avatar!)
-                      : const NetworkImage(
-                              'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
-                            )
-                            as ImageProvider,
+                  backgroundImage: _getAvatarImage(user?.avatar),
                 ),
               ),
               const SizedBox(width: 16),
@@ -149,12 +171,15 @@ class _ProfileViewState extends State<ProfileView> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          user?.name ?? 'Khách hàng',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        Flexible(
+                          child: Text(
+                            displayName,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -168,42 +193,6 @@ class _ProfileViewState extends State<ProfileView> {
                             Icons.check,
                             size: 10,
                             color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.workspace_premium_rounded,
-                          size: 14,
-                          color: AppColors.accentSurface,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Thành viên Vàng',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star_rounded,
-                          size: 16,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '4.8 (128 đánh giá)',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -225,9 +214,9 @@ class _ProfileViewState extends State<ProfileView> {
               Expanded(
                 child: Column(
                   children: [
-                    const Text(
-                      '12',
-                      style: TextStyle(
+                    Text(
+                      '$tripsCount',
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -252,17 +241,28 @@ class _ProfileViewState extends State<ProfileView> {
               Expanded(
                 child: Column(
                   children: [
-                    const Text(
-                      '98%',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 20,
+                          color: Colors.amber,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          rating > 0 ? rating.toStringAsFixed(1) : '0',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Tỷ lệ phản hồi',
+                      'Đánh giá',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.7),

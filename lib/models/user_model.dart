@@ -11,6 +11,8 @@ class UserModel {
   final int? walletId;
   final int? drivingLicenseId;
   final DrivingLicenseModel? drivingLicense;
+  final int tripsCount;
+  final double rating;
 
   UserModel({
     required this.id,
@@ -25,24 +27,41 @@ class UserModel {
     this.walletId,
     this.drivingLicenseId,
     this.drivingLicense,
+    this.tripsCount = 0,
+    this.rating = 0.0,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final userData = json['user'] is Map<String, dynamic>
+        ? json['user'] as Map<String, dynamic>
+        : (json['data'] is Map<String, dynamic>
+            ? json['data'] as Map<String, dynamic>
+            : json);
+
     return UserModel(
-      id: json['id'] as int,
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      phone: json['phone'] as String?,
-      avatar: json['avatar'] as String?,
-      gender: json['gender'] as int?,
-      dob: json['DOB'] as String?,
-      status: json['status'] as int? ?? 1,
-      roleId: json['role_id'] as int? ?? 2,
-      walletId: json['wallet_id'] as int?,
-      drivingLicenseId: json['driving_license_id'] as int?,
-      drivingLicense: json['driving_license'] != null
-          ? DrivingLicenseModel.fromJson(json['driving_license'] as Map<String, dynamic>)
+      id: userData['id'] is int ? userData['id'] as int : int.tryParse(userData['id']?.toString() ?? '') ?? 0,
+      name: userData['name'] as String? ?? '',
+      email: userData['email'] as String? ?? '',
+      phone: userData['phone'] as String?,
+      avatar: userData['avatar'] as String?,
+      gender: userData['gender'] as int?,
+      dob: userData['DOB'] as String?,
+      status: userData['status'] as int? ?? 1,
+      roleId: userData['role_id'] as int? ?? 2,
+      walletId: userData['wallet_id'] as int?,
+      drivingLicenseId: userData['driving_license_id'] as int?,
+      drivingLicense: userData['driving_license'] != null
+          ? DrivingLicenseModel.fromJson(userData['driving_license'] as Map<String, dynamic>)
           : null,
+      tripsCount: userData['trips_count'] is int
+          ? userData['trips_count'] as int
+          : (userData['tripsCount'] is int
+              ? userData['tripsCount'] as int
+              : int.tryParse(userData['trips_count']?.toString() ?? userData['tripsCount']?.toString() ?? '') ?? 0),
+      rating: double.tryParse(
+              userData['rating']?.toString() ??
+              userData['reviews_avg_rating']?.toString() ??
+              userData['avg_rating']?.toString() ?? '') ?? 0.0,
     );
   }
 
@@ -60,6 +79,8 @@ class UserModel {
       'wallet_id': walletId,
       'driving_license_id': drivingLicenseId,
       'driving_license': drivingLicense?.toJson(),
+      'trips_count': tripsCount,
+      'rating': rating,
     };
   }
 }
