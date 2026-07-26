@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../models/user_model.dart';
 import '../themes/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../viewmodels/driver_license_viewmodel.dart';
 import '../widgets/app_toast.dart';
 
@@ -30,12 +32,20 @@ class _DriverLicenseViewState extends State<DriverLicenseView> {
   @override
   void initState() {
     super.initState();
+    _viewModel.addListener(_onViewModelChanged);
     _loadProfile();
+  }
+
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   // Dispose các controller khi widget bị hủy
   @override
   void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
     _numberController.dispose();
     _fullNameController.dispose();
     _dobController.dispose();
@@ -395,6 +405,10 @@ class _DriverLicenseViewState extends State<DriverLicenseView> {
         message: "Gửi yêu cầu xác thực thành công!",
         type: ToastType.success,
       );
+
+      if (mounted) {
+        context.read<AuthProvider>().fetchProfile();
+      }
 
       setState(() => _selectedImage = null);
       _loadProfile();
