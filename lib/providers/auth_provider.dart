@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:duantotnghiep_app_thue_xe/models/user_model.dart';
@@ -136,6 +138,41 @@ class AuthProvider extends ChangeNotifier {
         }
       }
 
+      _errorMessage = null;
+      return true;
+    } catch (e) {
+      _errorMessage = _cleanErrorMessage(e.toString());
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Cập nhật thông tin tài khoản
+  Future<bool> updateProfile({
+    required String name,
+    String? phone,
+    int? gender,
+    String? dob,
+    File? avatarFile,
+    XFile? avatarXFile,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updatedUser = await _authService.updateProfile(
+        name: name,
+        phone: phone,
+        gender: gender,
+        dob: dob,
+        avatarFile: avatarFile,
+        avatarXFile: avatarXFile,
+      );
+      _user = updatedUser;
+      await fetchProfile();
       _errorMessage = null;
       return true;
     } catch (e) {

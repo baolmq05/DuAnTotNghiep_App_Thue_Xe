@@ -44,12 +44,12 @@ class UserModel {
       email: userData['email'] as String? ?? '',
       phone: userData['phone'] as String?,
       avatar: userData['avatar'] as String?,
-      gender: userData['gender'] as int?,
+      gender: userData['gender'] is int ? userData['gender'] as int : int.tryParse(userData['gender']?.toString() ?? ''),
       dob: userData['DOB'] as String?,
-      status: userData['status'] as int? ?? 1,
-      roleId: userData['role_id'] as int? ?? 2,
-      walletId: userData['wallet_id'] as int?,
-      drivingLicenseId: userData['driving_license_id'] as int?,
+      status: userData['status'] is int ? userData['status'] as int : int.tryParse(userData['status']?.toString() ?? '') ?? 1,
+      roleId: userData['role_id'] is int ? userData['role_id'] as int : int.tryParse(userData['role_id']?.toString() ?? '') ?? 2,
+      walletId: userData['wallet_id'] is int ? userData['wallet_id'] as int : int.tryParse(userData['wallet_id']?.toString() ?? ''),
+      drivingLicenseId: userData['driving_license_id'] is int ? userData['driving_license_id'] as int : int.tryParse(userData['driving_license_id']?.toString() ?? ''),
       drivingLicense: userData['driving_license'] != null
           ? DrivingLicenseModel.fromJson(userData['driving_license'] as Map<String, dynamic>)
           : null,

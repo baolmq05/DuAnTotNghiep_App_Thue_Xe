@@ -197,6 +197,38 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () {
+                        context.push('/edit-profile');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.edit_rounded,
+                              color: Colors.white,
+                              size: 13,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Chỉnh sửa hồ sơ',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
