@@ -4,6 +4,7 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
+import 'promotion_detail_dialog.dart';
 
 class HomePromotion extends StatefulWidget {
   const HomePromotion({super.key});
@@ -42,21 +43,24 @@ class _HomePromotionState extends State<HomePromotion> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  // TextButton(
-                  //   onPressed: () {},
-                  //   style: TextButton.styleFrom(
-                  //     padding: EdgeInsets.zero,
-                  //     minimumSize: const Size(50, 30),
-                  //     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  //   ),
-                  //   child: const Text(
-                  //     'Xem tất cả',
-                  //     style: TextStyle(
-                  //       color: AppColors.primary,
-                  //       fontWeight: FontWeight.w600,
-                  //     ),
-                  //   ),
-                  // ),
+                  if (promotions.isNotEmpty)
+                    TextButton(
+                      onPressed: () {
+                        PromotionsListDialog.show(context, promotions);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(50, 30),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Xem tất cả',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

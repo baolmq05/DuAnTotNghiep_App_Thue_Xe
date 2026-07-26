@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../models/promotion_model.dart';
 import '../../themes/app_colors.dart';
+import 'promotion_detail_dialog.dart';
 
 class PromotionTile extends StatelessWidget {
   final Promotion promotion;
+  final VoidCallback? onTap;
 
-  const PromotionTile({super.key, required this.promotion});
+  const PromotionTile({
+    super.key,
+    required this.promotion,
+    this.onTap,
+  });
 
   String get discountText {
     if (promotion.discountType == "0") {
@@ -22,7 +28,9 @@ class PromotionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap ?? () => PromotionDetailDialog.show(context, promotion),
+      child: Container(
       height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
@@ -115,6 +123,7 @@ class PromotionTile extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
