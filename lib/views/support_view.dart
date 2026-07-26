@@ -67,7 +67,7 @@ class _SupportViewState extends State<SupportView> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -76,6 +76,15 @@ class _SupportViewState extends State<SupportView> {
             }
           },
         ),
+        title: const Text(
+          'Trung tâm hỗ trợ nhanh',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -84,18 +93,9 @@ class _SupportViewState extends State<SupportView> {
             // Header Banner Block
             Container(
               color: const Color(0xFFE8F6F4),
-              padding: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.only(bottom: 24, top: 8),
               child: Column(
                 children: [
-                  const Text(
-                    'Trung tâm hỗ trợ nhanh',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                   Center(
                     child: Stack(
                       alignment: Alignment.center,

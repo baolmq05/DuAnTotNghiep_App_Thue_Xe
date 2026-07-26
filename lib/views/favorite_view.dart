@@ -49,7 +49,7 @@ class _FavoriteViewState extends State<FavoriteView> {
         title: const Text(
           'Yêu thích',
           style: TextStyle(
-            color: AppColors.primary,
+            color: Colors.black,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

@@ -69,7 +69,7 @@ class _DriverLicenseViewState extends State<DriverLicenseView> {
         title: const Text(
           "Giấy phép lái xe",
           style: TextStyle(
-            color: AppColors.primary,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
