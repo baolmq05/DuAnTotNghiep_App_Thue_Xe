@@ -35,18 +35,18 @@ class _FavoriteViewState extends State<FavoriteView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
-          color: Colors.black,
+          color: context.textPrimary,
         ),
-        title: const Text(
+        title: Text(
           'Yêu thích',
           style: TextStyle(
             color: AppColors.primary,
@@ -85,30 +85,45 @@ class _FavoriteViewState extends State<FavoriteView> {
                   child: Container(
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.cardColor,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: context.border),
                     ),
-                    child: TextField(
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        hintText: 'Tìm xe trong danh sách yêu thích...',
-                        hintStyle: TextStyle(
-                          color: Colors.black38,
-                          fontSize: 13,
-                        ),
-                        prefixIcon: Icon(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(width: 12),
+                        Icon(
                           Icons.search,
-                          color: Colors.black38,
+                          color: context.textSecondary,
                           size: 20,
                         ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 11),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                searchQuery = value;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Tìm xe trong danh sách yêu thích...',
+                              hintStyle: TextStyle(
+                                color: context.textSecondary,
+                                fontSize: 13,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
+                            ),
+                            style: TextStyle(
+                              color: context.textPrimary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                     ),
                   ),
                 ),
@@ -130,17 +145,17 @@ class _FavoriteViewState extends State<FavoriteView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                          Icon(Icons.error_outline, size: 48, color: Colors.red),
                           const SizedBox(height: 16),
                           Text(
                             favoriteVM.errorMessage!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.grey),
+                            style: TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () => favoriteVM.fetchFavorites(),
-                            child: const Text('Thử lại'),
+                            child: Text('Thử lại'),
                           ),
                         ],
                       ),
@@ -161,7 +176,7 @@ class _FavoriteViewState extends State<FavoriteView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.favorite_border_rounded,
                           size: 64,
                           color: Colors.black12,
@@ -171,7 +186,7 @@ class _FavoriteViewState extends State<FavoriteView> {
                           searchQuery.isNotEmpty
                               ? 'Không tìm thấy xe phù hợp'
                               : 'Danh sách yêu thích trống',
-                          style: const TextStyle(color: Colors.grey, fontSize: 15),
+                          style: TextStyle(color: Colors.grey, fontSize: 15),
                         ),
                       ],
                     ),
@@ -231,12 +246,12 @@ class _FavoriteViewState extends State<FavoriteView> {
     return Container(
       height: 140,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: context.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -261,81 +276,49 @@ class _FavoriteViewState extends State<FavoriteView> {
                       width: 130,
                       height: double.infinity,
                       color: Colors.grey.shade200,
-                      child: const Icon(
+                      child: Icon(
                         Icons.directions_car_rounded,
                         color: Colors.grey,
                         size: 36,
                       ),
                     ),
                   ),
-                  if (discount.isNotEmpty)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF4D6D),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.local_offer_outlined,
-                              color: Colors.white,
-                              size: 10,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              discount,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  // Owner avatar + name overlay
+                  // Owner avatar + name overlay (Top Left)
                   Positioned(
-                    bottom: 6,
-                    left: 6,
+                    top: 8,
+                    left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.55),
-                        borderRadius: BorderRadius.circular(4),
+                        color: Colors.black.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                             child: Image.network(
                               ownerAvatar,
-                              width: 12,
-                              height: 12,
+                              width: 18,
+                              height: 18,
                               fit: BoxFit.cover,
-                              errorBuilder: (c, e, s) => const Icon(
+                              errorBuilder: (c, e, s) => Icon(
                                 Icons.account_circle,
                                 color: Colors.white,
-                                size: 12,
+                                size: 18,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 6),
                           Text(
                             ownerName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -352,35 +335,48 @@ class _FavoriteViewState extends State<FavoriteView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top row: "Giao xe tận nơi" & Heart Icon
+                    // Top row: Discount Tag (if any) & Heart Icon
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(115, 227, 242, 253),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'Giao xe tận nơi',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
+                        if (discount.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
                             ),
-                          ),
-                        ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF4D6D),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.local_offer_outlined,
+                                  color: Colors.white,
+                                  size: 10,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  discount,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          const SizedBox(),
                         GestureDetector(
                           onTap: () {
                             context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
                           },
                           child: Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                               boxShadow: [
@@ -391,7 +387,7 @@ class _FavoriteViewState extends State<FavoriteView> {
                                 ),
                               ],
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.favorite_rounded,
                               color: Color(0xFFFF4D6D),
                               size: 18,
@@ -410,27 +406,27 @@ class _FavoriteViewState extends State<FavoriteView> {
                             car.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: context.textPrimary,
                             ),
                           ),
                         ),
                         const SizedBox(width: 4),
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.star_rounded,
                               color: Colors.amber,
                               size: 14,
                             ),
                             Text(
                               ' $rating',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: context.textPrimary,
                               ),
                             ),
                           ],
@@ -441,9 +437,9 @@ class _FavoriteViewState extends State<FavoriteView> {
                     // Location
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_outlined,
-                          color: Colors.black45,
+                          color: context.textSecondary,
                           size: 12,
                         ),
                         const SizedBox(width: 2),
@@ -452,9 +448,9 @@ class _FavoriteViewState extends State<FavoriteView> {
                             location,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: Colors.black45,
+                              color: context.textSecondary,
                             ),
                           ),
                         ),
@@ -466,7 +462,7 @@ class _FavoriteViewState extends State<FavoriteView> {
                       '$seats • $transmission • $fuel',
                       style: TextStyle(
                         fontSize: 10,
-                        color: Colors.grey.shade600,
+                        color: context.textSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -479,9 +475,9 @@ class _FavoriteViewState extends State<FavoriteView> {
                       children: [
                         Text(
                           'Đã chạy $trips',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            color: Colors.black54,
+                            color: context.textSecondary,
                           ),
                         ),
                         Row(
@@ -490,17 +486,17 @@ class _FavoriteViewState extends State<FavoriteView> {
                           children: [
                             Text(
                               price,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primary,
                               ),
                             ),
-                            const Text(
+                            Text(
                               '/ngày',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.black45,
+                                color: context.textSecondary,
                               ),
                             ),
                           ],

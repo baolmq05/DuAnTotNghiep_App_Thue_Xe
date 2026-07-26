@@ -44,7 +44,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
         if (viewmodel.isLoading) {
           return Scaffold(
             appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-            body: const Center(child: CircularProgressIndicator()),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -55,17 +55,17 @@ class _CarDetailPageState extends State<CarDetailPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
                     viewmodel.errorMessage!,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.textSecondary),
+                    style: TextStyle(color: context.textSecondary),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => viewmodel.fetchCarDetail(id: widget.carId),
-                    child: const Text('Thử lại'),
+                    child: Text('Thử lại'),
                   ),
                 ],
               ),
@@ -78,21 +78,23 @@ class _CarDetailPageState extends State<CarDetailPage> {
         if (car == null) {
           return Scaffold(
             appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-            body: const Center(child: Text('Không tìm thấy thông tin xe')),
+            body: Center(child: Text('Không tìm thấy thông tin xe')),
           );
         }
 
         final imageUrls = car.images.map((img) => img.imageUrl).toList();
 
         return Scaffold(
+          backgroundColor: context.scaffoldBackgroundColor,
           appBar: AppBar(
-            title: const Text('Chi tiết xe'),
-            backgroundColor: Theme.of(context).colorScheme.onPrimary,
+            title: Text('Chi tiết xe'),
+            backgroundColor: context.scaffoldBackgroundColor,
+            foregroundColor: context.textPrimary,
             actions: [
               IconButton(
                 icon: Icon(
                   isFav ? Icons.favorite : Icons.favorite_border,
-                  color: isFav ? Colors.red : AppColors.textSecondary,
+                  color: isFav ? Colors.red : context.textSecondary,
                   size: 26.0,
                 ),
                 onPressed: () async {
@@ -132,7 +134,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
               CarInfoHeader(car: car),
               const SizedBox(height: 12.0),
               CarLocationSection(car: car),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Divider(
                   color: Color.fromARGB(92, 158, 158, 158),

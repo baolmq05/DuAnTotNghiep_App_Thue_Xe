@@ -187,10 +187,10 @@ class HomeCarCard extends StatelessWidget {
           // Title / Car Name
           Text(
             car.name.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -211,17 +211,17 @@ class HomeCarCard extends StatelessWidget {
           Row(
             spacing: 4,
             children: [
-              const Icon(
+              Icon(
                 Icons.location_on_outlined,
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
                 size: 16,
               ),
               Expanded(
                 child: Text(
                   location,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -315,9 +315,9 @@ class HomeCarCard extends StatelessWidget {
             ),
 
             // Unit
-            const Text(
+            Text(
               '/ngày',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: context.textSecondary),
             ),
           ],
         ),

@@ -173,10 +173,10 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
   Widget _datePickerTheme(BuildContext context, Widget? child) {
     return Theme(
       data: Theme.of(context).copyWith(
-        colorScheme: const ColorScheme.light(
+        colorScheme: ColorScheme.light(
           primary: AppColors.primary,
           onPrimary: Colors.white,
-          onSurface: AppColors.textPrimary,
+          onSurface: context.textPrimary,
         ),
       ),
       child: Localizations.override(
@@ -257,7 +257,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
         top: 20,
         bottom: 20 + bottomInset,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -281,17 +281,17 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Bộ lọc nâng cao',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               TextButton(
                 onPressed: _resetFilters,
-                child: const Text(
+                child: Text(
                   'Thiết lập lại',
                   style: TextStyle(
                     color: Colors.red,
@@ -302,7 +302,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
               ),
             ],
           ),
-          const Divider(),
+          Divider(),
           const SizedBox(height: 10),
 
           // Scrollable filter contents
@@ -316,13 +316,13 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                   controller: _addressController,
                   decoration: InputDecoration(
                     hintText: 'Nhập thành phố, quận huyện...',
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.location_on_outlined,
                       color: AppColors.primary,
                     ),
                     suffixIcon: _addressController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18, color: Colors.grey),
+                            icon: Icon(Icons.clear, size: 18, color: Colors.grey),
                             onPressed: () {
                               setState(() {
                                 _addressController.clear();
@@ -346,7 +346,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                       ),
                     ),
                     filled: true,
-                    fillColor: AppColors.card,
+                    fillColor: context.cardColor,
                     contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   ),
                   onChanged: (val) {
@@ -365,12 +365,12 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Nhận xe',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
+                              color: context.textSecondary,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -382,7 +382,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: AppColors.border),
                                 borderRadius: BorderRadius.circular(8),
-                                color: AppColors.card,
+                                color: context.cardColor,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -390,12 +390,12 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                   Expanded(
                                     child: Text(
                                       _pickupDate != null ? _formatDate(_pickupDate!) : 'Chọn ngày',
-                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  const Icon(Icons.calendar_month_outlined, size: 16, color: AppColors.primary),
+                                  Icon(Icons.calendar_month_outlined, size: 16, color: AppColors.primary),
                                 ],
                               ),
                             ),
@@ -409,16 +409,16 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: AppColors.border),
                                 borderRadius: BorderRadius.circular(8),
-                                color: AppColors.card,
+                                color: context.cardColor,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     _pickupTime != null ? _formatTime(_pickupTime!) : 'Chọn giờ',
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                                   ),
-                                  const Icon(Icons.access_time, size: 16, color: AppColors.primary),
+                                  Icon(Icons.access_time, size: 16, color: AppColors.primary),
                                 ],
                               ),
                             ),
@@ -432,12 +432,12 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Trả xe',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
+                              color: context.textSecondary,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -449,7 +449,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: AppColors.border),
                                 borderRadius: BorderRadius.circular(8),
-                                color: AppColors.card,
+                                color: context.cardColor,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -457,12 +457,12 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                   Expanded(
                                     child: Text(
                                       _returnDate != null ? _formatDate(_returnDate!) : 'Chọn ngày',
-                                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  const Icon(Icons.calendar_month_outlined, size: 16, color: AppColors.primary),
+                                  Icon(Icons.calendar_month_outlined, size: 16, color: AppColors.primary),
                                 ],
                               ),
                             ),
@@ -476,16 +476,16 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                               decoration: BoxDecoration(
                                 border: Border.all(color: AppColors.border),
                                 borderRadius: BorderRadius.circular(8),
-                                color: AppColors.card,
+                                color: context.cardColor,
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     _returnTime != null ? _formatTime(_returnTime!) : 'Chọn giờ',
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                                   ),
-                                  const Icon(Icons.access_time, size: 16, color: AppColors.primary),
+                                  Icon(Icons.access_time, size: 16, color: AppColors.primary),
                                 ],
                               ),
                             ),
@@ -525,10 +525,10 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                 },
                                 selectedColor: AppColors.primary,
                                 labelStyle: TextStyle(
-                                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                                  color: isSelected ? Colors.white : context.textPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
-                                backgroundColor: AppColors.card,
+                                backgroundColor: context.cardColor,
                                 side: BorderSide(
                                   color: isSelected ? AppColors.primary : AppColors.border,
                                 ),
@@ -556,10 +556,10 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                         },
                         selectedColor: AppColors.primary,
                         labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textPrimary,
+                          color: isSelected ? Colors.white : context.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
-                        backgroundColor: AppColors.card,
+                        backgroundColor: context.cardColor,
                         side: BorderSide(
                           color: isSelected ? AppColors.primary : AppColors.border,
                         ),
@@ -587,10 +587,10 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                         },
                         selectedColor: AppColors.primary,
                         labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textPrimary,
+                          color: isSelected ? Colors.white : context.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
-                        backgroundColor: AppColors.card,
+                        backgroundColor: context.cardColor,
                         side: BorderSide(
                           color: isSelected ? AppColors.primary : AppColors.border,
                         ),
@@ -618,10 +618,10 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                         },
                         selectedColor: AppColors.primary,
                         labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textPrimary,
+                          color: isSelected ? Colors.white : context.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
-                        backgroundColor: AppColors.card,
+                        backgroundColor: context.cardColor,
                         side: BorderSide(
                           color: isSelected ? AppColors.primary : AppColors.border,
                         ),
@@ -639,7 +639,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                     _buildSectionHeader('Giá thuê 1 ngày'),
                     Text(
                       '${_formatPriceValue(_priceRange.start)} - ${_formatPriceValue(_priceRange.end)}${_priceRange.end >= 3000000 ? '+' : ''}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -681,7 +681,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
               ),
               minimumSize: const Size(double.infinity, 50),
             ),
-            child: const Text(
+            child: Text(
               'Áp dụng bộ lọc',
               style: TextStyle(
                 color: Colors.white,
@@ -700,10 +700,10 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
       padding: const EdgeInsets.only(bottom: 8.0, top: 4.0),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
+          color: context.textPrimary,
         ),
       ),
     );

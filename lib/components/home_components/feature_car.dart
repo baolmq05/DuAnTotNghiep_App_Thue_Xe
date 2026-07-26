@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../themes/app_colors.dart';
 
 class FeatureCar extends StatelessWidget {
   final IconData icon;
@@ -10,8 +11,8 @@ class FeatureCar extends StatelessWidget {
     return Row(
       spacing: 4,
       children: [
-        Icon(icon, size: 16, color: Colors.black),
-        Text(text, style: TextStyle(fontSize: 12)),
+        Icon(icon, size: 16, color: context.textPrimary),
+        Text(text, style: TextStyle(fontSize: 12, color: context.textPrimary)),
       ],
     );
   }

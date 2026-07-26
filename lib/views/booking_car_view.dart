@@ -145,10 +145,10 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -222,10 +222,10 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -288,10 +288,10 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -349,10 +349,10 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -735,23 +735,23 @@ class _BookingCarViewState extends State<BookingCarView> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.card,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Xác nhận đặt xe',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         centerTitle: true,
-        backgroundColor: AppColors.background,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back,
-            color: AppColors.textSecondary,
+            color: context.textSecondary,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
@@ -802,7 +802,7 @@ class _BookingCarViewState extends State<BookingCarView> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: _cardShadow,
         ),
@@ -824,32 +824,32 @@ class _BookingCarViewState extends State<BookingCarView> {
                 children: [
                   Text(
                     car!.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.star_rounded,
                         color: AppColors.warning,
                         size: 18,
                       ),
-                      const Text(
+                      Text(
                         ' 5.0 ',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: AppColors.textPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
                       Text(
                         '• Ghế: ${car!.seatCount} • Biển: ${car!.licensePlate}',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: context.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -867,7 +867,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                     ),
                     child: Text(
                       car!.transmission ?? 'Tự động',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
@@ -887,7 +887,7 @@ class _BookingCarViewState extends State<BookingCarView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: _cardShadow,
       ),
@@ -895,7 +895,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
+            children: [
               Icon(
                 Icons.calendar_today_rounded,
                 size: 16,
@@ -906,7 +906,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                 'Thời gian thuê',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
@@ -915,12 +915,12 @@ class _BookingCarViewState extends State<BookingCarView> {
           ),
           const SizedBox(height: 16),
           // NHẬN XE row
-          const Text(
+          Text(
             'Nhận xe',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -951,12 +951,12 @@ class _BookingCarViewState extends State<BookingCarView> {
           ),
           const SizedBox(height: 14),
           // TRẢ XE row
-          const Text(
+          Text(
             'Trả xe',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -998,7 +998,7 @@ class _BookingCarViewState extends State<BookingCarView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppColors.border),
         ),
@@ -1009,10 +1009,10 @@ class _BookingCarViewState extends State<BookingCarView> {
             const SizedBox(width: 6),
             Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: context.textPrimary,
               ),
             ),
           ],
@@ -1029,7 +1029,7 @@ class _BookingCarViewState extends State<BookingCarView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: _cardShadow,
       ),
@@ -1037,7 +1037,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
+            children: [
               Icon(
                 Icons.local_shipping_rounded,
                 size: 16,
@@ -1048,7 +1048,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                 'Hình thức nhận xe',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
@@ -1076,13 +1076,13 @@ class _BookingCarViewState extends State<BookingCarView> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.location_on_rounded,
                     color: AppColors.primary,
                     size: 20,
@@ -1092,11 +1092,11 @@ class _BookingCarViewState extends State<BookingCarView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Địa chỉ nhận xe',
                           style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1104,9 +1104,9 @@ class _BookingCarViewState extends State<BookingCarView> {
                         Text(
                           car?.carLocation?.address ??
                               'Đang cập nhật địa chỉ...',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -1122,13 +1122,13 @@ class _BookingCarViewState extends State<BookingCarView> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.location_on_rounded,
                     color: AppColors.primary,
                     size: 20,
@@ -1138,11 +1138,11 @@ class _BookingCarViewState extends State<BookingCarView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Vị trí xe hiện tại',
                           style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1150,9 +1150,9 @@ class _BookingCarViewState extends State<BookingCarView> {
                         Text(
                           car?.carLocation?.address ??
                               'Đang cập nhật địa chỉ...',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -1183,14 +1183,14 @@ class _BookingCarViewState extends State<BookingCarView> {
               decoration: InputDecoration(
                 hintText: 'Nhập địa chỉ nhận xe...',
                 prefixIcon: isCalculatingMap
-                    ? const Padding(
+                    ? Padding(
                         padding: EdgeInsets.all(12.0),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: AppColors.primary,
                         ),
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.map_rounded,
                         color: AppColors.primary,
                         size: 20,
@@ -1199,7 +1199,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                   horizontal: 16,
                   vertical: 14,
                 ),
-                fillColor: AppColors.card,
+                fillColor: context.cardColor,
                 filled: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -1223,9 +1223,9 @@ class _BookingCarViewState extends State<BookingCarView> {
               Container(
                 constraints: const BoxConstraints(maxHeight: 200),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: context.cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: context.border),
                   boxShadow: _cardShadow,
                 ),
                 child: ListView.separated(
@@ -1233,23 +1233,23 @@ class _BookingCarViewState extends State<BookingCarView> {
                   padding: EdgeInsets.zero,
                   itemCount: _suggestions.length,
                   separatorBuilder: (context, index) =>
-                      const Divider(height: 1, color: AppColors.border),
+                      Divider(height: 1, color: AppColors.border),
                   itemBuilder: (context, index) {
                     final suggestion = _suggestions[index];
                     final desc = suggestion['description'] ?? '';
                     final pid = suggestion['place_id'] ?? '';
                     return ListTile(
                       dense: true,
-                      leading: const Icon(
+                      leading: Icon(
                         Icons.location_on_outlined,
                         size: 18,
                         color: AppColors.primary,
                       ),
                       title: Text(
                         desc,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.textPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
                       onTap: () async {
@@ -1274,17 +1274,17 @@ class _BookingCarViewState extends State<BookingCarView> {
               children: [
                 Text(
                   'Khoảng cách: $distanceInKm km',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   'Giới hạn giao xe: ${maxDist.toInt()} km',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
               ],
@@ -1293,7 +1293,7 @@ class _BookingCarViewState extends State<BookingCarView> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.error_outline_rounded,
                     color: AppColors.error,
                     size: 16,
@@ -1302,7 +1302,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                   Expanded(
                     child: Text(
                       'Vị trí quá xa! Chủ xe này chỉ nhận giao xe dưới ${maxDist.toInt()} km.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.error,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -1352,7 +1352,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                             fontSize: 13,
                             color: calculatedDeliveryFee == 0
                                 ? AppColors.success
-                                : AppColors.textPrimary,
+                                : context.textPrimary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -1412,7 +1412,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                             point: LatLng(carLatitude!, carLongitude!),
                             width: 80,
                             height: 80,
-                            child: const Column(
+                            child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
@@ -1448,7 +1448,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                             ),
                             width: 80,
                             height: 80,
-                            child: const Column(
+                            child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
@@ -1499,7 +1499,7 @@ class _BookingCarViewState extends State<BookingCarView> {
           padding: const EdgeInsets.symmetric(vertical: 14),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryDark : AppColors.background,
+            color: isSelected ? AppColors.primaryDark : context.cardColor,
             border: Border.all(
               color: isSelected ? Colors.transparent : AppColors.border,
             ),
@@ -1512,7 +1512,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                 icon,
                 color: isSelected
                     ? AppColors.background
-                    : AppColors.textPrimary,
+                    : context.textPrimary,
                 size: 18,
               ),
               const SizedBox(width: 8),
@@ -1521,7 +1521,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                 style: TextStyle(
                   color: isSelected
                       ? AppColors.background
-                      : AppColors.textPrimary,
+                      : context.textPrimary,
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 ),
@@ -1538,7 +1538,7 @@ class _BookingCarViewState extends State<BookingCarView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: _cardShadow,
       ),
@@ -1546,7 +1546,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
+            children: [
               Icon(
                 Icons.confirmation_num_rounded,
                 size: 16,
@@ -1557,7 +1557,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                 'Mã giảm giá',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
@@ -1572,17 +1572,17 @@ class _BookingCarViewState extends State<BookingCarView> {
                   controller: _promoController,
                   decoration: InputDecoration(
                     hintText: 'Nhập mã khuyến mãi...',
-                    hintStyle: const TextStyle(
-                      color: AppColors.textSecondary,
+                    hintStyle: TextStyle(
+                      color: context.textSecondary,
                       fontSize: 14,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 14,
                     ),
-                    fillColor: AppColors.card,
+                    fillColor: context.cardColor,
                     filled: true,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.discount_outlined,
                       size: 18,
                       color: AppColors.warning,
@@ -1608,12 +1608,12 @@ class _BookingCarViewState extends State<BookingCarView> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Áp dụng',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.background,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -1629,18 +1629,18 @@ class _BookingCarViewState extends State<BookingCarView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: _cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Bảng tính giá chi tiết',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
             ),
@@ -1676,7 +1676,7 @@ class _BookingCarViewState extends State<BookingCarView> {
               '-${_formatCurrency(promoDiscount)}',
               isDiscount: true,
             ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Divider(height: 1, thickness: 1, color: AppColors.border),
           ),
@@ -1692,7 +1692,7 @@ class _BookingCarViewState extends State<BookingCarView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Tổng cộng',
                   style: TextStyle(
                     fontSize: 15,
@@ -1705,7 +1705,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                   children: [
                     Text(
                       _formatCurrency(totalAmount),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryDark,
@@ -1715,7 +1715,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                       const SizedBox(height: 2),
                       Text(
                         'Tiết kiệm ${_formatCurrency(totalDiscountAmount)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: AppColors.success,
@@ -1744,14 +1744,14 @@ class _BookingCarViewState extends State<BookingCarView> {
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+          style: TextStyle(color: context.textSecondary, fontSize: 14),
         ),
         Text(
           value,
           style: TextStyle(
             color: isDiscount || isFree
                 ? AppColors.success
-                : AppColors.textPrimary,
+                : context.textPrimary,
             fontSize: 14,
             fontWeight: isDiscount || isFree
                 ? FontWeight.bold
@@ -1776,10 +1776,12 @@ class _BookingCarViewState extends State<BookingCarView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: context.isDarkMode
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -1813,12 +1815,12 @@ class _BookingCarViewState extends State<BookingCarView> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Tôi đồng ý với Chính sách hủy chuyến của ứng dụng.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                         ),
                       ),
                     ),
@@ -1943,7 +1945,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                               showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Row(
+                                  title: Row(
                                     children: [
                                       Icon(
                                         Icons.error_outline,
@@ -1957,7 +1959,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
-                                      child: const Text(
+                                      child: Text(
                                         'Đóng',
                                         style: TextStyle(
                                           color: AppColors.primary,
@@ -1989,10 +1991,10 @@ class _BookingCarViewState extends State<BookingCarView> {
                           )
                         : Text(
                             'Gửi yêu cầu đặt xe',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.background,
+                              color: Colors.white,
                               letterSpacing: 0.5,
                             ),
                           ),

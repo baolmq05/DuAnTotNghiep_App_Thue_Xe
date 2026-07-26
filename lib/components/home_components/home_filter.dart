@@ -118,7 +118,7 @@ class _HomeFilterState extends State<HomeFilter> {
                       height: 90,
                       width: 90,
                       color: Colors.white24,
-                      child: const Icon(
+                      child: Icon(
                         Icons.directions_car,
                         color: Colors.white,
                         size: 36,
@@ -139,7 +139,7 @@ class _HomeFilterState extends State<HomeFilter> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: Colors.white,
+                color: context.cardColor,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,7 +148,7 @@ class _HomeFilterState extends State<HomeFilter> {
                     child: Row(
                       spacing: 10,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_outlined,
                           color: AppColors.primary,
                           size: 20,
@@ -157,11 +157,11 @@ class _HomeFilterState extends State<HomeFilter> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 "Địa chỉ nhận xe",
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -185,9 +185,9 @@ class _HomeFilterState extends State<HomeFilter> {
                       ],
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.gps_fixed,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                     size: 20,
                   ),
                 ],
@@ -210,16 +210,16 @@ class _HomeFilterState extends State<HomeFilter> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
+                      color: context.cardColor,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Nhận xe',
                           style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -233,10 +233,10 @@ class _HomeFilterState extends State<HomeFilter> {
                         ),
                         Text(
                           _formatTime(_pickupTime),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ],
@@ -250,16 +250,16 @@ class _HomeFilterState extends State<HomeFilter> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
+                      color: context.cardColor,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Trả xe',
                           style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -273,10 +273,10 @@ class _HomeFilterState extends State<HomeFilter> {
                         ),
                         Text(
                           _formatTime(_returnTime),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ],
@@ -314,7 +314,7 @@ class _HomeFilterState extends State<HomeFilter> {
                 ),
                 minimumSize: const Size(double.infinity, 40),
               ),
-              child: const Text(
+              child: Text(
                 'Tìm xe',
                 style: TextStyle(
                   color: Colors.white,
@@ -427,10 +427,10 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -460,10 +460,10 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -488,10 +488,10 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -516,10 +516,10 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -557,9 +557,9 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
         top: 20,
         bottom: 20 + bottomInset,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: context.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -583,30 +583,30 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Bộ lọc tìm kiếm',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                  icon: Icon(Icons.close, color: context.textSecondary),
                 ),
               ],
             ),
-            const Divider(),
+            Divider(),
             const SizedBox(height: 12),
 
             // Section 1: Địa chỉ nhận xe
-            const Text(
+            Text(
               'Địa chỉ nhận xe',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: context.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -615,12 +615,12 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
               onChanged: _onAddressChanged,
               decoration: InputDecoration(
                 hintText: 'Nhập thành phố, quận huyện...',
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.location_on_outlined,
                   color: AppColors.primary,
                 ),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear, color: Colors.grey),
+                  icon: Icon(Icons.clear, color: Colors.grey),
                   onPressed: () {
                     _addressController.clear();
                     setState(() {
@@ -644,11 +644,11 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                   ),
                 ),
                 filled: true,
-                fillColor: AppColors.card,
+                fillColor: context.cardColor,
               ),
             ),
             if (_isLoadingSuggestions)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Center(
                   child: SizedBox(
@@ -683,16 +683,16 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                       final suggestion = _suggestions[index];
                       return ListTile(
                         dense: true,
-                        leading: const Icon(
+                        leading: Icon(
                           Icons.location_on_outlined,
                           color: AppColors.primary,
                           size: 18,
                         ),
                         title: Text(
                           suggestion,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -711,12 +711,12 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
             const SizedBox(height: 20),
 
             // Section 2: Thời gian nhận xe & trả xe
-            const Text(
+            Text(
               'Thời gian thuê xe',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: context.textPrimary,
               ),
             ),
             const SizedBox(height: 10),
@@ -730,11 +730,11 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Nhận xe',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -750,7 +750,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                           decoration: BoxDecoration(
                             border: Border.all(color: AppColors.border),
                             borderRadius: BorderRadius.circular(8),
-                            color: AppColors.card,
+                            color: context.cardColor,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -758,7 +758,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                               Expanded(
                                 child: Text(
                                   _formatDate(_pickupDate),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
                                   ),
@@ -766,7 +766,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.calendar_month_outlined,
                                 size: 18,
                                 color: AppColors.primary,
@@ -788,19 +788,19 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                           decoration: BoxDecoration(
                             border: Border.all(color: AppColors.border),
                             borderRadius: BorderRadius.circular(8),
-                            color: AppColors.card,
+                            color: context.cardColor,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 _formatTime(_pickupTime),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.access_time,
                                 size: 18,
                                 color: AppColors.primary,
@@ -818,11 +818,11 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Trả xe',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -838,7 +838,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                           decoration: BoxDecoration(
                             border: Border.all(color: AppColors.border),
                             borderRadius: BorderRadius.circular(8),
-                            color: AppColors.card,
+                            color: context.cardColor,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -846,7 +846,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                               Expanded(
                                 child: Text(
                                   _formatDate(_returnDate),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
                                   ),
@@ -854,7 +854,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.calendar_month_outlined,
                                 size: 18,
                                 color: AppColors.primary,
@@ -876,19 +876,19 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                           decoration: BoxDecoration(
                             border: Border.all(color: AppColors.border),
                             borderRadius: BorderRadius.circular(8),
-                            color: AppColors.card,
+                            color: context.cardColor,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 _formatTime(_returnTime),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.access_time,
                                 size: 18,
                                 color: AppColors.primary,
@@ -915,7 +915,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                 ),
                 minimumSize: const Size(double.infinity, 48),
               ),
-              child: const Text(
+              child: Text(
                 'Áp dụng bộ lọc',
                 style: TextStyle(
                   color: Colors.white,

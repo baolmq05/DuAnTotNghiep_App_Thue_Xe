@@ -69,13 +69,13 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.textPrimary),
           onPressed: () => _goBack(context),
         ),
         title: Text(
           currentIsOwner ? 'Thông tin chủ xe' : 'Hồ sơ khách thuê',
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: context.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -95,8 +95,8 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     currentIsOwner
                         ? 'Đang tải thông tin chủ xe...'
                         : 'Đang tải hồ sơ khách thuê...',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: context.textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -112,7 +112,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline_rounded,
                       size: 64,
                       color: AppColors.error,
@@ -121,8 +121,8 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     Text(
                       'Đã xảy ra lỗi: ${viewModel.errorMessage}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: context.textPrimary,
                         fontSize: 14,
                       ),
                     ),
@@ -134,8 +134,8 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                           isOwner: widget.isOwner,
                         );
                       },
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('Thử lại'),
+                      icon: Icon(Icons.refresh_rounded),
+                      label: Text('Thử lại'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
@@ -157,8 +157,8 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                 currentIsOwner
                     ? 'Không tìm thấy thông tin chủ xe'
                     : 'Không tìm thấy hồ sơ khách thuê',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: context.textSecondary,
                   fontSize: 14,
                 ),
               ),
@@ -173,7 +173,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                 // 1. Header cá nhân chủ xe
                 _buildOwnerHeader(profile, currentIsOwner),
 
-                const Divider(
+                Divider(
                   height: 24,
                   thickness: 1,
                   color: AppColors.border,
@@ -184,7 +184,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
 
                 // 3. Danh sách xe (nếu là chủ xe)
                 if (currentIsOwner) ...[
-                  const Divider(
+                  Divider(
                     height: 24,
                     thickness: 1,
                     color: AppColors.border,
@@ -219,15 +219,15 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                 ),
                 child: CircleAvatar(
                   radius: 40,
-                  backgroundColor: AppColors.card,
+                  backgroundColor: context.cardColor,
                   backgroundImage: profile.avatar != null
                       ? NetworkImage(profile.avatar!)
                       : null,
                   child: profile.avatar == null
-                      ? const Icon(
+                      ? Icon(
                           Icons.person,
                           size: 40,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                         )
                       : null,
                 ),
@@ -240,26 +240,26 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   children: [
                     Text(
                       profile.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.calendar_today_rounded,
                           size: 13,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Tham gia từ ${profile.joinDate}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                           ),
                         ),
                       ],
@@ -274,7 +274,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: context.cardColor,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border),
             ),
@@ -286,7 +286,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.star_rounded,
                           color: Colors.amber,
                           size: 24,
@@ -294,20 +294,20 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                         const SizedBox(width: 4),
                         Text(
                           profile.rating.toString(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Đánh giá',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
                   ],
@@ -319,7 +319,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.directions_car_rounded,
                           color: AppColors.primary,
                           size: 22,
@@ -327,10 +327,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                         const SizedBox(width: 6),
                         Text(
                           '${profile.tripsCount}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                           ),
                         ),
                       ],
@@ -338,9 +338,9 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     const SizedBox(height: 4),
                     Text(
                       currentIsOwner ? 'Chuyến đi' : 'Chuyến thuê',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
                   ],
@@ -375,10 +375,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                 currentIsOwner
                     ? 'Đánh giá từ khách hàng ($totalReviews)'
                     : 'Đánh giá từ chủ xe ($totalReviews)',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
             ],
@@ -393,7 +393,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                       ? 'Chủ xe này chưa có đánh giá nào'
                       : 'Người thuê này chưa có đánh giá nào',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -405,7 +405,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: displayList.length,
-              separatorBuilder: (context, index) => const Divider(
+              separatorBuilder: (context, index) => Divider(
                 height: 20,
                 thickness: 0.5,
                 color: AppColors.border,
@@ -425,15 +425,15 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                           },
                           child: CircleAvatar(
                             radius: 18,
-                            backgroundColor: AppColors.card,
+                            backgroundColor: context.cardColor,
                             backgroundImage: review.reviewerAvatar != null
                                 ? NetworkImage(review.reviewerAvatar!)
                                 : null,
                             child: review.reviewerAvatar == null
-                                ? const Icon(
+                                ? Icon(
                                     Icons.person,
                                     size: 18,
-                                    color: AppColors.textSecondary,
+                                    color: context.textSecondary,
                                   )
                                 : null,
                           ),
@@ -445,10 +445,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                             children: [
                               Text(
                                 review.reviewerName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                                  color: context.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -468,9 +468,9 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                                   const SizedBox(width: 6),
                                   Text(
                                     review.createdAt,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
-                                      color: AppColors.textSecondary,
+                                      color: context.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -483,9 +483,9 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     const SizedBox(height: 8),
                     Text(
                       review.comment,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                         height: 1.4,
                       ),
                     ),
@@ -502,11 +502,11 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     onPressed: () {
                       viewModel.loadMoreReviews();
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 18,
                     ),
-                    label: const Text('Xem thêm đánh giá'),
+                    label: Text('Xem thêm đánh giá'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: const BorderSide(color: AppColors.primary),
@@ -541,10 +541,10 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
             children: [
               Text(
                 'Danh sách xe (${cars.length})',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               if (cars.isNotEmpty)
@@ -555,7 +555,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     minimumSize: const Size(60, 30),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Xem tất cả',
                     style: TextStyle(
                       color: AppColors.primary,
@@ -569,12 +569,12 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
         ),
         const SizedBox(height: 8),
         if (cars.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 24.0),
             child: Center(
               child: Text(
                 'Chủ xe này chưa đăng ký xe nào.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                style: TextStyle(color: context.textSecondary, fontSize: 13),
               ),
             ),
           )
@@ -644,20 +644,20 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     children: [
                       Text(
                         'Tất cả xe của $ownerName',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: context.textPrimary,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded),
+                        icon: Icon(Icons.close_rounded),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 1),
+                Divider(height: 1),
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,

@@ -73,14 +73,14 @@ class _NotificationViewState extends State<NotificationView> {
                         color: AppColors.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.mail_outline_rounded,
                         color: AppColors.primary,
                         size: 22,
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Chi tiết thông báo',
                       style: TextStyle(
                         fontSize: 18,
@@ -90,7 +90,7 @@ class _NotificationViewState extends State<NotificationView> {
                     ),
                   ],
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Divider(height: 1),
                 ),
@@ -98,17 +98,17 @@ class _NotificationViewState extends State<NotificationView> {
                 // tg tb
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.access_time_rounded,
                       size: 14,
-                      color: Colors.black45,
+                      color: context.textSecondary,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       formattedDate,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Colors.black45,
+                        color: context.textSecondary,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -120,7 +120,7 @@ class _NotificationViewState extends State<NotificationView> {
                   child: SingleChildScrollView(
                     child: Text(
                       detailNotification.message,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         height: 1.5,
                         color: Colors.black87,
@@ -147,7 +147,7 @@ class _NotificationViewState extends State<NotificationView> {
                         vertical: 12,
                       ),
                     ),
-                    child: const Text('Đóng'),
+                    child: Text('Đóng'),
                   ),
                 ),
               ],
@@ -188,18 +188,18 @@ class _NotificationViewState extends State<NotificationView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Xóa thông báo đã chọn'),
+          title: Text('Xóa thông báo đã chọn'),
           content: Text(
             'Bạn có chắc muốn xóa ${_selectedNotificationIds.length} thông báo đã chọn không?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Hủy'),
+              child: Text('Hủy'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Xóa'),
+              child: Text('Xóa'),
             ),
           ],
         );
@@ -264,7 +264,7 @@ class _NotificationViewState extends State<NotificationView> {
         SnackBar(
           content: Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline_rounded,
                 color: Colors.white,
                 size: 20,
@@ -273,7 +273,7 @@ class _NotificationViewState extends State<NotificationView> {
               Expanded(
                 child: Text(
                   'Không xóa được thông báo: $e',
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                  style: TextStyle(fontSize: 14, color: Colors.white),
                 ),
               ),
             ],
@@ -301,14 +301,14 @@ class _NotificationViewState extends State<NotificationView> {
               .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Thông báo',
           style: TextStyle(
-            color: Colors.black,
+            color: context.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -317,14 +317,14 @@ class _NotificationViewState extends State<NotificationView> {
           if (_isSelectionMode)
             TextButton(
               onPressed: _toggleSelectionMode,
-              child: const Text(
+              child: Text(
                 'Hủy',
-                style: TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: context.textSecondary),
               ),
             )
           else
             IconButton(
-              icon: const Icon(Icons.delete_sweep, color: Colors.black87),
+              icon: Icon(Icons.delete_sweep, color: context.textPrimary),
               onPressed: () {
                 if (viewModel.allNotifications.isEmpty) return;
                 _toggleSelectionMode();
@@ -337,7 +337,7 @@ class _NotificationViewState extends State<NotificationView> {
                   : _deleteSelectedNotifications,
               child: Text(
                 'Xóa (${_selectedNotificationIds.length})',
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
                 ),
@@ -352,16 +352,16 @@ class _NotificationViewState extends State<NotificationView> {
           _buildTabToggle(),
           Expanded(
             child: viewModel.isLoading
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )
                 : displayedNotifications.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'Không có thông báo nào.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
                   )
@@ -397,7 +397,7 @@ class _NotificationViewState extends State<NotificationView> {
       height: 46,
       padding: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
-        color: AppColors.textSecondary.withOpacity(0.08),
+        color: context.isDarkMode ? Colors.grey.shade800 : context.textSecondary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: LayoutBuilder(
@@ -442,7 +442,7 @@ class _NotificationViewState extends State<NotificationView> {
                                 : FontWeight.normal,
                             color: _isAllTab
                                 ? AppColors.primary
-                                : AppColors.textSecondary,
+                                : context.textSecondary,
                           ),
                         ),
                       ),
@@ -462,7 +462,7 @@ class _NotificationViewState extends State<NotificationView> {
                                 : FontWeight.normal,
                             color: !_isAllTab
                                 ? AppColors.primary
-                                : AppColors.textSecondary,
+                                : context.textSecondary,
                           ),
                         ),
                       ),
@@ -483,7 +483,7 @@ class _NotificationViewState extends State<NotificationView> {
       padding: const EdgeInsets.only(top: 16.0, bottom: 8.0, left: 4.0),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
           color: AppColors.primary,
@@ -534,7 +534,7 @@ class _NotificationViewState extends State<NotificationView> {
                       ? Icons.notifications_none_rounded
                       : Icons.notifications_active_rounded,
                   color: notification.isRead
-                      ? AppColors.textSecondary
+                      ? context.textSecondary
                       : AppColors.primary,
                   size: 22,
                 ),
@@ -554,8 +554,8 @@ class _NotificationViewState extends State<NotificationView> {
                             ? FontWeight.w400
                             : FontWeight.w600,
                         color: notification.isRead
-                            ? Colors.black54
-                            : Colors.black87,
+                            ? context.textSecondary
+                            : context.textPrimary,
                         height: 1.4,
                       ),
                     ),
@@ -564,7 +564,7 @@ class _NotificationViewState extends State<NotificationView> {
                       timeString,
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary.withOpacity(0.8),
+                        color: context.textSecondary,
                       ),
                     ),
                   ],
@@ -576,7 +576,7 @@ class _NotificationViewState extends State<NotificationView> {
                   alignment: Alignment.center,
                   width: 7,
                   height: 7,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.primary,
                   ),

@@ -71,10 +71,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         appBar: AppBar(
           backgroundColor: AppColors.primary,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => context.go('/orders'),
           ),
-          title: const Text('Lỗi', style: TextStyle(color: Colors.white)),
+          title: Text('Lỗi', style: TextStyle(color: Colors.white)),
         ),
         body: Center(
           child: Column(
@@ -84,7 +84,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 viewModel.errorMessage.isNotEmpty
                     ? viewModel.errorMessage
                     : 'Không tìm thấy đơn hàng.',
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
@@ -92,7 +92,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                 ),
-                child: const Text(
+                child: Text(
                   'Thử lại',
                   style: TextStyle(color: Colors.white),
                 ),
@@ -107,14 +107,14 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     final car = trip.car;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             backgroundColor: AppColors.primary,
             pinned: true,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () {
                 if (context.canPop()) {
                   context.pop();
@@ -123,7 +123,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 }
               },
             ),
-            title: const Text(
+            title: Text(
               'Chi tiết đơn hàng',
               style: TextStyle(
                 color: Colors.white,
@@ -139,7 +139,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.headset_mic_outlined,
                         color: Colors.white,
                       ),
@@ -148,7 +148,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     IconButton(
                       constraints: const BoxConstraints(),
                       padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.more_horiz, color: Colors.white),
+                      icon: Icon(Icons.more_horiz, color: Colors.white),
                       onPressed: () => _showOptionBottomSheet(context, trip),
                     ),
                   ],
@@ -188,9 +188,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: context.cardColor,
           border: Border(
-            top: BorderSide(color: Colors.grey.shade200, width: 0.5),
+            top: BorderSide(color: context.border, width: 0.5),
           ),
         ),
         padding: EdgeInsets.only(
@@ -236,7 +236,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
             child: Text(
               trip.getStatusDisplay(),
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -254,7 +254,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   children: [
                     Text(
                       '#RT${trip.id}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -262,7 +262,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     const SizedBox(height: 2),
                     Text(
                       'Đặt ngày ${_formatDate(trip.startAt)}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      style: TextStyle(color: Colors.white, fontSize: 12),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -279,7 +279,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       alignment: Alignment.centerRight,
                       child: Text(
                         _formatPrice(trip.cost),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -289,7 +289,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     const SizedBox(height: 2),
                     Text(
                       'Đặt cọc: ${_formatPrice(trip.cost)}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      style: TextStyle(color: Colors.white, fontSize: 12),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -310,7 +310,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
     return Card(
       margin: EdgeInsets.zero,
-      color: AppColors.card,
+      color: context.cardColor,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
@@ -339,7 +339,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 children: [
                   Text(
                     car.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -347,7 +347,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_on,
                         size: 14,
                         color: AppColors.primary,
@@ -358,7 +358,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           '${car.licensePlate} • $addressText',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 14),
                         ),
                       ),
                     ],
@@ -366,20 +366,20 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.person_outline, size: 14),
+                      Icon(Icons.person_outline, size: 14),
                       Text(
                         ' ${car.seatCount} chỗ  ',
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13),
                       ),
-                      const Icon(Icons.autorenew, size: 14),
+                      Icon(Icons.autorenew, size: 14),
                       Text(
                         ' ${car.transmission ?? "Số tự động"}  ',
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13),
                       ),
-                      const Icon(Icons.local_gas_station_outlined, size: 14),
+                      Icon(Icons.local_gas_station_outlined, size: 14),
                       Text(
                         ' ${car.fuelType ?? "Xăng"}',
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13),
                       ),
                     ],
                   ),
@@ -404,16 +404,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Chủ xe',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -432,7 +432,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       ? (exception, stackTrace) {}
                       : null,
                   child: (avatarUrl == null || avatarUrl.isEmpty)
-                      ? const Icon(Icons.person, color: AppColors.textSecondary, size: 28)
+                      ? Icon(Icons.person, color: context.textSecondary, size: 28)
                       : null,
                 ),
               ),
@@ -446,7 +446,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     children: [
                       Text(
                         owner.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),
@@ -454,19 +454,19 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.star,
                             color: AppColors.primary,
                             size: 16,
                           ),
-                          const Text(
+                          Text(
                             ' 4.9 ',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
                             '(86 đánh giá)',
                             style: TextStyle(
-                              color: AppColors.textSecondary,
+                              color: context.textSecondary,
                               fontSize: 13,
                             ),
                           ),
@@ -499,7 +499,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                                   color: AppColors.primary,
                                 ),
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.chat_bubble_outline,
                                 color: AppColors.primary,
                                 size: 20,
@@ -523,7 +523,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       border: Border.all(color: Colors.grey.shade300),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.call, color: AppColors.primary, size: 20),
+                      icon: Icon(Icons.call, color: AppColors.primary, size: 20),
                       onPressed: () => _showPhoneDialog(owner),
                       hoverColor: Colors.transparent,
                       splashColor: Colors.transparent,
@@ -547,17 +547,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Thời gian thuê',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -575,7 +575,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   Text(
                     '$rentalDays ngày',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -584,7 +584,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
@@ -593,7 +593,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
@@ -629,31 +629,31 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.access_time, size: 10, color: AppColors.primary),
+            Icon(Icons.access_time, size: 10, color: AppColors.primary),
             const SizedBox(width: 4),
             Text(
               label,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              style: TextStyle(color: context.textSecondary, fontSize: 13),
             ),
           ],
         ),
         Text(
           date,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         Text(
           time,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 4),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.location_on, size: 10, color: AppColors.primary),
+            Icon(Icons.location_on, size: 10, color: AppColors.primary),
             const SizedBox(width: 4),
             Text(
               location,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              style: TextStyle(color: context.textSecondary, fontSize: 13),
             ),
           ],
         ),
@@ -669,20 +669,20 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Chi phí',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
-          const Divider(height: 24),
+          Divider(height: 24),
           _buildPriceRow(
             'Tiền thuê xe',
             _formatPrice(unitPrice),
@@ -696,16 +696,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               '-${_formatPrice(trip.discountAmount)}',
               isDiscount: true,
             ),
-          const Divider(height: 24),
+          Divider(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Tổng cộng',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                     fontSize: 16,
                   ),
                 ),
@@ -717,9 +717,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     _formatPrice(trip.cost),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                       fontSize: 16,
                     ),
                   ),
@@ -731,10 +731,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Đã thanh toán (đặt cọc)',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                  style: TextStyle(color: context.textSecondary, fontSize: 13),
                 ),
               ),
               const SizedBox(width: 8),
@@ -744,7 +744,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     _formatPrice(trip.cost),
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    style: TextStyle(color: context.textSecondary, fontSize: 13),
                   ),
                 ),
               ),
@@ -764,7 +764,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: context.textPrimary),
             ),
           ),
           const SizedBox(width: 8),
@@ -775,7 +775,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               child: Text(
                 value,
                 style: TextStyle(
-                  color: isDiscount ? AppColors.success : AppColors.textPrimary,
+                  color: isDiscount ? AppColors.success : context.textPrimary,
                   fontWeight: isDiscount ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -796,17 +796,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Trạng thái đơn ',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -914,10 +914,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
         ),
@@ -972,14 +972,14 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               color: isDanger ? AppColors.error : AppColors.border,
             ),
             borderRadius: BorderRadius.circular(8),
-            color: AppColors.card,
+            color: context.cardColor,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                color: isDanger ? AppColors.error : AppColors.textPrimary,
+                color: isDanger ? AppColors.error : context.textPrimary,
                 size: 20,
               ),
               const SizedBox(height: 4),
@@ -991,7 +991,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: isDanger ? AppColors.error : AppColors.textPrimary,
+                  color: isDanger ? AppColors.error : context.textPrimary,
                 ),
               ),
             ],
@@ -1069,26 +1069,26 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Chủ xe: ${owner.name}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+            Text('Chủ xe: ${owner.name}', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.phone_android, color: AppColors.primary, size: 20),
+                  Icon(Icons.phone_android, color: AppColors.primary, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: SelectableText(
                       phone,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                   ),
@@ -1100,7 +1100,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng', style: TextStyle(color: AppColors.primary)),
+            child: Text('Đóng', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),
@@ -1119,16 +1119,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.headset_mic_outlined, color: AppColors.primary),
-              title: const Text('Liên hệ trung tâm hỗ trợ'),
+              leading: Icon(Icons.headset_mic_outlined, color: AppColors.primary),
+              title: Text('Liên hệ trung tâm hỗ trợ'),
               onTap: () {
                 Navigator.pop(context);
                 context.push('/support');
               },
             ),
             ListTile(
-              leading: const Icon(Icons.article_outlined, color: AppColors.primary),
-              title: const Text('Chính sách & Quy định thuê xe'),
+              leading: Icon(Icons.article_outlined, color: AppColors.primary),
+              title: Text('Chính sách & Quy định thuê xe'),
               onTap: () {
                 Navigator.pop(context);
                 context.push('/policy');
@@ -1136,8 +1136,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
             if (trip.car?.owner != null)
               ListTile(
-                leading: const Icon(Icons.person_outline, color: AppColors.primary),
-                title: const Text('Xem hồ sơ chủ xe'),
+                leading: Icon(Icons.person_outline, color: AppColors.primary),
+                title: Text('Xem hồ sơ chủ xe'),
                 onTap: () {
                   Navigator.pop(context);
                   context.push('/owner-profile/${trip.car!.owner!.id}?isOwner=true');
@@ -1173,17 +1173,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Biên bản nhận xe',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textPrimary),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
-            const Divider(height: 20),
+            Divider(height: 20),
             _buildReportDetailRow('Mã đơn hàng:', '#RT${trip.id}'),
             _buildReportDetailRow('Tên xe:', car?.name ?? 'Xe tự lái'),
             _buildReportDetailRow('Biển số xe:', car?.licensePlate ?? 'N/A'),
@@ -1220,7 +1220,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('Đã hiểu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text('Đã hiểu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -1253,17 +1253,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Biên bản trả xe',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textPrimary),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
-            const Divider(height: 20),
+            Divider(height: 20),
             _buildReportDetailRow('Mã đơn hàng:', '#RT${trip.id}'),
             _buildReportDetailRow('Tên xe:', car?.name ?? 'Xe tự lái'),
             _buildReportDetailRow('Biển số xe:', car?.licensePlate ?? 'N/A'),
@@ -1300,7 +1300,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('Đã hiểu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text('Đã hiểu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -1319,13 +1319,13 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             width: 130,
             child: Text(
               label,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+              style: TextStyle(color: context.textSecondary, fontSize: 14),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
+              style: TextStyle(color: context.textPrimary, fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
         ],

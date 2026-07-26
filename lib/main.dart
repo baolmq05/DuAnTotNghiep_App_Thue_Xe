@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_theme.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/theme_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -38,6 +39,7 @@ class DrivioApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => ConversationViewmodel()),
         ChangeNotifierProvider(create: (context) => ChatbotViewModel()),
         ChangeNotifierProvider(create: (context) => HomeViewModel()),
@@ -50,31 +52,37 @@ class DrivioApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => PolicyViewModel()),
         ChangeNotifierProvider(create: (context) => FavoriteViewModel()),
       ],
-      child: MaterialApp.router(
-        // Device_Preview Package (Important)
-        locale: DevicePreview.locale(context),
-        builder: DevicePreview.appBuilder,
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp.router(
+            // Device_Preview Package (Important)
+            locale: DevicePreview.locale(context),
+            builder: DevicePreview.appBuilder,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
 
-        // Enable drag-to-scroll with mouse on Web
-        scrollBehavior: const MaterialScrollBehavior().copyWith(
-          dragDevices: {
-            PointerDeviceKind.touch,
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.stylus,
-            PointerDeviceKind.trackpad,
-          },
-        ),
+            // Enable drag-to-scroll with mouse on Web
+            scrollBehavior: const MaterialScrollBehavior().copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.stylus,
+                PointerDeviceKind.trackpad,
+              },
+            ),
 
-        // Main Code
-        debugShowCheckedModeBanner: false,
-        theme: appTheme,
-        routerConfig: drivioRouter,
+            // Main Code
+            debugShowCheckedModeBanner: false,
+            theme: appTheme,
+            darkTheme: darkTheme,
+            themeMode: themeProvider.themeMode,
+            routerConfig: drivioRouter,
+          );
+        },
       ),
     );
   }

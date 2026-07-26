@@ -116,12 +116,12 @@ class _EditProfileViewState extends State<EditProfileView> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const Text(
+                Text(
                   'Thay đổi ảnh đại diện',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -132,9 +132,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                       color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+                    child: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
                   ),
-                  title: const Text('Chụp ảnh mới', style: TextStyle(fontWeight: FontWeight.w500)),
+                  title: Text('Chụp ảnh mới', style: TextStyle(fontWeight: FontWeight.w500)),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
@@ -147,9 +147,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                       color: AppColors.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                    child: Icon(Icons.photo_library_outlined, color: AppColors.primary),
                   ),
-                  title: const Text('Chọn từ thư viện', style: TextStyle(fontWeight: FontWeight.w500)),
+                  title: Text('Chọn từ thư viện', style: TextStyle(fontWeight: FontWeight.w500)),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.gallery);
@@ -215,15 +215,15 @@ class _EditProfileViewState extends State<EditProfileView> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Chỉnh sửa hồ sơ',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
         ),
       ),
@@ -267,11 +267,11 @@ class _EditProfileViewState extends State<EditProfileView> {
                               onTap: _showImageSourceBottomSheet,
                               child: Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   color: AppColors.primary,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.camera_alt_rounded,
                                   color: Colors.white,
                                   size: 18,
@@ -287,7 +287,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       _buildLabel('Họ và tên *'),
                       TextFormField(
                         controller: _nameController,
-                        style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 15, color: context.textPrimary),
                         decoration: _buildInputDecoration(
                           hintText: 'Nhập họ và tên của bạn',
                           prefixIcon: Icons.person_outline_rounded,
@@ -320,7 +320,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       TextFormField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
-                        style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 15, color: context.textPrimary),
                         decoration: _buildInputDecoration(
                           hintText: 'Nhập số điện thoại',
                           prefixIcon: Icons.phone_android_rounded,
@@ -356,7 +356,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       TextFormField(
                         controller: _dobController,
                         readOnly: true,
-                        style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 15, color: context.textPrimary),
                         decoration: _buildInputDecoration(
                           hintText: 'Chọn ngày sinh (YYYY-MM-DD)',
                           prefixIcon: Icons.calendar_month_outlined,
@@ -375,10 +375,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                             builder: (context, child) {
                               return Theme(
                                 data: Theme.of(context).copyWith(
-                                  colorScheme: const ColorScheme.light(
+                                  colorScheme: ColorScheme.light(
                                     primary: AppColors.primary,
                                     onPrimary: Colors.white,
-                                    onSurface: AppColors.textPrimary,
+                                    onSurface: context.textPrimary,
                                   ),
                                 ),
                                 child: child!,
@@ -438,7 +438,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Lưu thay đổi',
                           style: TextStyle(
                             color: Colors.white,
@@ -462,10 +462,10 @@ class _EditProfileViewState extends State<EditProfileView> {
         padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
         ),
       ),
@@ -485,7 +485,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       selectedColor: AppColors.primary,
       backgroundColor: Colors.white,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppColors.textPrimary,
+        color: isSelected ? Colors.white : context.textPrimary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         fontSize: 14,
       ),
@@ -508,8 +508,8 @@ class _EditProfileViewState extends State<EditProfileView> {
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
-      prefixIcon: Icon(prefixIcon, color: AppColors.textSecondary, size: 22),
+      hintStyle: TextStyle(color: context.textSecondary, fontSize: 15),
+      prefixIcon: Icon(prefixIcon, color: context.textSecondary, size: 22),
       filled: true,
       fillColor: fillColor ?? Colors.white,
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),

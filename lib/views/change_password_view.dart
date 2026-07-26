@@ -80,23 +80,15 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     final isLoading = context.watch<AuthProvider>().isLoading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9FAFC),
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.textPrimary,
-            size: 20,
-          ),
-          onPressed: isLoading ? null : () => context.pop(),
-        ),
-        title: const Text(
+        title: Text(
           'Đổi mật khẩu',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -125,7 +117,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline_rounded,
                         color: AppColors.primary,
                         size: 22,
@@ -152,7 +144,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   style: TextStyle(
                     fontSize: 14.0,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary.withValues(alpha: 0.8),
+                    color: context.textPrimary.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -160,12 +152,9 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   controller: _currentPasswordController,
                   obscureText: _isCurrentPasswordObscured,
                   enabled: !isLoading,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15.0,
-                  ),
+                  style: TextStyle(color: context.textPrimary, fontSize: 15.0),
                   decoration: InputDecoration(
-                    prefixIcon: const Padding(
+                    prefixIcon: Padding(
                       padding: EdgeInsets.only(left: 16.0, right: 12.0),
                       child: Icon(
                         Icons.lock_outline_rounded,
@@ -184,7 +173,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                           _isCurrentPasswordObscured
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                           size: 20.0,
                         ),
                         onPressed: () {
@@ -196,13 +185,16 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       ),
                     ),
                     hintText: 'Nhập mật khẩu hiện tại',
-                    hintStyle: const TextStyle(
-                      color: AppColors.textSecondary,
+                    hintStyle: TextStyle(
+                      color: context.textSecondary,
                       fontSize: 15.0,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 14.0,
+                      horizontal: 16.0,
+                    ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: context.cardColor,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: const BorderSide(
@@ -247,7 +239,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   style: TextStyle(
                     fontSize: 14.0,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary.withValues(alpha: 0.8),
+                    color: context.textPrimary.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -255,12 +247,9 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   controller: _newPasswordController,
                   obscureText: _isNewPasswordObscured,
                   enabled: !isLoading,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15.0,
-                  ),
+                  style: TextStyle(color: context.textPrimary, fontSize: 15.0),
                   decoration: InputDecoration(
-                    prefixIcon: const Padding(
+                    prefixIcon: Padding(
                       padding: EdgeInsets.only(left: 16.0, right: 12.0),
                       child: Icon(
                         Icons.lock_reset_rounded,
@@ -279,7 +268,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                           _isNewPasswordObscured
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                           size: 20.0,
                         ),
                         onPressed: () {
@@ -290,13 +279,16 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       ),
                     ),
                     hintText: 'Nhập mật khẩu mới',
-                    hintStyle: const TextStyle(
-                      color: AppColors.textSecondary,
+                    hintStyle: TextStyle(
+                      color: context.textSecondary,
                       fontSize: 15.0,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 14.0,
+                      horizontal: 16.0,
+                    ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: context.cardColor,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: const BorderSide(
@@ -344,7 +336,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   style: TextStyle(
                     fontSize: 14.0,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary.withValues(alpha: 0.8),
+                    color: context.textPrimary.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -352,12 +344,9 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   controller: _confirmPasswordController,
                   obscureText: _isConfirmPasswordObscured,
                   enabled: !isLoading,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15.0,
-                  ),
+                  style: TextStyle(color: context.textPrimary, fontSize: 15.0),
                   decoration: InputDecoration(
-                    prefixIcon: const Padding(
+                    prefixIcon: Padding(
                       padding: EdgeInsets.only(left: 16.0, right: 12.0),
                       child: Icon(
                         Icons.lock_person_outlined,
@@ -376,7 +365,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                           _isConfirmPasswordObscured
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                           size: 20.0,
                         ),
                         onPressed: () {
@@ -388,13 +377,16 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       ),
                     ),
                     hintText: 'Xác nhận lại mật khẩu mới',
-                    hintStyle: const TextStyle(
-                      color: AppColors.textSecondary,
+                    hintStyle: TextStyle(
+                      color: context.textSecondary,
                       fontSize: 15.0,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 14.0,
+                      horizontal: 16.0,
+                    ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: context.cardColor,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: const BorderSide(
@@ -461,7 +453,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                               ),
                             ),
                           )
-                        : const Text(
+                        : Text(
                             'Đổi mật khẩu',
                             style: TextStyle(
                               fontSize: 16.0,

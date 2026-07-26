@@ -18,22 +18,22 @@ class SupportDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           title,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: context.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -66,7 +66,7 @@ class SupportDetailView extends StatelessWidget {
                         color: AppColors.primary.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.menu_book_rounded,
                         size: 64,
                         color: AppColors.primary,
@@ -100,7 +100,7 @@ class SupportDetailView extends StatelessWidget {
                       Text(
                         title,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -119,9 +119,9 @@ class SupportDetailView extends StatelessWidget {
                   // Subtitle / Intro Content
                   Text(
                     content,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                       height: 1.5,
                     ),
                   ),
@@ -129,12 +129,12 @@ class SupportDetailView extends StatelessWidget {
 
                   // Steps Section
                   if (steps != null && steps!.isNotEmpty) ...[
-                    const Text(
+                    Text(
                       'Các bước thực hiện',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -149,14 +149,14 @@ class SupportDetailView extends StatelessWidget {
                             Container(
                               width: 28,
                               height: 28,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: AppColors.primary,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
                                 child: Text(
                                   '$index',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
@@ -168,9 +168,9 @@ class SupportDetailView extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 stepText,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 15,
-                                  color: AppColors.textPrimary,
+                                  color: context.textPrimary,
                                   height: 1.4,
                                 ),
                               ),
@@ -195,7 +195,7 @@ class SupportDetailView extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.info_outline_rounded,
                           color: AppColors.primary,
                         ),

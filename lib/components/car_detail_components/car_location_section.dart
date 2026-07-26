@@ -16,14 +16,14 @@ class CarLocationSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start, // Căn lề icon và text thẳng hàng từ trên xuống
         children: [
-          const Icon(Icons.location_on, color: AppColors.primary, size: 20),
+          Icon(Icons.location_on, color: AppColors.primary, size: 20),
           const SizedBox(width: 8.0),
           Expanded(
             child: Text(
               car.carLocation.address,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14.0,
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
                 height: 1.4, // Tạo khoảng cách giãn dòng cho dễ đọc địa chỉ dài
               ),
             ),

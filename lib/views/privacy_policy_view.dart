@@ -8,21 +8,21 @@ class PrivacyPolicyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Chính sách bảo mật',
           style: TextStyle(
-            color: Colors.white,
+            color: context.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
-        backgroundColor: AppColors.primary,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios, color: context.textPrimary),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -38,7 +38,7 @@ class PrivacyPolicyView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Banner cam kết bảo mật của Drivo
+              // Banner cam kết bảo mật của Drivo (gradient giữ nguyên – trắng trên gradient là OK)
               Container(
                 padding: const EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
@@ -105,18 +105,19 @@ class PrivacyPolicyView extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              const Text(
+              Text(
                 'Điều khoản thu thập & Xử lý dữ liệu',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               const SizedBox(height: 12),
 
               // Item 1: Dữ liệu vị trí
               _buildPolicyInfoCard(
+                context: context,
                 icon: Icons.my_location_rounded,
                 iconBgColor: const Color(0xFFE3F2FD),
                 iconColor: const Color(0xFF1E88E5),
@@ -129,6 +130,7 @@ class PrivacyPolicyView extends StatelessWidget {
 
               // Item 2: Dữ liệu tài khoản ngân hàng
               _buildPolicyInfoCard(
+                context: context,
                 icon: Icons.account_balance_rounded,
                 iconBgColor: const Color(0xFFE8F5E9),
                 iconColor: const Color(0xFF43A047),
@@ -143,41 +145,41 @@ class PrivacyPolicyView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(18.0),
                 decoration: BoxDecoration(
-                  color: AppColors.accentSurface.withValues(alpha: 0.4),
+                  color: context.cardColor,
                   borderRadius: BorderRadius.circular(16.0),
                   border: Border.all(
-                    color: AppColors.secondary.withValues(alpha: 0.3),
+                    color: context.border,
                     width: 1.0,
                   ),
                 ),
                 child: Column(
                   children: [
                     Row(
-                      children: const [
-                        Icon(
+                      children: [
+                        const Icon(
                           Icons.info_outline_rounded,
                           color: AppColors.secondary,
                           size: 24,
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Xem chi tiết chính sách',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                              color: context.textPrimary,
                             ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const Text(
+                    Text(
                       'Quý Khách hàng có thể xem thêm chi tiết tại Chính sách bảo vệ dữ liệu cá nhân của Drivo.',
                       style: TextStyle(
                         fontSize: 13.5,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -254,6 +256,7 @@ class PrivacyPolicyView extends StatelessWidget {
   }
 
   Widget _buildPolicyInfoCard({
+    required BuildContext context,
     required IconData icon,
     required Color iconBgColor,
     required Color iconColor,
@@ -263,10 +266,10 @@ class PrivacyPolicyView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
-          color: Colors.grey.shade200,
+          color: context.border,
           width: 1.2,
         ),
         boxShadow: [
@@ -298,10 +301,10 @@ class PrivacyPolicyView extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
               ),
@@ -310,9 +313,9 @@ class PrivacyPolicyView extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             description,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13.5,
-              color: AppColors.textSecondary,
+              color: context.textSecondary,
               height: 1.45,
             ),
           ),

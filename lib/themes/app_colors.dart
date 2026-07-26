@@ -24,3 +24,36 @@ class AppColors {
   static const error = Color(0xFFEF4444);
   static const info = Color(0xFF3B82F6);
 }
+
+extension AppThemeColors on BuildContext {
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+
+  ColorScheme get colorScheme => Theme.of(this).colorScheme;
+
+  // Primary / Brand colors - Giữ nguyên màu primary như yêu cầu của người dùng
+  Color get primaryColor => AppColors.primary;
+  Color get primaryDark => AppColors.primaryDark;
+  Color get secondaryColor => AppColors.secondary;
+  Color get accentSurface =>
+      isDarkMode ? const Color(0xFF3B2F25) : AppColors.accentSurface;
+
+  // Backgrounds - Sử dụng Colors.grey.shade900 làm nền và giảm dần cho thẻ
+  Color get backgroundColor => colorScheme.surface;
+  Color get cardColor => isDarkMode ? Colors.grey.shade800 : Colors.white;
+  Color get scaffoldBackgroundColor =>
+      isDarkMode ? Colors.grey.shade900 : const Color(0xFFF9FAFC);
+
+  // Texts - Chữ luôn luôn là màu trắng ở Dark Mode
+  Color get textPrimary => isDarkMode ? Colors.white : AppColors.textPrimary;
+  Color get textSecondary =>
+      isDarkMode ? Colors.white70 : AppColors.textSecondary;
+
+  // Border
+  Color get border => isDarkMode ? Colors.grey.shade800 : AppColors.border;
+
+  // Status
+  Color get success => isDarkMode ? const Color(0xFF4ADE80) : AppColors.success;
+  Color get warning => isDarkMode ? const Color(0xFFFBBF24) : AppColors.warning;
+  Color get error => colorScheme.error;
+  Color get info => isDarkMode ? const Color(0xFF60A5FA) : AppColors.info;
+}

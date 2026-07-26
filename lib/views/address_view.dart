@@ -52,7 +52,7 @@ class _AddressViewState extends State<AddressView> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             isEdit ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới',
-            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
           ),
           content: TextField(
             controller: _addressController,
@@ -61,7 +61,7 @@ class _AddressViewState extends State<AddressView> {
             keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
               hintText: 'Nhập địa chỉ của bạn...',
-              hintStyle: const TextStyle(color: AppColors.textSecondary),
+              hintStyle: TextStyle(color: context.textSecondary),
               filled: true,
               fillColor: Colors.grey.shade50,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -78,7 +78,7 @@ class _AddressViewState extends State<AddressView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Hủy', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Hủy', style: TextStyle(color: context.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -146,18 +146,18 @@ class _AddressViewState extends State<AddressView> {
       builder: (dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text(
+          title: Text(
             'Xóa địa chỉ',
             style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error),
           ),
           content: Text(
             'Bạn có chắc chắn muốn xóa địa chỉ này?\n\n"${address.addressName}"',
-            style: const TextStyle(fontSize: 14, height: 1.4),
+            style: TextStyle(fontSize: 14, height: 1.4),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Hủy', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Hủy', style: TextStyle(color: context.textSecondary)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -190,7 +190,7 @@ class _AddressViewState extends State<AddressView> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 elevation: 0,
               ),
-              child: const Text('Xóa'),
+              child: Text('Xóa'),
             ),
           ],
         );
@@ -203,13 +203,13 @@ class _AddressViewState extends State<AddressView> {
     final user = context.watch<AuthProvider>().user;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        title: const Text(
+        title: Text(
           'Địa chỉ của tôi',
           style: TextStyle(
             color: AppColors.primary,
@@ -218,7 +218,7 @@ class _AddressViewState extends State<AddressView> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -230,7 +230,7 @@ class _AddressViewState extends State<AddressView> {
         actions: [
           if (user != null)
             IconButton(
-              icon: const Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 26),
+              icon: Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 26),
               onPressed: () => _showAddressDialog(),
               tooltip: 'Thêm địa chỉ',
             ),
@@ -239,7 +239,7 @@ class _AddressViewState extends State<AddressView> {
       body: Consumer<AddressViewModel>(
         builder: (context, addressVM, child) {
           if (addressVM.isLoading && addressVM.addresses.isEmpty) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               ),
@@ -259,36 +259,36 @@ class _AddressViewState extends State<AddressView> {
                         color: AppColors.primary.withValues(alpha: 0.08),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.location_off_outlined,
                         size: 72,
                         color: AppColors.primary,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Chưa có địa chỉ nào',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Hãy lưu lại các địa chỉ thường sử dụng để đặt xe hoặc giao nhận xe nhanh chóng hơn.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         height: 1.4,
                       ),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: () => _showAddressDialog(),
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      label: const Text('Thêm địa chỉ đầu tiên', style: TextStyle(fontWeight: FontWeight.bold)),
+                      icon: Icon(Icons.add, color: Colors.white),
+                      label: Text('Thêm địa chỉ đầu tiên', style: TextStyle(fontWeight: FontWeight.bold)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
@@ -340,7 +340,7 @@ class _AddressViewState extends State<AddressView> {
                                   color: AppColors.primary.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.place_rounded,
                                   color: AppColors.primary,
                                   size: 24,
@@ -363,10 +363,10 @@ class _AddressViewState extends State<AddressView> {
                                     const SizedBox(height: 4),
                                     Text(
                                       address.addressName,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
-                                        color: AppColors.textPrimary,
+                                        color: context.textPrimary,
                                         height: 1.4,
                                       ),
                                     ),
@@ -378,13 +378,13 @@ class _AddressViewState extends State<AddressView> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.edit_outlined, color: AppColors.secondary, size: 20),
+                                    icon: Icon(Icons.edit_outlined, color: AppColors.secondary, size: 20),
                                     onPressed: () => _showAddressDialog(address: address),
                                     constraints: const BoxConstraints(),
                                     padding: const EdgeInsets.all(8),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+                                    icon: Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
                                     onPressed: () => _confirmDelete(address),
                                     constraints: const BoxConstraints(),
                                     padding: const EdgeInsets.all(8),
@@ -402,7 +402,7 @@ class _AddressViewState extends State<AddressView> {
               if (addressVM.isLoading)
                 Container(
                   color: Colors.black.withValues(alpha: 0.15),
-                  child: const Center(
+                  child: Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                     ),
@@ -421,7 +421,7 @@ class _AddressViewState extends State<AddressView> {
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 4,
-            child: const Icon(Icons.add_location_rounded, size: 26),
+            child: Icon(Icons.add_location_rounded, size: 26),
           );
         },
       ),

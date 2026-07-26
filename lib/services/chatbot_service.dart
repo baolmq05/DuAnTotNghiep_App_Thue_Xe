@@ -35,10 +35,15 @@ class ChatbotService extends BaseService {
         requiresAuth: true,
       );
 
+      if (response is Map) {
+        // API trả về {"res": "..."} hoặc {"message": "..."}
+        return response['res']?.toString() ??
+            response['message']?.toString();
+      }
       if (response is String) {
         return response;
       }
-      return response?.toString();
+      return null;
     } catch (e) {
       rethrow;
     }

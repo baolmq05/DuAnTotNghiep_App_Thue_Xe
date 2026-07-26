@@ -3,7 +3,6 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart';
 
 /// Widget hiển thị danh sách các tiện ích của xe (wifi, bản đồ, camera hành trình...) dạng lưới
-/// Dành cho newbie: Sử dụng StatelessWidget và dùng GridView.builder để tải danh sách động từ model
 class CarAmenitiesSection extends StatelessWidget {
   final Car_Detail car;
 
@@ -26,7 +25,7 @@ class CarAmenitiesSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 16),
@@ -44,7 +43,7 @@ class CarAmenitiesSection extends StatelessWidget {
             itemCount: car.features.length,
             itemBuilder: (context, index) {
               final feature = car.features[index];
-              return _buildAmenityImage(feature.featureName, feature.icon);
+              return _buildAmenityImage(context, feature.featureName, feature.icon);
             },
           ),
         ],
@@ -53,7 +52,7 @@ class CarAmenitiesSection extends StatelessWidget {
   }
 
   /// Hàm phụ hiển thị ảnh và tên của từng tiện ích
-  Widget _buildAmenityImage(String name, String imageUrl) {
+  Widget _buildAmenityImage(BuildContext context, String name, String imageUrl) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -86,10 +85,10 @@ class CarAmenitiesSection extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
           ),
         ),
       ],

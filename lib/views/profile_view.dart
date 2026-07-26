@@ -27,18 +27,18 @@ class _ProfileViewState extends State<ProfileView> {
     final user = context.watch<AuthProvider>().user;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9FAFC),
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        title: const Text(
+        title: Text(
           'Hồ sơ',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: context.textPrimary,
           ),
         ),
         actions: [
@@ -55,7 +55,7 @@ class _ProfileViewState extends State<ProfileView> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                backgroundColor: AppColors.error,
+                backgroundColor: context.error,
                 offset: const Offset(-4, 4),
                 child: IconButton(
                   icon: const Icon(Icons.notifications_none_rounded),
@@ -63,7 +63,7 @@ class _ProfileViewState extends State<ProfileView> {
                     context.push('/notification');
                   },
                   iconSize: 26,
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                 ),
               );
             },
@@ -74,7 +74,7 @@ class _ProfileViewState extends State<ProfileView> {
               context.push('/setting');
             },
             iconSize: 26,
-            color: AppColors.primary,
+            color: context.primaryColor,
             padding: const EdgeInsets.only(right: 16.0),
           ),
         ],
@@ -86,23 +86,23 @@ class _ProfileViewState extends State<ProfileView> {
           const SizedBox(height: 16),
           _buildWalletCard(),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Dịch vụ của tôi',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
           _buildServicesCard(user),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Khác',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -128,7 +128,8 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Widget _buildProfileCard(UserModel? user) {
-    final String displayName = (user?.name != null && user!.name.trim().isNotEmpty)
+    final String displayName =
+        (user?.name != null && user!.name.trim().isNotEmpty)
         ? user.name
         : 'Khách hàng';
     final int tripsCount = user?.tripsCount ?? 0;
@@ -137,11 +138,11 @@ class _ProfileViewState extends State<ProfileView> {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: context.primaryColor,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.15),
+            color: context.primaryColor.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -203,7 +204,10 @@ class _ProfileViewState extends State<ProfileView> {
                         context.push('/edit-profile');
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(20),
@@ -314,11 +318,13 @@ class _ProfileViewState extends State<ProfileView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: context.isDarkMode
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -329,12 +335,14 @@ class _ProfileViewState extends State<ProfileView> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFFFAF2EC),
+              color: context.isDarkMode
+                  ? const Color(0xFF3B2F25)
+                  : const Color(0xFFFAF2EC),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.wallet_rounded,
-              color: AppColors.secondary,
+              color: context.secondaryColor,
               size: 24,
             ),
           ),
@@ -343,20 +351,17 @@ class _ProfileViewState extends State<ProfileView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Ví của tôi',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 12, color: context.textSecondary),
                 ),
                 const SizedBox(height: 2),
-                const Text(
+                Text(
                   '2.450.000đ',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
               ],
@@ -365,11 +370,18 @@ class _ProfileViewState extends State<ProfileView> {
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFAF2EC),
-              foregroundColor: AppColors.secondary,
+              backgroundColor: context.isDarkMode
+                  ? const Color(0xFF3B2F25)
+                  : const Color(0xFFFAF2EC),
+              foregroundColor: context.secondaryColor,
               elevation: 0,
               shadowColor: Colors.transparent,
-              side: const BorderSide(color: Color(0xFFF0DCD0), width: 1),
+              side: BorderSide(
+                color: context.isDarkMode
+                    ? const Color(0xFF5A4638)
+                    : const Color(0xFFF0DCD0),
+                width: 1,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -388,11 +400,13 @@ class _ProfileViewState extends State<ProfileView> {
   Widget _buildServicesCard(UserModel? user) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: context.isDarkMode
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -401,6 +415,7 @@ class _ProfileViewState extends State<ProfileView> {
       child: Column(
         children: [
           _buildMenuItem(
+            context,
             icon: Icons.favorite_border_rounded,
             title: 'Xe yêu thích',
             onTap: () {
@@ -408,17 +423,16 @@ class _ProfileViewState extends State<ProfileView> {
             },
           ),
           _buildMenuItem(
+            context,
             icon: Icons.badge_outlined,
             title: 'Giấy phép lái xe',
             trailing: _buildLicenseBadge(user),
             onTap: () {
               context.push('/driver-license');
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Xem Giấy phép lái xe')),
-              );
             },
           ),
           _buildMenuItem(
+            context,
             icon: Icons.lock_outline,
             title: 'Đặt lại mật khẩu',
             onTap: () {
@@ -426,11 +440,12 @@ class _ProfileViewState extends State<ProfileView> {
             },
           ),
           _buildMenuItem(
+            context,
             icon: Icons.help_outline_rounded,
             title: 'Trung tâm hỗ trợ',
             showDivider: false,
             onTap: () {
-              context.go('/support');
+              context.push('/support');
             },
           ),
         ],
@@ -441,11 +456,13 @@ class _ProfileViewState extends State<ProfileView> {
   Widget _buildOtherCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: context.isDarkMode
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -454,6 +471,7 @@ class _ProfileViewState extends State<ProfileView> {
       child: Column(
         children: [
           _buildMenuItem(
+            context,
             icon: Icons.settings_outlined,
             title: 'Cài đặt',
             showDivider: false,
@@ -466,7 +484,8 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildMenuItem({
+  Widget _buildMenuItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     Widget? trailing,
@@ -487,32 +506,33 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 Icon(
                   icon,
-                  color: AppColors.primary.withValues(alpha: 0.7),
+                  color: context.primaryColor.withValues(alpha: 0.7),
                   size: 22,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
                 ),
-                ?trailing,
-                const SizedBox(width: 4),
+                if (trailing != null) ...[trailing, const SizedBox(width: 4)],
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: Colors.grey.shade400,
+                  color: context.isDarkMode
+                      ? Colors.grey.shade600
+                      : Colors.grey.shade400,
                   size: 20,
                 ),
               ],
             ),
           ),
           if (showDivider)
-            const Divider(height: 1, thickness: 1, color: AppColors.border),
+            Divider(height: 1, thickness: 1, color: context.border),
         ],
       ),
     );
@@ -524,13 +544,17 @@ class _ProfileViewState extends State<ProfileView> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.amber.shade50,
+          color: context.isDarkMode
+              ? const Color(0xFF3E2D13)
+              : Colors.amber.shade50,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
           'Chưa xác thực',
           style: TextStyle(
-            color: Colors.amber.shade800,
+            color: context.isDarkMode
+                ? Colors.amber.shade400
+                : Colors.amber.shade800,
             fontSize: 10,
             fontWeight: FontWeight.w600,
           ),
@@ -541,13 +565,15 @@ class _ProfileViewState extends State<ProfileView> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8F5E9),
+          color: context.isDarkMode
+              ? const Color(0xFF1E3A24)
+              : const Color(0xFFE8F5E9),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: const Text(
+        child: Text(
           'Đã xác thực',
           style: TextStyle(
-            color: AppColors.success,
+            color: context.success,
             fontSize: 10,
             fontWeight: FontWeight.w600,
           ),
@@ -557,13 +583,15 @@ class _ProfileViewState extends State<ProfileView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: context.isDarkMode
+            ? const Color(0xFF4A2B10)
+            : Colors.orange.shade50,
         borderRadius: BorderRadius.circular(6),
       ),
-      child: const Text(
+      child: Text(
         'Chờ duyệt',
         style: TextStyle(
-          color: Colors.orange,
+          color: context.isDarkMode ? Colors.orange.shade400 : Colors.orange,
           fontSize: 10,
           fontWeight: FontWeight.w600,
         ),

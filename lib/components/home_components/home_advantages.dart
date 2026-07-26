@@ -19,7 +19,7 @@ class DrivioAdvantageTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
@@ -34,23 +34,23 @@ class DrivioAdvantageTile extends StatelessWidget {
             child: Container(
               width: 70,
               height: 70,
-              color: Colors.white,
+              color: context.isDarkMode ? Colors.grey.shade700 : Colors.white,
               child: imageUrl.startsWith('http')
                   ? Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.image_not_supported_outlined,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         size: 30,
                       ),
                     )
                   : Image.asset(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.image_not_supported_outlined,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         size: 30,
                       ),
                     ),
@@ -67,18 +67,18 @@ class DrivioAdvantageTile extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                     height: 1.3,
                   ),
                 ),
@@ -125,14 +125,14 @@ class HomeAdvantages extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Title
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Text(
             'Tính năng nổi bật tại Drivio',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
         ),

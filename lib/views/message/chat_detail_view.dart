@@ -241,18 +241,18 @@ class _ChatDetailViewState extends State<ChatDetailView> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0.5,
         shadowColor: Colors.black12,
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBackgroundColor,
         leadingWidth: 44,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_ios_new,
-              color: Colors.black,
+              color: context.textPrimary,
               size: 20,
             ),
             onPressed: () => context.pop(),
@@ -265,8 +265,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             Expanded(
               child: Text(
                 _conv.name,
-                style: const TextStyle(
-                  color: Colors.black,
+                style: TextStyle(
+                  color: context.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -280,7 +280,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
           //   onPressed: () {},
           // ),
           IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.black54),
+            icon: Icon(Icons.info_outline, color: context.textSecondary),
             onPressed: () {},
           ),
           const SizedBox(width: 8),
@@ -349,7 +349,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
               bottom: 25,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardColor,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.04),
@@ -380,10 +380,10 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                   child: Container(
                     height: 42,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
+                      color: context.isDarkMode ? Colors.grey.shade800 : const Color(0xFFF9FAFB),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFFE5E7EB),
+                        color: context.border,
                         width: 1,
                       ),
                     ),
@@ -454,7 +454,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                   decoration: BoxDecoration(
                     color: msg.isMe
                         ? AppColors.primary
-                        : const Color(0xFFF3F4F6),
+                        : (context.isDarkMode
+                            ? Colors.grey.shade800
+                            : const Color(0xFFF3F4F6)),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -469,7 +471,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                   child: Text(
                     msg.text,
                     style: TextStyle(
-                      color: msg.isMe ? Colors.white : Colors.black87,
+                      color: msg.isMe ? Colors.white : context.textPrimary,
                       fontSize: 15,
                       height: 1.3,
                     ),

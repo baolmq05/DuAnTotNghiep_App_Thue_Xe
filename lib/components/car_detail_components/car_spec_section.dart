@@ -3,7 +3,6 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart';
 
 /// Widget hiển thị thông số kỹ thuật của xe (Số ghế, truyền động, loại nhiên liệu, tiêu hao)
-/// Dành cho newbie: Sử dụng StatelessWidget và phân tách thành hàm con `_buildSpecTile` cho code gọn gàng, dễ quản lý
 class CarSpecSection extends StatelessWidget {
   final Car_Detail car;
 
@@ -27,21 +26,25 @@ class CarSpecSection extends StatelessWidget {
             childAspectRatio: 2.5, // Tỷ lệ chiều rộng / chiều cao của mỗi ô thông số
             children: [
               _buildSpecTile(
+                context,
                 Icons.airline_seat_recline_normal_rounded,
                 'Số ghế',
                 '${car.seatCount} chỗ',
               ),
               _buildSpecTile(
+                context,
                 Icons.settings_suggest_rounded,
                 'Truyền động',
                 car.transmission,
               ),
               _buildSpecTile(
+                context,
                 Icons.local_gas_station_rounded,
                 'Nhiên liệu',
                 car.fuelType,
               ),
               _buildSpecTile(
+                context,
                 Icons.speed_rounded,
                 'Tiêu hao',
                 '${car.fuelConsumption}L/100km',
@@ -54,13 +57,13 @@ class CarSpecSection extends StatelessWidget {
   }
 
   /// Hàm phụ hiển thị từng ô thông số riêng biệt
-  Widget _buildSpecTile(IconData icon, String title, String value) {
+  Widget _buildSpecTile(BuildContext context, IconData icon, String title, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: context.border, width: 1),
       ),
       child: Row(
         children: [
@@ -73,18 +76,18 @@ class CarSpecSection extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

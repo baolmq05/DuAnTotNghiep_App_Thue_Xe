@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/policy_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -166,10 +167,8 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -186,7 +185,7 @@ class _RegisterViewState extends State<RegisterView> {
             },
             icon: Icon(
               CupertinoIcons.chevron_left,
-              color: colorScheme.onSurface,
+              color: context.textPrimary,
               size: 24.0,
             ),
             padding: EdgeInsets.zero,
@@ -208,7 +207,7 @@ class _RegisterViewState extends State<RegisterView> {
                 style: TextStyle(
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.primaryContainer,
+                  color: AppColors.primary,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -220,7 +219,7 @@ class _RegisterViewState extends State<RegisterView> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.0,
-                  color: colorScheme.onSurfaceVariant,
+                  color: context.textSecondary,
                 ),
               ),
               const SizedBox(height: 40.0),
@@ -230,7 +229,7 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: _nameController,
                 keyboardType: TextInputType.name,
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: context.textPrimary,
                   fontSize: 15.0,
                 ),
                 decoration: InputDecoration(
@@ -238,7 +237,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.person,
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       size: 22.0,
                     ),
                   ),
@@ -248,19 +247,19 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   hintText: 'Họ và tên',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 15.0,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                    borderSide: BorderSide(color: context.border, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                 ),
               ),
@@ -271,7 +270,7 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: context.textPrimary,
                   fontSize: 15.0,
                 ),
                 decoration: InputDecoration(
@@ -279,7 +278,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.phone,
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       size: 22.0,
                     ),
                   ),
@@ -289,19 +288,19 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   hintText: 'Số điện thoại',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 15.0,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                    borderSide: BorderSide(color: context.border, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                 ),
               ),
@@ -312,7 +311,7 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: context.textPrimary,
                   fontSize: 15.0,
                 ),
                 decoration: InputDecoration(
@@ -320,7 +319,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.email_outlined,
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       size: 22.0,
                     ),
                   ),
@@ -330,19 +329,19 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   hintText: 'Email',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 15.0,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                    borderSide: BorderSide(color: context.border, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                 ),
               ),
@@ -353,7 +352,7 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: _passwordController,
                 obscureText: _isPasswordObscured,
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: context.textPrimary,
                   fontSize: 15.0,
                 ),
                 decoration: InputDecoration(
@@ -361,7 +360,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.lock,
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       size: 22.0,
                     ),
                   ),
@@ -376,7 +375,7 @@ class _RegisterViewState extends State<RegisterView> {
                         _isPasswordObscured
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: colorScheme.onSurface,
+                        color: context.textPrimary,
                         size: 20.0,
                       ),
                       onPressed: () {
@@ -388,19 +387,19 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   hintText: 'Mật khẩu',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 15.0,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                    borderSide: BorderSide(color: context.border, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                 ),
               ),
@@ -411,7 +410,7 @@ class _RegisterViewState extends State<RegisterView> {
                 controller: _confirmPasswordController,
                 obscureText: _isConfirmPasswordObscured,
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: context.textPrimary,
                   fontSize: 15.0,
                 ),
                 decoration: InputDecoration(
@@ -419,7 +418,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.lock,
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       size: 22.0,
                     ),
                   ),
@@ -434,7 +433,7 @@ class _RegisterViewState extends State<RegisterView> {
                         _isConfirmPasswordObscured
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: colorScheme.onSurface,
+                        color: context.textPrimary,
                         size: 20.0,
                       ),
                       onPressed: () {
@@ -446,19 +445,19 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   hintText: 'Nhập lại mật khẩu',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 15.0,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.outline, width: 1.0),
+                    borderSide: BorderSide(color: context.border, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: colorScheme.primaryContainer, width: 1.5),
+                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                 ),
               ),
@@ -474,21 +473,21 @@ class _RegisterViewState extends State<RegisterView> {
                         onChanged: (value) {
                           policyViewModel.setAccepted(value ?? false);
                         },
-                        activeColor: colorScheme.primary,
+                        activeColor: AppColors.primary,
                       ),
                       Expanded(
                         child: Text.rich(
                           TextSpan(
                             text: 'Tôi đã đọc và đồng ý với ',
                             style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
+                              color: context.textSecondary,
                               fontSize: 13.0,
                             ),
                             children: [
                               TextSpan(
                                 text: 'Chính sách & Quy định',
                                 style: TextStyle(
-                                  color: colorScheme.primary,
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),
@@ -521,7 +520,7 @@ class _RegisterViewState extends State<RegisterView> {
                     child: ElevatedButton(
                       onPressed: auth.isLoading ? null : _handleRegister,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primaryContainer,
+                        backgroundColor: AppColors.primary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
@@ -555,7 +554,7 @@ class _RegisterViewState extends State<RegisterView> {
                 children: [
                   Expanded(
                     child: Divider(
-                      color: colorScheme.outline,
+                      color: context.border,
                       thickness: 1.0,
                     ),
                   ),
@@ -565,13 +564,13 @@ class _RegisterViewState extends State<RegisterView> {
                       'Hoặc đăng ký với',
                       style: TextStyle(
                         fontSize: 13.0,
-                        color: const Color(0xCC6B7280),
+                        color: context.textSecondary,
                       ),
                     ),
                   ),
                   Expanded(
                     child: Divider(
-                      color: colorScheme.outline,
+                      color: context.border,
                       thickness: 1.0,
                     ),
                   ),
@@ -586,11 +585,11 @@ class _RegisterViewState extends State<RegisterView> {
                     onPressed: auth.isLoading ? null : _handleGoogleRegister,
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(54.0),
-                      side: BorderSide(color: colorScheme.outline, width: 1.0),
+                      side: BorderSide(color: context.border, width: 1.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
-                      backgroundColor: Colors.white,
+                      backgroundColor: context.cardColor,
                       elevation: 0,
                     ),
                     child: Row(
@@ -605,7 +604,7 @@ class _RegisterViewState extends State<RegisterView> {
                         Text(
                           'Đăng ký với Google',
                           style: TextStyle(
-                            color: colorScheme.onSurface,
+                            color: context.textPrimary,
                             fontSize: 15.0,
                             fontWeight: FontWeight.w500,
                           ),
@@ -658,7 +657,7 @@ class _RegisterViewState extends State<RegisterView> {
                   Text(
                     'Đã có tài khoản? ',
                     style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
+                      color: context.textSecondary,
                       fontSize: 14.0,
                     ),
                   ),
@@ -673,7 +672,7 @@ class _RegisterViewState extends State<RegisterView> {
                     child: Text(
                       'Đăng nhập ngay',
                       style: TextStyle(
-                        color: colorScheme.primaryContainer,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
                       ),

@@ -342,17 +342,17 @@ class _ConversationsViewState extends State<ConversationsView> {
     final list = filteredConversations(viewModel.conversations);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleSpacing: 20.0,
-        title: const Text(
+        title: Text(
           'Tin nhắn',
           style: TextStyle(
-            color: Colors.black,
+            color: context.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
@@ -371,10 +371,10 @@ class _ConversationsViewState extends State<ConversationsView> {
                     child: Container(
                       height: 48,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFB),
+                        color: context.isDarkMode ? Colors.grey.shade800 : const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: const Color(0xFFE5E7EB),
+                          color: context.border,
                           width: 1,
                         ),
                       ),
@@ -411,15 +411,15 @@ class _ConversationsViewState extends State<ConversationsView> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.cardColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: const Color(0xFFE5E7EB),
+                          color: context.border,
                           width: 1,
                         ),
                       ),
-                      child: const Center(
-                        child: Icon(Icons.tune, color: Colors.black, size: 20),
+                      child: Center(
+                        child: Icon(Icons.tune, color: context.textPrimary, size: 20),
                       ),
                     ),
                   ),
@@ -569,8 +569,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                   : ListView.separated(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: list.length,
-                      separatorBuilder: (context, index) => const Divider(
-                        color: Color(0xFFF3F4F6),
+                      separatorBuilder: (context, index) => Divider(
+                        color: context.border,
                         height: 1,
                         indent: 86,
                         endIndent: 20,
@@ -617,7 +617,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
-                                                color: Colors.black87,
+                                                color: context.textPrimary,
                                                 fontSize: 15.5,
                                                 fontWeight: conv.unreadCount > 0
                                                     ? FontWeight.bold
@@ -639,8 +639,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 color: conv.unreadCount > 0
-                                                    ? Colors.black87
-                                                    : const Color(0xFF6B7280),
+                                                    ? context.textPrimary
+                                                    : context.textSecondary,
                                                 fontSize: 14,
                                                 height: 1.3,
                                                 fontWeight: conv.unreadCount > 0

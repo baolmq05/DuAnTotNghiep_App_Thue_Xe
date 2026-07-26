@@ -12,13 +12,15 @@ class SupportView extends StatefulWidget {
 
 class _SupportViewState extends State<SupportView> {
   int _currentGuideIndex = 0;
-  final CarouselSliderController _carouselController = CarouselSliderController();
+  final CarouselSliderController _carouselController =
+      CarouselSliderController();
 
   final List<Map<String, dynamic>> _guides = [
     {
       'title': 'Hướng dẫn đặt xe',
       'category': 'Dành cho khách thuê',
-      'description': 'Quy trình tìm kiếm xe phù hợp, đặt xe và giao nhận xe từ chủ xe.',
+      'description':
+          'Quy trình tìm kiếm xe phù hợp, đặt xe và giao nhận xe từ chủ xe.',
       'image': 'lib/assets/images/onboarding/slide1.png',
       'color': const Color(0xFFE2F3F0),
       'steps': [
@@ -26,13 +28,14 @@ class _SupportViewState extends State<SupportView> {
         'Đặt xe: Gửi yêu cầu đặt xe và chờ chủ xe phê duyệt (thường dưới 30 phút).',
         'Đặt cọc: Thanh toán tiền cọc 30% qua ví hoặc cổng thanh toán của Drivio.',
         'Nhận xe: Kiểm tra kỹ hiện trạng xe, chụp ảnh check-in và ký biên bản bàn giao xe.',
-        'Trả xe: Trả xe đúng giờ, vệ sinh sạch sẽ và hoàn tất thủ tục bàn giao.'
-      ]
+        'Trả xe: Trả xe đúng giờ, vệ sinh sạch sẽ và hoàn tất thủ tục bàn giao.',
+      ],
     },
     {
       'title': 'Hướng dẫn dành cho chủ xe',
       'category': 'Dành cho chủ xe',
-      'description': 'Đăng ký xe dễ dàng, quản lý lịch thuê và bắt đầu gia tăng thu nhập từ xe nhàn rỗi.',
+      'description':
+          'Đăng ký xe dễ dàng, quản lý lịch thuê và bắt đầu gia tăng thu nhập từ xe nhàn rỗi.',
       'image': 'lib/assets/images/onboarding/slide2.png',
       'color': const Color(0xFFFEE3CE),
       'steps': [
@@ -40,129 +43,47 @@ class _SupportViewState extends State<SupportView> {
         'Quản lý lịch: Cập nhật lịch bận/rỗi của xe để tránh tình trạng trùng lịch.',
         'Duyệt yêu cầu: Phản hồi nhanh các yêu cầu thuê từ khách hàng để cải thiện tỷ lệ phản hồi.',
         'Giao xe: Kiểm tra giấy phép lái xe của khách hàng, ghi nhận mức nhiên liệu và bàn giao chìa khóa.',
-        'Nhận lại xe & Đánh giá: Kiểm tra tình trạng xe khi nhận lại và gửi đánh giá khách hàng.'
-      ]
+        'Nhận lại xe & Đánh giá: Kiểm tra tình trạng xe khi nhận lại và gửi đánh giá khách hàng.',
+      ],
     },
     {
       'title': 'Chính sách hủy chuyến & đền bù',
       'category': 'Quy định chung',
-      'description': 'Thông tin chi tiết về các mốc thời gian hủy chuyến và hoàn trả tiền đặt cọc.',
+      'description':
+          'Thông tin chi tiết về các mốc thời gian hủy chuyến và hoàn trả tiền đặt cọc.',
       'image': 'lib/assets/images/onboarding/slide3.png',
       'color': const Color(0xFFE3EDF7),
       'steps': [
         'Hủy chuyến miễn phí: Thực hiện hủy trong vòng 1 giờ sau khi cọc (nếu cách giờ nhận xe trên 24h).',
         'Hủy trước 24h: Khách hàng được hoàn trả 100% tiền đặt cọc.',
         'Hủy dưới 24h: Khách hàng bị phạt 30% tiền đặt cọc (chuyển cho chủ xe làm phí đền bù).',
-        'Sự cố phát sinh: Liên hệ hotline 1900 9217 ngay lập tức nếu gặp sự cố giao nhận xe.'
-      ]
+        'Sự cố phát sinh: Liên hệ hotline 1900 9217 ngay lập tức nếu gặp sự cố giao nhận xe.',
+      ],
     },
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE8F6F4),
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/home');
-            }
-          },
+        title: Text(
+          'Trung tâm hỗ trợ',
+          style: TextStyle(
+            color: context.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header Banner Block
-            Container(
-              color: const Color(0xFFE8F6F4),
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                children: [
-                  const Text(
-                    'Trung tâm hỗ trợ nhanh',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Background Circle
-                        Container(
-                          width: 140,
-                          height: 140,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        // Support Icon
-                        const Icon(
-                          Icons.support_agent_rounded,
-                          size: 96,
-                          color: AppColors.primary,
-                        ),
-                        // Speech Bubble Left
-                        Positioned(
-                          left: -12,
-                          top: 20,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 20,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                        // Question Mark Right
-                        Positioned(
-                          right: -12,
-                          top: 30,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.question_mark_rounded,
-                              size: 20,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             const SizedBox(height: 16),
 
             // Quick Support Card
@@ -170,7 +91,7 @@ class _SupportViewState extends State<SupportView> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -182,12 +103,12 @@ class _SupportViewState extends State<SupportView> {
               ),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Cần hỗ trợ nhanh, vui lòng gọi 1900 9217 (7AM - 10PM) hoặc gửi tin nhắn vào Drivio Fanpage.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                       height: 1.4,
                     ),
                   ),
@@ -198,11 +119,19 @@ class _SupportViewState extends State<SupportView> {
                         child: OutlinedButton.icon(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Đang kết nối cuộc gọi tới 1900 9217...')),
+                              const SnackBar(
+                                content: Text(
+                                  'Đang kết nối cuộc gọi tới 1900 9217...',
+                                ),
+                              ),
                             );
                           },
-                          icon: const Icon(Icons.phone_outlined, color: AppColors.primary, size: 20),
-                          label: const Text(
+                          icon: Icon(
+                            Icons.phone_outlined,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                          label: Text(
                             'Gọi điện',
                             style: TextStyle(
                               color: AppColors.primary,
@@ -211,8 +140,13 @@ class _SupportViewState extends State<SupportView> {
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.primary, width: 1.5),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            side: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
@@ -222,11 +156,17 @@ class _SupportViewState extends State<SupportView> {
                         child: ElevatedButton.icon(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Đang mở Drivio Fanpage...')),
+                              const SnackBar(
+                                content: Text('Đang mở Drivio Fanpage...'),
+                              ),
                             );
                           },
-                          icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 20),
-                          label: const Text(
+                          icon: Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          label: Text(
                             'Gửi tin nhắn',
                             style: TextStyle(
                               color: Colors.white,
@@ -236,14 +176,16 @@ class _SupportViewState extends State<SupportView> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF52C48E),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             elevation: 0,
                           ),
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -264,11 +206,11 @@ class _SupportViewState extends State<SupportView> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Color(0xFFD0F0EA),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.thumb_up_alt_outlined,
                       color: Color(0xFF1E705F),
                       size: 24,
@@ -279,7 +221,7 @@ class _SupportViewState extends State<SupportView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Góp ý cùng Drivio',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -300,19 +242,29 @@ class _SupportViewState extends State<SupportView> {
                         ElevatedButton(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Cảm ơn bạn đã phản hồi! Form góp ý đang phát triển.')),
+                              const SnackBar(
+                                content: Text(
+                                  'Cảm ơn bạn đã phản hồi! Form góp ý đang phát triển.',
+                                ),
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF42B883),
                             foregroundColor: Colors.white,
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 22,
+                              vertical: 10,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text('Bắt đầu', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(
+                            'Bắt đầu',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ],
                     ),
@@ -324,14 +276,14 @@ class _SupportViewState extends State<SupportView> {
             const SizedBox(height: 24),
 
             // Hotline Insurance Section
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Hotline bảo hiểm',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
             ),
@@ -352,14 +304,14 @@ class _SupportViewState extends State<SupportView> {
             const SizedBox(height: 24),
 
             // Guides Section Title
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Hướng dẫn',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
             ),
@@ -374,7 +326,9 @@ class _SupportViewState extends State<SupportView> {
                     height: 170.0,
                     autoPlay: true,
                     autoPlayInterval: const Duration(seconds: 5),
-                    autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                    autoPlayAnimationDuration: const Duration(
+                      milliseconds: 800,
+                    ),
                     autoPlayCurve: Curves.fastOutSlowIn,
                     enlargeCenterPage: true,
                     enlargeFactor: 0.22,
@@ -391,12 +345,15 @@ class _SupportViewState extends State<SupportView> {
                       builder: (BuildContext context) {
                         return GestureDetector(
                           onTap: () {
-                            context.push('/support-detail', extra: {
-                              'title': guide['title'],
-                              'content': guide['description'],
-                              'imageUrl': guide['image'],
-                              'steps': guide['steps'],
-                            });
+                            context.push(
+                              '/support-detail',
+                              extra: {
+                                'title': guide['title'],
+                                'content': guide['description'],
+                                'imageUrl': guide['image'],
+                                'steps': guide['steps'],
+                              },
+                            );
                           },
                           child: Container(
                             width: MediaQuery.of(context).size.width,
@@ -416,28 +373,32 @@ class _SupportViewState extends State<SupportView> {
                                 Padding(
                                   padding: const EdgeInsets.all(20.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             guide['category'].toUpperCase(),
                                             style: TextStyle(
                                               fontSize: 11,
                                               fontWeight: FontWeight.bold,
-                                              color: AppColors.primary.withValues(alpha: 0.8),
+                                              color: AppColors.primary
+                                                  .withValues(alpha: 0.8),
                                               letterSpacing: 0.8,
                                             ),
                                           ),
                                           const SizedBox(height: 6),
                                           Text(
                                             guide['title'],
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              color: AppColors.textPrimary,
+                                              color: context.textPrimary,
                                             ),
                                           ),
                                           const SizedBox(height: 6),
@@ -447,13 +408,14 @@ class _SupportViewState extends State<SupportView> {
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               fontSize: 13,
-                                              color: AppColors.textSecondary.withValues(alpha: 0.9),
+                                              color: context.textSecondary
+                                                  .withValues(alpha: 0.9),
                                               height: 1.3,
                                             ),
                                           ),
                                         ],
                                       ),
-                                      const Row(
+                                      Row(
                                         children: [
                                           Text(
                                             'Xem chi tiết',
@@ -484,8 +446,8 @@ class _SupportViewState extends State<SupportView> {
                                       guide['title'].contains('đặt xe')
                                           ? Icons.directions_car_filled_rounded
                                           : (guide['title'].contains('chủ xe')
-                                              ? Icons.home_work_rounded
-                                              : Icons.gavel_rounded),
+                                                ? Icons.home_work_rounded
+                                                : Icons.gavel_rounded),
                                       size: 110,
                                       color: AppColors.primary,
                                     ),
@@ -515,7 +477,9 @@ class _SupportViewState extends State<SupportView> {
                         margin: const EdgeInsets.symmetric(horizontal: 3.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(3.0),
-                          color: isActive ? AppColors.primary : Colors.grey.shade300,
+                          color: isActive
+                              ? AppColors.primary
+                              : Colors.grey.shade300,
                         ),
                       ),
                     );
@@ -530,9 +494,14 @@ class _SupportViewState extends State<SupportView> {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFEE3CE), width: 1.5),
+                border: Border.all(
+                  color: context.isDarkMode
+                      ? context.border
+                      : const Color(0xFFFEE3CE),
+                  width: 1.5,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.03),
@@ -552,18 +521,18 @@ class _SupportViewState extends State<SupportView> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(10),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: AppColors.accentSurface,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.smart_toy_rounded,
                           color: AppColors.secondary,
                           size: 28,
                         ),
                       ),
                       const SizedBox(width: 14),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -572,7 +541,7 @@ class _SupportViewState extends State<SupportView> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                                color: context.textPrimary,
                               ),
                             ),
                             SizedBox(height: 4),
@@ -580,7 +549,7 @@ class _SupportViewState extends State<SupportView> {
                               'Giải đáp thắc mắc, hỗ trợ thông tin & hướng dẫn quy trình 24/7 cùng AI chatbot.',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.textSecondary,
+                                color: context.textSecondary,
                                 height: 1.3,
                               ),
                             ),
@@ -596,14 +565,14 @@ class _SupportViewState extends State<SupportView> {
             const SizedBox(height: 24),
 
             // Info Section Title
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'Thông tin',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
             ),
@@ -626,20 +595,20 @@ class _SupportViewState extends State<SupportView> {
                 _buildInfoItem(Icons.help_center_rounded, 'Hỏi và trả lời'),
                 _buildInfoItem(Icons.assignment_rounded, 'Quy chế hoạt động'),
                 _buildInfoItem(Icons.lock_rounded, 'Bảo mật thông tin'),
-                _buildInfoItem(Icons.handshake_rounded, 'Giải quyết tranh chấp'),
+                _buildInfoItem(
+                  Icons.handshake_rounded,
+                  'Giải quyết tranh chấp',
+                ),
               ],
             ),
 
             const SizedBox(height: 32),
 
             // Footer Version Details
-            const Center(
+            Center(
               child: Text(
                 'Phiên bản 5.2.7 (707)',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: context.textSecondary),
               ),
             ),
             const SizedBox(height: 32),
@@ -654,9 +623,9 @@ class _SupportViewState extends State<SupportView> {
       width: 110,
       margin: const EdgeInsets.only(right: 12, bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200, width: 1.2),
+        border: Border.all(color: context.border, width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -668,7 +637,9 @@ class _SupportViewState extends State<SupportView> {
       child: InkWell(
         onTap: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Đang gọi tổng đài bảo hiểm $name ($phone)...')),
+            SnackBar(
+              content: Text('Đang gọi tổng đài bảo hiểm $name ($phone)...'),
+            ),
           );
         },
         borderRadius: BorderRadius.circular(12),
@@ -679,7 +650,7 @@ class _SupportViewState extends State<SupportView> {
             children: [
               Text(
                 name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -688,9 +659,9 @@ class _SupportViewState extends State<SupportView> {
               const SizedBox(height: 6),
               Text(
                 phone,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -704,9 +675,9 @@ class _SupportViewState extends State<SupportView> {
   Widget _buildInfoItem(IconData icon, String title) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200, width: 1.2),
+        border: Border.all(color: context.border, width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -717,9 +688,9 @@ class _SupportViewState extends State<SupportView> {
       ),
       child: InkWell(
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Đang mở trang: $title')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Đang mở trang: $title')));
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -732,10 +703,10 @@ class _SupportViewState extends State<SupportView> {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                   height: 1.2,
                 ),
               ),

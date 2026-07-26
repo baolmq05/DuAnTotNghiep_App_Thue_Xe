@@ -538,7 +538,7 @@ class _VehicleListViewState extends State<VehicleListView> {
             Icon(
               Icons.tune_rounded,
               size: 16,
-              color: hasFilters ? Colors.white : AppColors.textPrimary,
+              color: hasFilters ? Colors.white : context.textPrimary,
             ),
             const SizedBox(width: 6),
             Text(
@@ -546,7 +546,7 @@ class _VehicleListViewState extends State<VehicleListView> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: hasFilters ? Colors.white : AppColors.textPrimary,
+                color: hasFilters ? Colors.white : context.textPrimary,
               ),
             ),
           ],
@@ -568,11 +568,11 @@ class _VehicleListViewState extends State<VehicleListView> {
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.bold,
-        color: isSelected ? Colors.white : AppColors.textPrimary,
+        color: isSelected ? Colors.white : context.textPrimary,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardColor,
       side: BorderSide(
-        color: isSelected ? AppColors.primary : AppColors.border,
+        color: isSelected ? AppColors.primary : context.border,
       ),
       showCheckmark: false,
     );
@@ -584,19 +584,19 @@ class _VehicleListViewState extends State<VehicleListView> {
     final visibleCars = filteredCars.take(_visibleCount).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F8),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
           onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary),
         ),
-        title: const Text(
+        title: Text(
           'Danh sách xe',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: context.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -636,7 +636,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.search_rounded,
                           color: AppColors.primary,
                           size: 24,
@@ -650,10 +650,10 @@ class _VehicleListViewState extends State<VehicleListView> {
                                 _address.isNotEmpty
                                     ? _address
                                     : 'Tất cả địa điểm',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                                  color: context.textPrimary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -661,9 +661,9 @@ class _VehicleListViewState extends State<VehicleListView> {
                               const SizedBox(height: 2),
                               Text(
                                 '${_formatDate(_pickupDate!)} (${_formatTime(_pickupTime!)}) - ${_formatDate(_returnDate!)} (${_formatTime(_returnTime!)})',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
-                                  color: AppColors.textSecondary,
+                                  color: context.textSecondary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -678,7 +678,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                             color: AppColors.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.edit_location_alt_outlined,
                             color: AppColors.primary,
                             size: 18,
@@ -812,13 +812,13 @@ class _VehicleListViewState extends State<VehicleListView> {
                   },
                   decoration: InputDecoration(
                     hintText: 'Tìm theo tên xe, địa điểm, từ khóa...',
-                    hintStyle: const TextStyle(
+                    hintStyle: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                     ),
                     filled: true,
                     fillColor: Colors.white,
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search_rounded,
                       color: AppColors.primary,
                       size: 20,
@@ -833,7 +833,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                                 _visibleCount = 8;
                               });
                             },
-                            icon: const Icon(Icons.clear_rounded, size: 20),
+                            icon: Icon(Icons.clear_rounded, size: 20),
                           ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -875,7 +875,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                   runSpacing: 8,
                   children: [
                     Chip(
-                      avatar: const Icon(
+                      avatar: Icon(
                         Icons.directions_car_outlined,
                         size: 16,
                         color: AppColors.primary,
@@ -885,20 +885,20 @@ class _VehicleListViewState extends State<VehicleListView> {
                       side: BorderSide(
                         color: AppColors.primary.withOpacity(0.12),
                       ),
-                      labelStyle: const TextStyle(
-                        color: AppColors.textPrimary,
+                      labelStyle: TextStyle(
+                        color: context.textPrimary,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
                     ),
                     if (_activeFiltersCount > 0)
                       ActionChip(
-                        avatar: const Icon(
+                        avatar: Icon(
                           Icons.clear_all_rounded,
                           size: 16,
                           color: Colors.red,
                         ),
-                        label: const Text('Xóa tất cả bộ lọc'),
+                        label: Text('Xóa tất cả bộ lọc'),
                         onPressed: () {
                           setState(() {
                             _address = '';
@@ -916,7 +916,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                         },
                         backgroundColor: Colors.white,
                         side: BorderSide(color: Colors.red.withOpacity(0.2)),
-                        labelStyle: const TextStyle(
+                        labelStyle: TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
@@ -941,7 +941,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.error_outline_rounded,
                           size: 52,
                           color: Colors.red,
@@ -950,7 +950,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                         Text(
                           _errorMessage ?? 'Đã xảy ra lỗi',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.black54),
+                          style: TextStyle(color: Colors.black54),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
@@ -958,7 +958,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                           ),
-                          child: const Text(
+                          child: Text(
                             'Thử lại',
                             style: TextStyle(color: Colors.white),
                           ),
@@ -981,30 +981,30 @@ class _VehicleListViewState extends State<VehicleListView> {
                           width: 88,
                           height: 88,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE9F3F4),
+                            color: context.isDarkMode ? const Color(0xFF1F3D45) : const Color(0xFFE9F3F4),
                             borderRadius: BorderRadius.circular(28),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.directions_car_outlined,
                             size: 42,
                             color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
+                        Text(
                           'Không tìm thấy xe phù hợp',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'Thử đổi địa điểm hoặc từ khóa tìm kiếm để xem thêm xe.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: AppColors.textSecondary,
+                            color: context.textSecondary,
                             height: 1.4,
                           ),
                         ),
@@ -1029,7 +1029,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                             foregroundColor: AppColors.primary,
                             side: const BorderSide(color: AppColors.primary),
                           ),
-                          child: const Text('Xem tất cả xe'),
+                          child: Text('Xem tất cả xe'),
                         ),
                       ],
                     ),

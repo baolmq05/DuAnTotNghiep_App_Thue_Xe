@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -92,10 +93,8 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: context.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -111,7 +110,7 @@ class _LoginViewState extends State<LoginView> {
                 style: TextStyle(
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.primaryContainer,
+                  color: AppColors.primary,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -123,7 +122,7 @@ class _LoginViewState extends State<LoginView> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.0,
-                  color: colorScheme.onSurfaceVariant,
+                  color: context.textSecondary,
                 ),
               ),
               const SizedBox(height: 36.0),
@@ -132,13 +131,13 @@ class _LoginViewState extends State<LoginView> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: TextStyle(color: colorScheme.onSurface, fontSize: 15.0),
+                style: TextStyle(color: context.textPrimary, fontSize: 15.0),
                 decoration: InputDecoration(
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.email_outlined,
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       size: 22.0,
                     ),
                   ),
@@ -148,23 +147,23 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   hintText: 'Email',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 15.0,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: colorScheme.outline,
+                      color: context.border,
                       width: 1.0,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       width: 1.5,
                     ),
                   ),
@@ -176,13 +175,13 @@ class _LoginViewState extends State<LoginView> {
               TextField(
                 controller: _passwordController,
                 obscureText: _isPasswordObscured,
-                style: TextStyle(color: colorScheme.onSurface, fontSize: 15.0),
+                style: TextStyle(color: context.textPrimary, fontSize: 15.0),
                 decoration: InputDecoration(
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.lock,
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       size: 22.0,
                     ),
                   ),
@@ -197,7 +196,7 @@ class _LoginViewState extends State<LoginView> {
                         _isPasswordObscured
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: colorScheme.onSurface,
+                        color: context.textPrimary,
                         size: 20.0,
                       ),
                       onPressed: () {
@@ -209,23 +208,23 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   hintText: 'Mật khẩu',
                   hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 15.0,
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 18.0),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.cardColor,
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: colorScheme.outline,
+                      color: context.border,
                       width: 1.0,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: colorScheme.primaryContainer,
+                      color: AppColors.primary,
                       width: 1.5,
                     ),
                   ),
@@ -246,7 +245,7 @@ class _LoginViewState extends State<LoginView> {
                   child: Text(
                     'Quên mật khẩu?',
                     style: TextStyle(
-                      color: colorScheme.onSurface,
+                      color: context.textPrimary,
                       fontWeight: FontWeight.w500,
                       fontSize: 14.0,
                     ),
@@ -263,7 +262,7 @@ class _LoginViewState extends State<LoginView> {
                     child: ElevatedButton(
                       onPressed: auth.isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primaryContainer,
+                        backgroundColor: AppColors.primary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
@@ -297,7 +296,7 @@ class _LoginViewState extends State<LoginView> {
               Row(
                 children: [
                   Expanded(
-                    child: Divider(color: colorScheme.outline, thickness: 1.0),
+                    child: Divider(color: context.border, thickness: 1.0),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -305,12 +304,12 @@ class _LoginViewState extends State<LoginView> {
                       'Hoặc tiếp tục với',
                       style: TextStyle(
                         fontSize: 13.0,
-                        color: const Color(0xCC6B7280),
+                        color: context.textSecondary,
                       ),
                     ),
                   ),
                   Expanded(
-                    child: Divider(color: colorScheme.outline, thickness: 1.0),
+                    child: Divider(color: context.border, thickness: 1.0),
                   ),
                 ],
               ),
@@ -323,11 +322,11 @@ class _LoginViewState extends State<LoginView> {
                     onPressed: auth.isLoading ? null : _handleGoogleLogin,
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(54.0),
-                      side: BorderSide(color: colorScheme.outline, width: 1.0),
+                      side: BorderSide(color: context.border, width: 1.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.0),
                       ),
-                      backgroundColor: Colors.white,
+                      backgroundColor: context.cardColor,
                       elevation: 0,
                     ),
                     child: Row(
@@ -342,7 +341,7 @@ class _LoginViewState extends State<LoginView> {
                         Text(
                           'Tiếp tục với Google',
                           style: TextStyle(
-                            color: colorScheme.onSurface,
+                            color: context.textPrimary,
                             fontSize: 15.0,
                             fontWeight: FontWeight.w500,
                           ),
@@ -363,7 +362,7 @@ class _LoginViewState extends State<LoginView> {
                   Text(
                     'Chưa có tài khoản? ',
                     style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
+                      color: context.textSecondary,
                       fontSize: 14.0,
                     ),
                   ),
@@ -374,7 +373,7 @@ class _LoginViewState extends State<LoginView> {
                     child: Text(
                       'Đăng ký ngay',
                       style: TextStyle(
-                        color: colorScheme.primaryContainer,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
                       ),
@@ -389,7 +388,7 @@ class _LoginViewState extends State<LoginView> {
                 TextSpan(
                   text: 'Bằng việc đăng nhập, bạn đồng ý với\n',
                   style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: context.textSecondary,
                     fontSize: 12.0,
                     height: 1.6,
                   ),
@@ -397,7 +396,7 @@ class _LoginViewState extends State<LoginView> {
                     TextSpan(
                       text: 'Chính sách & quy định',
                       style: TextStyle(
-                        color: colorScheme.onSurface,
+                        color: context.textPrimary,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
                       ),
@@ -410,7 +409,7 @@ class _LoginViewState extends State<LoginView> {
                     TextSpan(
                       text: 'Chính sách bảo mật',
                       style: TextStyle(
-                        color: colorScheme.onSurface,
+                        color: context.textPrimary,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.underline,
                       ),

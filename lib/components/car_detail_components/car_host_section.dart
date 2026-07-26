@@ -4,7 +4,6 @@ import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart
 import 'package:go_router/go_router.dart';
 
 /// Widget hiển thị thông tin chủ xe (Avatar, tên, sao đánh giá và chuyến đi)
-/// Dành cho newbie: Sử dụng StatelessWidget, khi nhấn vào avatar hoặc tên sẽ chuyển hướng qua trang profile chủ xe
 class CarHostSection extends StatelessWidget {
   final Car_Detail car;
 
@@ -19,9 +18,9 @@ class CarHostSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border, width: 1),
+          border: Border.all(color: context.border, width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,10 +59,10 @@ class CarHostSection extends StatelessWidget {
                           children: [
                             Text(
                               owner.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                                color: context.textPrimary,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -84,10 +83,10 @@ class CarHostSection extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${car.reviewsAvgRating?.toStringAsFixed(1) ?? '0'} (${car.tripsCount})',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: context.textPrimary,
                           ),
                         ),
                       ],

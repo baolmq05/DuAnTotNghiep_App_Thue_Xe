@@ -7,6 +7,7 @@ import 'package:duantotnghiep_app_thue_xe/components/home_components/home_rent_o
 import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -32,13 +33,17 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
+        backgroundColor: context.scaffoldBackgroundColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Drivio,',
-              style: TextStyle(fontSize: 13, color: Colors.black54),
+              style: TextStyle(fontSize: 13, color: context.textSecondary),
             ),
             Row(
               spacing: 5,
@@ -48,10 +53,10 @@ class _HomeViewState extends State<HomeView> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: context.textPrimary,
                   ),
                 ),
-                Icon(
+                const Icon(
                   Icons.waving_hand_sharp,
                   color: Colors.amberAccent,
                   size: 20,
@@ -82,7 +87,10 @@ class _HomeViewState extends State<HomeView> {
                     onPressed: () {
                       context.push('/notification');
                     },
-                    icon: const Icon(Icons.notifications_none_outlined),
+                    icon: Icon(
+                      Icons.notifications_none_outlined,
+                      color: context.textPrimary,
+                    ),
                   ),
                 );
               },

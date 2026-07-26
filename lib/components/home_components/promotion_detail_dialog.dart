@@ -35,7 +35,7 @@ class PromotionDetailDialog extends StatelessWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 8),
             Expanded(
               child: Text('Đã sao chép mã "${promotion.code}" vào bộ nhớ tạm'),
@@ -77,7 +77,7 @@ class PromotionDetailDialog extends StatelessWidget {
                     errorBuilder: (context, error, stackTrace) => Container(
                       height: 160,
                       color: Colors.grey.shade300,
-                      child: const Icon(
+                      child: Icon(
                         Icons.local_offer,
                         size: 50,
                         color: Colors.grey,
@@ -92,7 +92,7 @@ class PromotionDetailDialog extends StatelessWidget {
                       radius: 16,
                       child: IconButton(
                         padding: EdgeInsets.zero,
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.close,
                           color: Colors.white,
                           size: 18,
@@ -127,7 +127,7 @@ class PromotionDetailDialog extends StatelessWidget {
                           ),
                           child: Text(
                             discountText,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
@@ -146,8 +146,8 @@ class PromotionDetailDialog extends StatelessWidget {
                           ),
                           child: Text(
                             'Mã: ${promotion.code}',
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: context.textPrimary,
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
@@ -160,10 +160,10 @@ class PromotionDetailDialog extends StatelessWidget {
                     // Title
                     Text(
                       promotion.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -173,9 +173,9 @@ class PromotionDetailDialog extends StatelessWidget {
                       promotion.description.isNotEmpty
                           ? promotion.description
                           : 'Không có mô tả chi tiết.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -187,6 +187,7 @@ class PromotionDetailDialog extends StatelessWidget {
                     if (promotion.startDate.isNotEmpty ||
                         promotion.endDate.isNotEmpty)
                       _buildDetailRow(
+                        context,
                         icon: Icons.calendar_today_outlined,
                         label: 'Thời gian:',
                         value: '${promotion.startDate} - ${promotion.endDate}',
@@ -194,6 +195,7 @@ class PromotionDetailDialog extends StatelessWidget {
                     if (promotion.usageLimit > 0) ...[
                       const SizedBox(height: 6),
                       _buildDetailRow(
+                        context,
                         icon: Icons.confirmation_number_outlined,
                         label: 'Lượt dùng còn lại:',
                         value: '${promotion.usageLimit} lượt',
@@ -202,6 +204,7 @@ class PromotionDetailDialog extends StatelessWidget {
                     if (promotion.perUserLimit > 0) ...[
                       const SizedBox(height: 6),
                       _buildDetailRow(
+                        context,
                         icon: Icons.person_outline,
                         label: 'Lượt dùng/khách:',
                         value: '${promotion.perUserLimit} lần',
@@ -216,8 +219,8 @@ class PromotionDetailDialog extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () => _copyToClipboard(context),
-                            icon: const Icon(Icons.copy, size: 18),
-                            label: const Text('Sao chép mã'),
+                            icon: Icon(Icons.copy, size: 18),
+                            label: Text('Sao chép mã'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
                               side: const BorderSide(color: AppColors.primary),
@@ -240,7 +243,7 @@ class PromotionDetailDialog extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text('Đóng'),
+                            child: Text('Đóng'),
                           ),
                         ),
                       ],
@@ -255,27 +258,28 @@ class PromotionDetailDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow({
+  Widget _buildDetailRow(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
   }) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: context.textSecondary),
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 13, color: context.textSecondary),
         ),
         const SizedBox(width: 4),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -303,9 +307,9 @@ class PromotionsListDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
@@ -329,16 +333,16 @@ class PromotionsListDialog extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Chương trình ưu đãi',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -349,10 +353,10 @@ class PromotionsListDialog extends StatelessWidget {
           // List
           Expanded(
             child: promotions.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'Không có khuyến mãi nào',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(color: context.textSecondary),
                     ),
                   )
                 : ListView.separated(

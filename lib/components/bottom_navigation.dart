@@ -24,15 +24,17 @@ class BottomNavigation extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: context.isDarkMode
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
         ],
-        border: Border(top: BorderSide(color: Colors.grey.shade100, width: 1)),
+        border: Border(top: BorderSide(color: context.border, width: 1)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: SafeArea(
@@ -43,9 +45,11 @@ class BottomNavigation extends StatelessWidget {
           gap: 6,
           iconSize: 22,
           duration: const Duration(milliseconds: 300),
-          color: Colors.grey.shade500, // Màu icon khi chưa chọn (nhạt dịu mắt)
-          activeColor: AppColors.primary, // Màu icon/chữ khi được chọn
-          tabBackgroundColor: AppColors.primary.withValues(alpha: 0.08),
+          color: context.isDarkMode ? Colors.grey.shade400 : context.textSecondary, // Màu icon khi chưa chọn
+          activeColor: context.isDarkMode ? const Color(0xFF4DD0E1) : context.primaryColor, // Màu icon/chữ khi được chọn
+          tabBackgroundColor: context.isDarkMode
+              ? const Color(0xFF4DD0E1).withValues(alpha: 0.1)
+              : context.primaryColor.withValues(alpha: 0.08),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
 
           tabs: [
@@ -80,8 +84,8 @@ class BottomNavigation extends StatelessWidget {
                   selectedIndex == 2 ? Icons.message : Icons.message_outlined,
                   size: 22,
                   color: selectedIndex == 2
-                      ? AppColors.primary
-                      : Colors.grey.shade500,
+                      ? (context.isDarkMode ? const Color(0xFF4DD0E1) : context.primaryColor)
+                      : (context.isDarkMode ? Colors.grey.shade400 : context.textSecondary),
                 ),
               ),
             ),

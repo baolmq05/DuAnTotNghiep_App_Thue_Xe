@@ -1,5 +1,6 @@
 import 'package:duantotnghiep_app_thue_xe/components/setting_components/logout_button.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
@@ -11,16 +12,16 @@ class SettingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9FAFC),
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        title: const Text(
+        title: Text(
           "Cài đặt",
           style: TextStyle(
-            color: Colors.black,
+            color: context.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 24,
           ),
@@ -30,22 +31,24 @@ class SettingView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         children: [
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Cài đặt chung',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardColor,
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: context.isDarkMode 
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -54,44 +57,56 @@ class SettingView extends StatelessWidget {
             child: Column(
               children: [
                 _buildMenuItem(
+                  context,
                   icon: Icons.notifications_none_rounded,
                   title: 'Thông báo',
                   onTap: () {
                     context.push('/notification');
                   },
                 ),
-                _buildMenuItem(
-                  icon: Icons.dark_mode_outlined,
-                  title: 'Giao diện tối',
-                  showChevron: false,
-                  showDivider: false,
-                  trailing: Switch(
-                    value: false,
-                    onChanged: (value) {},
-                    activeTrackColor: AppColors.primary,
-                  ),
-                  onTap: () {},
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, child) {
+                    return _buildMenuItem(
+                      context,
+                      icon: Icons.dark_mode_outlined,
+                      title: 'Giao diện tối',
+                      showChevron: false,
+                      showDivider: false,
+                      trailing: Switch(
+                        value: themeProvider.isDarkMode,
+                        onChanged: (value) {
+                          themeProvider.toggleTheme(value);
+                        },
+                        activeTrackColor: context.primaryColor,
+                      ),
+                      onTap: () {
+                        themeProvider.toggleTheme(!themeProvider.isDarkMode);
+                      },
+                    );
+                  },
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'Hỗ trợ & Thông tin',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardColor,
               borderRadius: BorderRadius.circular(16.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: context.isDarkMode 
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : Colors.black.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -100,6 +115,7 @@ class SettingView extends StatelessWidget {
             child: Column(
               children: [
                 _buildMenuItem(
+                  context,
                   icon: Icons.help_outline,
                   title: 'Trung tâm trợ giúp',
                   onTap: () {
@@ -107,6 +123,7 @@ class SettingView extends StatelessWidget {
                   },
                 ),
                 _buildMenuItem(
+                  context,
                   icon: Icons.note_alt_outlined,
                   title: 'Chính sách & quy định ',
                   onTap: () {
@@ -114,6 +131,7 @@ class SettingView extends StatelessWidget {
                   },
                 ),
                 _buildMenuItem(
+                  context,
                   icon: Icons.policy_outlined,
                   title: 'Chính sách bảo mật',
                   onTap: () {
@@ -121,12 +139,13 @@ class SettingView extends StatelessWidget {
                   },
                 ),
                 _buildMenuItem(
+                  context,
                   icon: Icons.info_outline,
                   title: 'Giới thiệu ứng dụng',
                   showDivider: false,
                   trailing: Text(
                     'Phiên bản 1.0.0',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                    style: TextStyle(color: context.textSecondary, fontSize: 13),
                   ),
                   onTap: () {},
                 ),
@@ -149,7 +168,8 @@ class SettingView extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem({
+  Widget _buildMenuItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     Widget? trailing,
@@ -171,17 +191,17 @@ class SettingView extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: AppColors.primary.withValues(alpha: 0.7),
+                  color: context.primaryColor.withValues(alpha: 0.7),
                   size: 22,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                     ),
                   ),
                 ),
@@ -189,14 +209,14 @@ class SettingView extends StatelessWidget {
                 if (showChevron)
                   Icon(
                     Icons.chevron_right_rounded,
-                    color: Colors.grey.shade400,
+                    color: context.isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400,
                     size: 20,
                   ),
               ],
             ),
           ),
           if (showDivider)
-            const Divider(height: 1, thickness: 1, color: AppColors.border),
+            Divider(height: 1, thickness: 1, color: context.border),
         ],
       ),
     );

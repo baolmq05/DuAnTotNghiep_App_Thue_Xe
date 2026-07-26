@@ -4,7 +4,6 @@ import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart
 import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
 
 /// Widget hiển thị phần tiêu đề thông tin xe (Tên xe, Đánh giá, Số chuyến, Giá thuê)
-/// Dành cho newbie: Sử dụng StatelessWidget vì đây là widget tĩnh chỉ nhận dữ liệu và hiển thị, không lưu trạng thái
 class CarInfoHeader extends StatelessWidget {
   final Car_Detail car;
 
@@ -26,13 +25,13 @@ class CarInfoHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Tên xe - Chiếm trọn dòng trên cùng, thoải mái xuống dòng nếu tên quá dài
+          // 1. Tên xe - Chiếm trọn dòng trên cùng
           Text(
             car.name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22.0,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: context.isDarkMode ? const Color(0xFF4DD0E1) : AppColors.primary,
             ),
           ),
           const SizedBox(height: 8.0),
@@ -44,18 +43,18 @@ class CarInfoHeader extends StatelessWidget {
               const SizedBox(width: 4.0),
               Text(
                 rating,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14.0,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: context.textPrimary,
                 ),
               ),
               const SizedBox(width: 6.0),
               Text(
                 '• $tripsCount chuyến đi',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14.0,
-                  color: AppColors.textSecondary,
+                  color: context.textSecondary,
                 ),
               ),
             ],
@@ -90,11 +89,11 @@ class CarInfoHeader extends StatelessWidget {
                         color: AppColors.primary,
                       ),
                     ),
-                    const TextSpan(
+                    TextSpan(
                       text: ' / ngày',
                       style: TextStyle(
                         fontSize: 13.0,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                       ),
                     ),
                   ],
@@ -105,21 +104,28 @@ class CarInfoHeader extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                   decoration: BoxDecoration(
-                    color: Colors.red[50], // Nền đỏ nhạt
+                    color: context.isDarkMode ? const Color(0xFF4A1D1D) : Colors.red[50], // Nền đỏ nhạt
                     borderRadius: BorderRadius.circular(6.0),
-                    border: Border.all(color: Colors.red[100]!, width: 1.0),
+                    border: Border.all(
+                      color: context.isDarkMode ? Colors.red[900]! : Colors.red[100]!,
+                      width: 1.0,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.local_offer_outlined, color: Colors.red, size: 14),
+                      Icon(
+                        Icons.local_offer_outlined,
+                        color: context.isDarkMode ? Colors.red[300]! : Colors.red,
+                        size: 14,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         'Giảm ${formatPrice(car.discountValue)}đ',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12.0,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: context.isDarkMode ? Colors.red[300]! : Colors.red,
                         ),
                       ),
                     ],

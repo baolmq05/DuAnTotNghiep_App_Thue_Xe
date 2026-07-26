@@ -8,11 +8,7 @@ class PolicyView extends StatefulWidget {
   final bool showAcceptance;
   final VoidCallback? onAccept;
 
-  const PolicyView({
-    super.key,
-    this.showAcceptance = false,
-    this.onAccept,
-  });
+  const PolicyView({super.key, this.showAcceptance = false, this.onAccept});
 
   @override
   State<PolicyView> createState() => _PolicyViewState();
@@ -41,7 +37,7 @@ class _PolicyViewState extends State<PolicyView> {
     if (_scrollController.hasClients) {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
-      
+
       // Nếu người dùng cuộn đến gần cuối trang (còn 80px)
       if (currentScroll >= maxScroll - 80) {
         context.read<PolicyViewModel>().setHasReadFully(true);
@@ -71,26 +67,26 @@ class _PolicyViewState extends State<PolicyView> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Chính sách & Quy định',
           style: TextStyle(
-            color: Colors.white,
+            color: context.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
-        backgroundColor: AppColors.primary,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: Icon(Icons.arrow_back_ios, color: context.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: Consumer<PolicyViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.isLoading) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               ),
@@ -104,18 +100,26 @@ class _PolicyViewState extends State<PolicyView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 60, color: AppColors.error),
+                    Icon(Icons.error_outline, size: 60, color: AppColors.error),
                     const SizedBox(height: 16),
                     Text(
                       'Lỗi tải chính sách: ${viewModel.errorMessage}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: context.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
                       onPressed: () => viewModel.loadPolicy(),
-                      child: const Text('Thử lại', style: TextStyle(color: Colors.white)),
+                      child: Text(
+                        'Thử lại',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
@@ -124,10 +128,10 @@ class _PolicyViewState extends State<PolicyView> {
           }
 
           if (viewModel.sections.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Không tìm thấy thông tin chính sách.',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                style: TextStyle(color: context.textSecondary, fontSize: 16),
               ),
             );
           }
@@ -136,25 +140,27 @@ class _PolicyViewState extends State<PolicyView> {
             children: [
               // Anchor navigation bar (like a web sticky header)
               _buildAnchorBar(viewModel),
-              
+
               // Policy text list
               Expanded(
                 child: SingleChildScrollView(
                   controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 20.0,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Alert Banner
-                      _buildAlertBanner(),
-                      const SizedBox(height: 16),
-
                       // Generate Sections
                       ...List.generate(viewModel.sections.length, (index) {
                         final section = viewModel.sections[index];
-                        return _buildSectionCard(section, viewModel.sectionKeys[index]);
+                        return _buildSectionCard(
+                          section,
+                          viewModel.sectionKeys[index],
+                        );
                       }),
-                      
+
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -174,10 +180,10 @@ class _PolicyViewState extends State<PolicyView> {
     return Container(
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -192,7 +198,9 @@ class _PolicyViewState extends State<PolicyView> {
           final section = viewModel.sections[index];
           // Extracted short title from number format, e.g. "1. Trách nhiệm" -> "Trách nhiệm"
           final titleParts = section.title.split('. ');
-          final shortTitle = titleParts.length > 1 ? titleParts[1] : section.title;
+          final shortTitle = titleParts.length > 1
+              ? titleParts[1]
+              : section.title;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
@@ -207,7 +215,9 @@ class _PolicyViewState extends State<PolicyView> {
               ),
               selected: isSelected,
               selectedColor: AppColors.primary,
-              backgroundColor: Colors.grey.shade100,
+              backgroundColor: context.isDarkMode
+                  ? Colors.grey.shade800
+                  : Colors.grey.shade100,
               checkmarkColor: Colors.white,
               showCheckmark: false,
               side: BorderSide(
@@ -233,27 +243,6 @@ class _PolicyViewState extends State<PolicyView> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.secondary.withOpacity(0.5)),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.shield_outlined, color: AppColors.secondary, size: 28),
-          const SizedBox(width: 12),
-          Expanded(
-            child: RichText(
-              text: const TextSpan(
-                text: 'Chính sách bảo vệ dữ liệu & quy định chung tại ',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.4),
-                children: [
-                  TextSpan(
-                    text: 'DRIVIO',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
-                  ),
-                  TextSpan(text: '. Vui lòng đọc kỹ các điều khoản để đảm bảo quyền lợi của bạn.'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -264,9 +253,9 @@ class _PolicyViewState extends State<PolicyView> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppColors.border, width: 1),
+        side: BorderSide(color: context.border, width: 1),
       ),
-      color: Colors.white,
+      color: context.cardColor,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -275,14 +264,14 @@ class _PolicyViewState extends State<PolicyView> {
             // Section Title
             Text(
               section.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
               ),
             ),
-            const Divider(color: AppColors.border, height: 24, thickness: 1),
-            
+            Divider(color: AppColors.border, height: 24, thickness: 1),
+
             // Section Elements
             ...section.elements.map((element) => _buildElementWidget(element)),
           ],
@@ -299,16 +288,16 @@ class _PolicyViewState extends State<PolicyView> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 4.0, right: 8.0),
                 child: Icon(Icons.circle, size: 6, color: AppColors.primary),
               ),
               Expanded(
                 child: Text(
                   element.text ?? '',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13.5,
-                    color: AppColors.textPrimary,
+                    color: context.textPrimary,
                     height: 1.5,
                   ),
                 ),
@@ -323,19 +312,23 @@ class _PolicyViewState extends State<PolicyView> {
       case 'text':
       default:
         // Identify subsection titles like "A. Trách nhiệm của chủ xe" to make them bold
-        final isSubTitle = element.text != null && 
-            (element.text!.startsWith('A. ') || 
-             element.text!.startsWith('B. ') || 
-             element.text!.startsWith('C. '));
+        final isSubTitle =
+            element.text != null &&
+            (element.text!.startsWith('A. ') ||
+                element.text!.startsWith('B. ') ||
+                element.text!.startsWith('C. '));
 
         return Padding(
-          padding: EdgeInsets.only(bottom: isSubTitle ? 8.0 : 12.0, top: isSubTitle ? 8.0 : 0.0),
+          padding: EdgeInsets.only(
+            bottom: isSubTitle ? 8.0 : 12.0,
+            top: isSubTitle ? 8.0 : 0.0,
+          ),
           child: Text(
             element.text ?? '',
             style: TextStyle(
               fontSize: isSubTitle ? 14.5 : 13.5,
               fontWeight: isSubTitle ? FontWeight.bold : FontWeight.normal,
-              color: isSubTitle ? AppColors.primaryDark : AppColors.textPrimary,
+              color: isSubTitle ? AppColors.primaryDark : context.textPrimary,
               height: 1.5,
             ),
           ),
@@ -356,25 +349,23 @@ class _PolicyViewState extends State<PolicyView> {
       ),
       clipBehavior: Clip.antiAlias,
       child: Table(
-        columnWidths: const {
-          0: FlexColumnWidth(1.2),
-          1: FlexColumnWidth(1.0),
-        },
+        columnWidths: const {0: FlexColumnWidth(1.2), 1: FlexColumnWidth(1.0)},
         border: TableBorder.symmetric(
           inside: const BorderSide(color: AppColors.border, width: 0.5),
         ),
         children: [
           // Header Row
           TableRow(
-            decoration: const BoxDecoration(
-              color: AppColors.primaryDark,
-            ),
+            decoration: BoxDecoration(color: AppColors.primaryDark),
             children: element.tableHeaders!.map((header) {
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 10.0,
+                ),
                 child: Text(
                   header,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 12.5,
@@ -383,7 +374,7 @@ class _PolicyViewState extends State<PolicyView> {
               );
             }).toList(),
           ),
-          
+
           // Data Rows
           ...element.tableRows!.asMap().entries.map((entry) {
             final index = entry.key;
@@ -392,16 +383,23 @@ class _PolicyViewState extends State<PolicyView> {
 
             return TableRow(
               decoration: BoxDecoration(
-                color: isEven ? Colors.grey.shade50 : Colors.white,
+                color: isEven
+                    ? (context.isDarkMode
+                          ? Colors.grey.shade800
+                          : Colors.grey.shade50)
+                    : context.cardColor,
               ),
               children: row.map((cell) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12.0,
+                    horizontal: 10.0,
+                  ),
                   child: Text(
                     cell,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.0,
-                      color: AppColors.textPrimary,
+                      color: context.textPrimary,
                       height: 1.4,
                     ),
                   ),
@@ -430,7 +428,11 @@ class _PolicyViewState extends State<PolicyView> {
         children: [
           Row(
             children: [
-              Icon(Icons.calculate_outlined, color: Colors.blueGrey.shade700, size: 20),
+              Icon(
+                Icons.calculate_outlined,
+                color: Colors.blueGrey.shade700,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Bảng tóm tắt công thức tính giá',
@@ -442,7 +444,7 @@ class _PolicyViewState extends State<PolicyView> {
               ),
             ],
           ),
-          const Divider(height: 16),
+          Divider(height: 16),
           ...element.formulas!.map((formula) {
             final label = formula['label'] ?? '';
             final val = formula['value'] ?? '';
@@ -456,10 +458,10 @@ class _PolicyViewState extends State<PolicyView> {
                     width: 100,
                     child: Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12.5,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimary,
                       ),
                     ),
                   ),
@@ -488,10 +490,8 @@ class _PolicyViewState extends State<PolicyView> {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: const Border(
-          top: BorderSide(color: AppColors.border, width: 1.0),
-        ),
+        color: context.cardColor,
+        border: Border(top: BorderSide(color: AppColors.border, width: 1.0)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -508,7 +508,10 @@ class _PolicyViewState extends State<PolicyView> {
           children: [
             if (!viewModel.hasReadFully)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 6,
+                  horizontal: 10,
+                ),
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: Colors.orange.shade50,
@@ -516,7 +519,11 @@ class _PolicyViewState extends State<PolicyView> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.orange.shade800, size: 16),
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.orange.shade800,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -550,14 +557,16 @@ class _PolicyViewState extends State<PolicyView> {
                     'Tôi đã đọc kỹ và đồng ý với các Chính sách & Quy định nêu trên.',
                     style: TextStyle(
                       fontSize: 12.5,
-                      color: viewModel.hasReadFully ? AppColors.textPrimary : AppColors.textSecondary,
+                      color: viewModel.hasReadFully
+                          ? context.textPrimary
+                          : context.textSecondary,
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            
+
             // Confirm Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -575,7 +584,7 @@ class _PolicyViewState extends State<PolicyView> {
                       Navigator.of(context).pop();
                     }
                   : null,
-              child: const Text(
+              child: Text(
                 'Đồng ý và tiếp tục',
                 style: TextStyle(
                   color: Colors.white,

@@ -4,7 +4,6 @@ import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart
 import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
 
 /// Widget hiển thị chính sách và điều khoản (Giới hạn quãng đường, phí giao xe, điều khoản khác)
-/// Dành cho newbie: Sử dụng StatelessWidget, viết hàm phụ `_buildTermItem` để thống nhất giao diện các dòng điều khoản
 class CarTermsSection extends StatelessWidget {
   final Car_Detail car;
 
@@ -22,20 +21,23 @@ class CarTermsSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 12),
           // Các dòng thông tin điều khoản riêng biệt
           _buildTermItem(
+            context,
             Icons.info_outline,
             'Giới hạn quãng đường: Tối đa ${car.usageLimit.maxDailyDistance}km/ngày, phụ trội ${formatPrice(car.usageLimit.extraDistanceFee)}đ/km.',
           ),
           _buildTermItem(
+            context,
             Icons.local_shipping_outlined,
             'Giao xe tận nơi: Tối đa ${car.deliveryOption.maxDistance}km, miễn phí ${car.deliveryOption.freeDistance}km đầu, phí ${formatPrice(car.deliveryOption.feeDistance.toString())}đ/km.',
           ),
           _buildTermItem(
+            context,
             Icons.description_outlined,
             'Điều khoản thuê: ${car.rentalTerms}',
           ),
@@ -45,7 +47,7 @@ class CarTermsSection extends StatelessWidget {
   }
 
   /// Hàm phụ tạo một dòng điều khoản có icon đi kèm
-  Widget _buildTermItem(IconData icon, String text) {
+  Widget _buildTermItem(BuildContext context, IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -56,9 +58,9 @@ class CarTermsSection extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
                 height: 1.4,
               ),
             ),

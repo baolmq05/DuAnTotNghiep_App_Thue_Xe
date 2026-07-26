@@ -21,7 +21,7 @@ class CarBottomBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         boxShadow: [
           BoxShadow(
             color: const Color.fromRGBO(0, 0, 0, 0.05), // Tạo bóng đổ nhẹ phía trên thanh đặt xe
@@ -39,11 +39,11 @@ class CarBottomBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min, // Giới hạn kích thước cột tối thiểu để tránh tràn dòng
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Tổng cộng (ước tính)',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -54,7 +54,7 @@ class CarBottomBar extends StatelessWidget {
                       if (discount > 0) ...[
                         TextSpan(
                           text: formatPriceWithUnit(car.unitPrice),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey,
                             decoration: TextDecoration.lineThrough,
@@ -64,17 +64,17 @@ class CarBottomBar extends StatelessWidget {
                       ],
                       TextSpan(
                         text: formatPriceWithUnit(finalPrice.toString()),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
                         ),
                       ),
-                      const TextSpan(
+                      TextSpan(
                         text: ' / ngày',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],
@@ -99,7 +99,7 @@ class CarBottomBar extends StatelessWidget {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
+              child: Text(
                 'ĐẶT XE NGAY',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),

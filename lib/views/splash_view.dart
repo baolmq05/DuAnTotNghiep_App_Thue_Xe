@@ -78,7 +78,7 @@ class _SplashViewState extends State<SplashView> {
         children: [
           // Main Splash Background & Content
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -123,7 +123,7 @@ class _SplashViewState extends State<SplashView> {
                   const SizedBox(height: 20.0),
 
                   // Subtitles/Slogans
-                  const Text(
+                  Text(
                     'Thuê xe tự lái nhanh chóng',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -134,7 +134,7 @@ class _SplashViewState extends State<SplashView> {
                     ),
                   ),
                   const SizedBox(height: 6.0),
-                  const Text(
+                  Text(
                     '• An toàn • Minh bạch',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -188,7 +188,7 @@ class _SplashViewState extends State<SplashView> {
                         ? 'Đang kiểm tra kết nối...'
                         : 'Đang khởi động...',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13.0,
                       fontWeight: FontWeight.w400,
@@ -231,37 +231,37 @@ class _SplashViewState extends State<SplashView> {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(16.0),
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(
                                   0xFFFEE3CE,
                                 ), // AppColors.accentSurface
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.wifi_off_rounded,
                                 color: Color(0xFFA77E52), // AppColors.secondary
                                 size: 48.0,
                               ),
                             ),
                             const SizedBox(height: 20.0),
-                            const Text(
+                            Text(
                               'Không có kết nối Internet',
                               style: TextStyle(
                                 color: Color(
                                   0xFF1F2937,
-                                ), // AppColors.textPrimary
+                                ), // context.textPrimary
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.bold,
                               ),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 12.0),
-                            const Text(
+                            Text(
                               'Vui lòng kết nối Internet để tiếp tục sử dụng ứng dụng Drivio.',
                               style: TextStyle(
                                 color: Color(
                                   0xFF6B7280,
-                                ), // AppColors.textSecondary
+                                ), // context.textSecondary
                                 fontSize: 14.0,
                                 height: 1.5,
                               ),
@@ -288,7 +288,7 @@ class _SplashViewState extends State<SplashView> {
                                         ),
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'Đóng app',
                                       style: TextStyle(
                                         color: Color(0xFF6B7280),
@@ -329,7 +329,7 @@ class _SplashViewState extends State<SplashView> {
                                                   ),
                                             ),
                                           )
-                                        : const Text(
+                                        : Text(
                                             'Thử lại',
                                             style: TextStyle(
                                               fontWeight: FontWeight.w600,

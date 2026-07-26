@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../themes/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../models/trip_model.dart';
 import '../viewmodels/order_viewmodel.dart';
@@ -144,15 +144,16 @@ class _OrderViewState extends State<OrderView>
     final viewModel = context.watch<OrderViewModel>();
 
     return Scaffold(
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBackgroundColor,
         centerTitle: false,
-        title: const Text(
+        title: Text(
           'Đơn hàng của bạn',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: context.textPrimary,
           ),
         ),
       ),
@@ -161,7 +162,7 @@ class _OrderViewState extends State<OrderView>
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Container(
-              color: Colors.white,
+              color: context.scaffoldBackgroundColor,
               child: TabBar(
                 controller: _tabController,
                 isScrollable: true,
@@ -172,7 +173,7 @@ class _OrderViewState extends State<OrderView>
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
                 labelColor: Colors.white,
-                unselectedLabelColor: Colors.black,
+                unselectedLabelColor: context.textSecondary,
                 labelStyle: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 18,
@@ -251,46 +252,49 @@ class _OrderViewState extends State<OrderView>
     final imageUrl = trip.car?.getFirstImageUrl();
     final locationText = _getLocationText(trip);
 
+    final isDark = context.isDarkMode;
     // Xử lý màu sắc cho trạng thái
     Color statusBgColor;
     Color statusTextColor;
     switch (trip.status) {
       case 0: // Chờ duyệt
-        statusBgColor = const Color(0xffFFF3E0);
-        statusTextColor = const Color(0xffF57C00);
+        statusBgColor = isDark ? const Color(0xFF3E2C1A) : const Color(0xffFFF3E0);
+        statusTextColor = isDark ? const Color(0xFFFFB057) : const Color(0xffF57C00);
         break;
       case 1: // Chờ thanh toán
-        statusBgColor = const Color(0xffE3F2FD);
-        statusTextColor = const Color(0xff1976D2);
+        statusBgColor = isDark ? const Color(0xFF1E354A) : const Color(0xffE3F2FD);
+        statusTextColor = isDark ? const Color(0xFF64B5F6) : const Color(0xff1976D2);
         break;
       case 2: // Đã xác nhận / Chưa bắt đầu
       case 3: // Đang di chuyển
-        statusBgColor = const Color(0xffE8F5E9);
-        statusTextColor = const Color(0xff388E3C);
+        statusBgColor = isDark ? const Color(0xFF1A3E26) : const Color(0xffE8F5E9);
+        statusTextColor = isDark ? const Color(0xFF81C784) : const Color(0xff388E3C);
         break;
       case 4: // Hoàn tất
-        statusBgColor = const Color(0xffE8F5E9);
-        statusTextColor = const Color(0xff388E3C);
+        statusBgColor = isDark ? const Color(0xFF1A3E26) : const Color(0xffE8F5E9);
+        statusTextColor = isDark ? const Color(0xFF81C784) : const Color(0xff388E3C);
         break;
       case 5: // Người thuê hủy
       case 6: // Chủ xe hủy
-        statusBgColor = const Color(0xffFFEBEE);
-        statusTextColor = const Color(0xffD32F2F);
+        statusBgColor = isDark ? const Color(0xFF4A1F1F) : const Color(0xffFFEBEE);
+        statusTextColor = isDark ? const Color(0xFFE57373) : const Color(0xffD32F2F);
         break;
       default:
-        statusBgColor = Colors.grey.shade200;
-        statusTextColor = Colors.grey.shade800;
+        statusBgColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
+        statusTextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade800;
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: context.isDarkMode
+                ? Colors.black.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -401,9 +405,9 @@ class _OrderViewState extends State<OrderView>
                   children: [
                     Text(
                       _formatPrice(trip.cost),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
-                        color: Colors.black,
+                        color: context.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
