@@ -21,7 +21,7 @@ class _OrderViewState extends State<OrderView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 7, vsync: this);
+    _tabController = TabController(length: 8, vsync: this);
     _tabController.addListener(_handleTabSelection);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrderViewModel>().fetchTrips();
@@ -112,7 +112,7 @@ class _OrderViewState extends State<OrderView>
         width: size,
         height: size,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Image.network(
+        errorBuilder: (_, _, _) => Image.network(
           fallback,
           width: size,
           height: size,
@@ -134,7 +134,7 @@ class _OrderViewState extends State<OrderView>
       width: size,
       height: size,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) =>
+      errorBuilder: (_, _, _) =>
           Image.network(fallback, width: size, height: size, fit: BoxFit.cover),
     );
   }
@@ -187,6 +187,7 @@ class _OrderViewState extends State<OrderView>
                   Tab(text: "Tất cả"),
                   Tab(text: "Chờ duyệt"),
                   Tab(text: "Chờ thanh toán"),
+                  Tab(text: "Đã xác nhận"),
                   Tab(text: "Đang di chuyển"),
                   Tab(text: "Hoàn tất"),
                   Tab(text: "Chủ xe hủy"),
@@ -282,6 +283,41 @@ class _OrderViewState extends State<OrderView>
       default:
         statusBgColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
         statusTextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade800;
+    }
+
+    final double netTotal = (trip.cost - trip.discountAmount) < 0
+        ? 0.0
+        : (trip.cost - trip.discountAmount);
+
+    double actualPaid = trip.paidAmount;
+    if (actualPaid == 0 && trip.status >= 2 && trip.status != 5 && trip.status != 6) {
+      actualPaid = netTotal * 0.4;
+    }
+
+    final double ratio = netTotal > 0 ? (actualPaid / netTotal) : 0.0;
+    final bool isDepositPaid = trip.status >= 2 && trip.status != 5 && trip.status != 6;
+    final bool isFullPaid = isDepositPaid && ratio >= 0.9;
+
+    String payLabel;
+    String payValue;
+    Color payColor;
+
+    if (trip.status == 5 || trip.status == 6) {
+      payLabel = 'Trạng thái: ';
+      payValue = 'Đã hủy chuyến';
+      payColor = AppColors.error;
+    } else if (!isDepositPaid) {
+      payLabel = 'Thanh toán: ';
+      payValue = 'Chưa cọc/thanh toán';
+      payColor = context.textSecondary;
+    } else if (isFullPaid) {
+      payLabel = 'Đã thanh toán (100%): ';
+      payValue = _formatPrice(actualPaid);
+      payColor = AppColors.success;
+    } else {
+      payLabel = 'Đã đặt cọc (40%): ';
+      payValue = _formatPrice(actualPaid);
+      payColor = AppColors.success;
     }
 
     return Container(
@@ -404,7 +440,7 @@ class _OrderViewState extends State<OrderView>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _formatPrice(trip.cost),
+                      _formatPrice(netTotal),
                       style: TextStyle(
                         fontSize: 20,
                         color: context.textPrimary,
@@ -413,16 +449,20 @@ class _OrderViewState extends State<OrderView>
                     ),
                     Row(
                       children: [
-                        const Text(
-                          "Đặt cọc: ",
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
-                        ),
                         Text(
-                          _formatPrice(trip.cost),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
+                          payLabel,
+                          style: const TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                        Expanded(
+                          child: Text(
+                            payValue,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: payColor,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],

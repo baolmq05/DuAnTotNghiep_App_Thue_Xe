@@ -84,24 +84,25 @@ class OrderViewModel extends ChangeNotifier {
   int _getStatusForTab(int tabIndex) {
     switch (tabIndex) {
       case 1:
-        return 0;
+        return 0; // Chờ duyệt
       case 2:
-        return 1;
+        return 1; // Chờ thanh toán
+      case 3:
+        return 2; // Đã xác nhận / Đã cọc
       case 4:
-        return 4;
+        return 3; // Đang di chuyển
       case 5:
-        return 6;
+        return 4; // Hoàn tất
       case 6:
-        return 5;
+        return 6; // Chủ xe hủy
+      case 7:
+        return 5; // Người thuê hủy
       default:
         return 0;
     }
   }
 
   List<int> _getMultiStatusForTab(int tabIndex) {
-    if (tabIndex == 3) {
-      return [2, 3];
-    }
     return [];
   }
 }

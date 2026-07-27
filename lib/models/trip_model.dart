@@ -2,10 +2,13 @@ class TripModel {
   final int id;
   final double cost;
   final double discountAmount;
+  final double deliveryFee;
+  final double paidAmount;
   final int status;
   final int tripType;
   final DateTime startAt;
   final DateTime endAt;
+  final DateTime? createdAt;
   final int carId;
   final int userId;
   final String? deliveryAddress;
@@ -18,10 +21,13 @@ class TripModel {
     required this.id,
     required this.cost,
     required this.discountAmount,
+    this.deliveryFee = 0.0,
+    this.paidAmount = 0.0,
     required this.status,
     required this.tripType,
     required this.startAt,
     required this.endAt,
+    this.createdAt,
     required this.carId,
     required this.userId,
     this.deliveryAddress,
@@ -69,15 +75,38 @@ class TripModel {
       }
     }
 
+    double parsedPaidAmount = 0.0;
+    if (json['transactions'] != null && json['transactions'] is List) {
+      for (var txn in json['transactions']) {
+        if (txn is Map<String, dynamic>) {
+          parsedPaidAmount +=
+              double.tryParse(txn['amount']?.toString() ?? '0') ?? 0.0;
+        }
+      }
+    } else if (json['pending_balances'] != null && json['pending_balances'] is List) {
+      for (var pb in json['pending_balances']) {
+        if (pb is Map<String, dynamic>) {
+          parsedPaidAmount +=
+              double.tryParse(pb['amount']?.toString() ?? '0') ?? 0.0;
+        }
+      }
+    } else if (json['paid_amount'] != null) {
+      parsedPaidAmount = double.tryParse(json['paid_amount'].toString()) ?? 0.0;
+    }
+
     return TripModel(
       id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       cost: double.tryParse(json['cost']?.toString() ?? json['total_cost']?.toString() ?? json['price']?.toString() ?? '0') ?? 0.0,
       discountAmount:
           double.tryParse(json['discount_amount']?.toString() ?? '0') ?? 0.0,
+      deliveryFee:
+          double.tryParse(json['delivery_fee']?.toString() ?? '0') ?? 0.0,
+      paidAmount: parsedPaidAmount,
       status: json['status'] is int ? json['status'] as int : int.tryParse(json['status']?.toString() ?? '') ?? 0,
       tripType: json['trip_type'] is int ? json['trip_type'] as int : int.tryParse(json['trip_type']?.toString() ?? '') ?? 0,
       startAt: json['start_at'] != null ? DateTime.tryParse(json['start_at'].toString()) ?? DateTime.now() : DateTime.now(),
       endAt: json['end_at'] != null ? DateTime.tryParse(json['end_at'].toString()) ?? DateTime.now() : DateTime.now(),
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
       carId: json['car_id'] is int ? json['car_id'] as int : int.tryParse(json['car_id']?.toString() ?? '') ?? 0,
       userId: json['user_id'] is int ? json['user_id'] as int : int.tryParse(json['user_id']?.toString() ?? '') ?? 0,
       deliveryAddress: json['delivery_address']?.toString() ?? json['address']?.toString() ?? json['pickup_address']?.toString(),

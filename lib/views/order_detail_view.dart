@@ -4,7 +4,9 @@ import '../themes/app_colors.dart';
 import '../models/trip_model.dart';
 import '../viewmodels/order_detail_viewmodel.dart';
 import '../services/conversation_service.dart';
+import '../services/trip_service.dart';
 import '../models/conversation_model.dart';
+import '../widgets/app_toast.dart';
 import 'package:provider/provider.dart';
 
 class OrderDetailView extends StatefulWidget {
@@ -222,6 +224,30 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         statusBgColor = AppColors.error;
     }
 
+    final double netTotal = (trip.cost - trip.discountAmount) < 0
+        ? 0.0
+        : (trip.cost - trip.discountAmount);
+
+    double actualPaid = trip.paidAmount;
+    if (actualPaid == 0 && trip.status >= 2 && trip.status != 5 && trip.status != 6) {
+      actualPaid = netTotal * 0.4;
+    }
+
+    final double ratio = netTotal > 0 ? (actualPaid / netTotal) : 0.0;
+    final bool isDepositPaid = trip.status >= 2 && trip.status != 5 && trip.status != 6;
+    final bool isFullPaid = isDepositPaid && ratio >= 0.9;
+
+    String depositStatusText;
+    if (trip.status == 5 || trip.status == 6) {
+      depositStatusText = 'Chuyến đi đã hủy';
+    } else if (!isDepositPaid) {
+      depositStatusText = trip.status == 0 ? 'Chờ chủ xe duyệt' : 'Chờ thanh toán cọc';
+    } else if (isFullPaid) {
+      depositStatusText = 'Đã thanh toán 100% (${_formatPrice(actualPaid)})';
+    } else {
+      depositStatusText = 'Đã đặt cọc 40% (${_formatPrice(actualPaid)})';
+    }
+
     return Container(
       color: AppColors.primary,
       padding: const EdgeInsets.fromLTRB(20, 5, 20, 36),
@@ -278,7 +304,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerRight,
                       child: Text(
-                        _formatPrice(trip.cost),
+                        _formatPrice(netTotal),
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -288,7 +314,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Đặt cọc: ${_formatPrice(trip.cost)}',
+                      depositStatusText,
                       style: TextStyle(color: Colors.white, fontSize: 12),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -398,7 +424,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       avatarUrl = 'http://10.0.2.2:8000/storage/$avatarUrl';
     }
 
-    // Nút nhắn tin chỉ hiển thị khi đơn hàng đã thanh toán (status >= 2 và <= 4)
     final bool isPaid = trip.status >= 2 && trip.status <= 4;
 
     return Container(
@@ -479,7 +504,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Nút nhắn tin: Chỉ xuất hiện khi đơn hàng đã thanh toán
                   if (isPaid) ...[
                     Container(
                       width: 44,
@@ -540,8 +564,15 @@ class _OrderDetailViewState extends State<OrderDetailView> {
   }
 
   Widget _buildTimeCard(TripModel trip) {
-    final startCity = trip.car?.carLocation?.city ?? 'TP. Hồ Chí Minh';
-    final endCity = trip.car?.carLocation?.city ?? 'TP. Hồ Chí Minh';
+    final startCity = (trip.deliveryAddress != null &&
+            trip.deliveryAddress!.trim().isNotEmpty)
+        ? trip.deliveryAddress!
+        : (trip.car?.carLocation?.address ??
+            trip.car?.carLocation?.city ??
+            'TP. Hồ Chí Minh');
+    final endCity = (trip.car?.carLocation?.address ??
+        trip.car?.carLocation?.city ??
+        'TP. Hồ Chí Minh');
     final rentalDays = _calculateDays(trip.startAt, trip.endAt);
 
     return Container(
@@ -554,7 +585,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Thời gian thuê',
+            'Thời gian & Địa điểm',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: context.textPrimary,
@@ -563,15 +594,20 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTimeSubCol(
-                'Nhận xe',
-                _formatDate(trip.startAt),
-                _formatDateTime(trip.startAt),
-                startCity,
+              Expanded(
+                child: _buildTimeSubCol(
+                  'Nhận xe',
+                  _formatDate(trip.startAt),
+                  _formatDateTime(trip.startAt),
+                  startCity,
+                ),
               ),
+              const SizedBox(width: 8),
               Column(
                 children: [
+                  const SizedBox(height: 12),
                   Text(
                     '$rentalDays ngày',
                     style: TextStyle(
@@ -589,7 +625,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           shape: BoxShape.circle,
                         ),
                       ),
-                      Container(width: 40, height: 1, color: AppColors.border),
+                      Container(width: 30, height: 1, color: AppColors.border),
                       Container(
                         width: 6,
                         height: 6,
@@ -602,11 +638,14 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   ),
                 ],
               ),
-              _buildTimeSubCol(
-                'Trả xe',
-                _formatDate(trip.endAt),
-                _formatDateTime(trip.endAt),
-                endCity,
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildTimeSubCol(
+                  'Trả xe',
+                  _formatDate(trip.endAt),
+                  _formatDateTime(trip.endAt),
+                  endCity,
+                ),
               ),
             ],
           ),
@@ -621,10 +660,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     String time,
     String location,
   ) {
+    final bool isStart = label == 'Nhận xe';
     return Column(
-      crossAxisAlignment: label == 'Nhận xe'
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.end,
+      crossAxisAlignment: isStart ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
@@ -639,21 +677,30 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         ),
         Text(
           date,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
         ),
         Text(
           time,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
         const SizedBox(height: 4),
         Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.location_on, size: 10, color: AppColors.primary),
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Icon(Icons.location_on, size: 10, color: AppColors.primary),
+            ),
             const SizedBox(width: 4),
-            Text(
-              location,
-              style: TextStyle(color: context.textSecondary, fontSize: 13),
+            Expanded(
+              child: Text(
+                location,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: isStart ? TextAlign.left : TextAlign.right,
+                style: TextStyle(color: context.textSecondary, fontSize: 12),
+              ),
             ),
           ],
         ),
@@ -663,8 +710,35 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
   Widget _buildPriceCard(TripModel trip) {
     final rentalDays = _calculateDays(trip.startAt, trip.endAt);
-    final subtotal = trip.cost + trip.discountAmount;
-    final unitPrice = subtotal / rentalDays;
+    final double unitPrice = (trip.car != null && trip.car!.unitPrice > 0)
+        ? trip.car!.unitPrice
+        : ((trip.cost - trip.deliveryFee) > 0
+            ? (trip.cost - trip.deliveryFee) / rentalDays
+            : trip.cost / rentalDays);
+    final double rentalFee = unitPrice * rentalDays;
+    final double netTotal = (trip.cost - trip.discountAmount) < 0
+        ? 0.0
+        : (trip.cost - trip.discountAmount);
+
+    double actualPaid = trip.paidAmount;
+    if (actualPaid == 0 && trip.status >= 2 && trip.status != 5 && trip.status != 6) {
+      actualPaid = netTotal * 0.4;
+    }
+
+    final double ratio = netTotal > 0 ? (actualPaid / netTotal) : 0.0;
+    final bool isDepositPaid = trip.status >= 2 && trip.status != 5 && trip.status != 6;
+    final bool isFullPaid = isDepositPaid && ratio >= 0.9;
+
+    String paymentStatusText;
+    if (trip.status == 5 || trip.status == 6) {
+      paymentStatusText = 'Đã hủy chuyến';
+    } else if (!isDepositPaid) {
+      paymentStatusText = 'Chưa cọc/thanh toán';
+    } else if (isFullPaid) {
+      paymentStatusText = 'Đã thanh toán (100%) - ${_formatPrice(actualPaid)}';
+    } else {
+      paymentStatusText = 'Đã đặt cọc (40%) - ${_formatPrice(actualPaid)}';
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -676,7 +750,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Chi phí',
+            'Thông tin thanh toán',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: context.textPrimary,
@@ -684,15 +758,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           ),
           Divider(height: 24),
           _buildPriceRow(
-            'Tiền thuê xe',
-            _formatPrice(unitPrice),
+            'Đơn giá thuê xe',
+            '${_formatPrice(unitPrice)} / ${trip.tripType == 0 ? "ngày" : "km"}',
           ),
-          _buildPriceRow('Số ngày', '$rentalDays ngày'),
-          _buildPriceRow('Phí giao xe', _formatPrice(0)),
-          _buildPriceRow('Phí vệ sinh', _formatPrice(0)),
+          _buildPriceRow('Số ngày thuê', '$rentalDays ngày'),
+          _buildPriceRow('Tổng chi phí ban đầu', _formatPrice(rentalFee)),
+          if (trip.deliveryFee > 0)
+            _buildPriceRow('Phí giao xe', _formatPrice(trip.deliveryFee)),
           if (trip.discountAmount > 0)
             _buildPriceRow(
-              'Khuyến mãi',
+              'Số tiền được giảm giá',
               '-${_formatPrice(trip.discountAmount)}',
               isDiscount: true,
             ),
@@ -702,7 +777,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             children: [
               Expanded(
                 child: Text(
-                  'Tổng cộng',
+                  'Thành tiền',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: context.textPrimary,
@@ -716,24 +791,24 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
                   child: Text(
-                    _formatPrice(trip.cost),
+                    _formatPrice(netTotal),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: context.textPrimary,
-                      fontSize: 16,
+                      color: AppColors.primary,
+                      fontSize: 18,
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
-                  'Đã thanh toán (đặt cọc)',
+                  'Trạng thái thanh toán',
                   style: TextStyle(color: context.textSecondary, fontSize: 13),
                 ),
               ),
@@ -743,8 +818,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
                   child: Text(
-                    _formatPrice(trip.cost),
-                    style: TextStyle(color: context.textSecondary, fontSize: 13),
+                    paymentStatusText,
+                    style: TextStyle(
+                      color: isDepositPaid
+                          ? AppColors.success
+                          : context.textSecondary,
+                      fontSize: 13,
+                      fontWeight: isDepositPaid
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
@@ -793,6 +876,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     final isStep4 = trip.status >= 3;
     final isStep5 = trip.status == 4;
 
+    final bool canCancel = trip.status >= 0 && trip.status <= 3;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -803,7 +888,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Trạng thái đơn ',
+            'Trạng thái đơn',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: context.textPrimary,
@@ -864,6 +949,32 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ),
             ],
           ),
+          if (canCancel) ...[
+            const SizedBox(height: 36),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _showCancelConfirmDialog(trip),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  side: const BorderSide(color: AppColors.error),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.white),
+                label: const Text(
+                  'Hủy chuyến đi',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.white
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -1036,11 +1147,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       context.push('/chat/${conv.id}', extra: conv);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Không thể tạo đoạn chat: $e'),
-          backgroundColor: AppColors.error,
-        ),
+      AppToast.show(
+        context,
+        message: 'Không thể tạo đoạn chat: $e',
+        type: ToastType.error,
       );
     } finally {
       if (mounted) {
@@ -1104,6 +1214,239 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCancelConfirmDialog(TripModel trip) {
+    bool isCancelling = false;
+
+    final bookingTime = trip.createdAt ?? DateTime.now();
+    final startTime = trip.startAt;
+    final now = DateTime.now();
+
+    final tripValue = (trip.cost - trip.discountAmount) < 0
+        ? 0.0
+        : (trip.cost - trip.discountAmount);
+
+    double totalPaid = trip.paidAmount;
+    if (totalPaid == 0 && trip.status >= 2 && trip.status != 5 && trip.status != 6) {
+      totalPaid = tripValue * 0.4;
+    }
+
+    double feePercent = 0.0;
+    String policyDesc = 'Miễn phí hủy chuyến (Trong vòng 1h sau khi đặt xe)';
+
+    final diffInMinutes = now.difference(bookingTime).inMinutes.abs();
+    if (diffInMinutes > 60) {
+      final diffInDays = startTime.difference(now).inHours / 24.0;
+      if (diffInDays >= 7) {
+        feePercent = 0.10;
+        policyDesc =
+            'Phí hủy 10% giá trị chuyến đi (Trước chuyến đi >= 7 ngày và sau 1h khi đặt)';
+      } else {
+        feePercent = 0.40;
+        policyDesc =
+            'Phí hủy 40% giá trị chuyến đi (Trong vòng 7 ngày trước chuyến đi và sau 1h khi đặt)';
+      }
+    }
+
+    final double cancelFeeAmount = tripValue * feePercent;
+    final double actualCompensation =
+        totalPaid < cancelFeeAmount ? totalPaid : cancelFeeAmount;
+    final double actualRefund =
+        (totalPaid - actualCompensation) < 0 ? 0.0 : (totalPaid - actualCompensation);
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: const [
+              Icon(Icons.warning_amber_rounded, color: AppColors.error),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Xác nhận hủy chuyến đi',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bạn có chắc chắn muốn hủy chuyến đi #RT${trip.id} này không? Quyết định này không thể hoàn tác.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildCancelPolicyRow(
+                        'Chính sách áp dụng:',
+                        policyDesc,
+                        isBoldValue: true,
+                      ),
+                      const SizedBox(height: 6),
+                      _buildCancelPolicyRow(
+                        'Giá trị chuyến đi:',
+                        _formatPrice(tripValue),
+                      ),
+                      const SizedBox(height: 6),
+                      _buildCancelPolicyRow(
+                        'Số tiền đã thanh toán:',
+                        _formatPrice(totalPaid),
+                      ),
+                      const SizedBox(height: 6),
+                      _buildCancelPolicyRow(
+                        'Phí hủy chuyến:',
+                        _formatPrice(cancelFeeAmount),
+                        isDanger: true,
+                      ),
+                      const Divider(height: 16),
+                      _buildCancelPolicyRow(
+                        'Tiền hoàn khách thuê:',
+                        _formatPrice(actualRefund),
+                        isSuccess: true,
+                      ),
+                      if (actualCompensation > 0) ...[
+                        const SizedBox(height: 6),
+                        _buildCancelPolicyRow(
+                          'Bồi thường chủ xe:',
+                          _formatPrice(actualCompensation),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '* Tiền hoàn sẽ được chuyển trực tiếp vào ví điện tử ngay sau khi xác nhận hủy.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                    color: context.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isCancelling ? null : () => Navigator.pop(context),
+              child: Text(
+                'Quay lại',
+                style: TextStyle(color: context.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: isCancelling
+                  ? null
+                  : () async {
+                      final currentContext = context;
+                      final nav = Navigator.of(currentContext);
+                      final viewModel = currentContext.read<OrderDetailViewModel>();
+
+                      setDialogState(() => isCancelling = true);
+                      final result =
+                          await TripService().cancelTrip(trip.id);
+                      if (!mounted) return;
+                      nav.pop();
+
+                      if (currentContext.mounted) {
+                        if (result['success'] == true) {
+                          AppToast.show(
+                            currentContext,
+                            message: result['message'] ?? 'Đã hủy chuyến đi thành công!',
+                            type: ToastType.success,
+                          );
+                          viewModel.fetchTripDetail(trip.id);
+                        } else {
+                          AppToast.show(
+                            currentContext,
+                            message: result['message'] ?? 'Không thể hủy chuyến!',
+                            type: ToastType.error,
+                          );
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: isCancelling
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Xác nhận hủy',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCancelPolicyRow(
+    String label,
+    String value, {
+    bool isBoldValue = false,
+    bool isDanger = false,
+    bool isSuccess = false,
+  }) {
+    Color valColor = AppColors.primary;
+    if (isDanger) valColor = AppColors.error;
+    if (isSuccess) valColor = AppColors.success;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: (isBoldValue || isSuccess || isDanger)
+                  ? FontWeight.bold
+                  : FontWeight.w500,
+              color: (isSuccess || isDanger) ? valColor : Colors.grey.shade900,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

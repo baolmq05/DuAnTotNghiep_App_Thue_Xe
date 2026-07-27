@@ -60,4 +60,30 @@ class TripService extends BaseService {
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
     }
   }
+
+  // Hủy chuyến đi (khách thuê)
+  Future<Map<String, dynamic>> cancelTrip(int tripId, {String? reason}) async {
+    try {
+      final response = await store(
+        'api/trips/$tripId/cancel',
+        body: reason != null ? {'reason': reason} : {},
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Hủy chuyến thành công!',
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể hủy chuyến đi.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi hủy chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra khi hủy chuyến: $e'};
+    }
+  }
 }
