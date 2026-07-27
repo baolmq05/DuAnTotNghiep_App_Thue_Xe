@@ -155,7 +155,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
               const SizedBox(height: 32.0),
             ],
           ),
-          bottomNavigationBar: CarBottomBar(car: car),
+          bottomNavigationBar:
+              CarBottomBar(car: car, hasBooked: viewmodel.hasBooked),
           extendBodyBehindAppBar: false,
         );
       },
