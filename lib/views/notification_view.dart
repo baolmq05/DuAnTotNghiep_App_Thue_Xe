@@ -70,7 +70,7 @@ class _NotificationViewState extends State<NotificationView> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -188,44 +188,53 @@ class _NotificationViewState extends State<NotificationView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: Text('Xóa thông báo đã chọn'),
+          title: const Text('Xóa thông báo đã chọn'),
           content: Text(
             'Bạn có chắc muốn xóa ${_selectedNotificationIds.length} thông báo đã chọn không?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text('Hủy'),
+              child: const Text('Hủy'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('Xóa'),
+              child: const Text('Xóa'),
             ),
           ],
         );
       },
     );
 
-    if (shouldDelete != true) return;
+    if (shouldDelete != true || !mounted) return;
+
     final viewModel = context.read<NotificationViewModel>();
     final selectedNotifications = viewModel.allNotifications
         .where((item) => _selectedNotificationIds.contains(item.id))
         .toList();
 
-    try {
-      await Future.wait(
-        selectedNotifications
-            .map((notification) => viewModel.deleteNotification(notification))
-            .toList(),
-      );
+    final List<int> deletedIds = [];
+    Object? firstError;
 
-      if (!mounted) return;
-      setState(() {
-        _selectedNotificationIds.clear();
+    for (final notification in selectedNotifications) {
+      try {
+        await viewModel.deleteNotification(notification);
+        deletedIds.add(notification.id);
+      } catch (e) {
+        firstError ??= e;
+      }
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _selectedNotificationIds.removeWhere((id) => deletedIds.contains(id));
+      if (_selectedNotificationIds.isEmpty) {
         _isSelectionMode = false;
-      });
+      }
+    });
 
-      // hiển thị xóa thành công
+    if (firstError == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -256,15 +265,12 @@ class _NotificationViewState extends State<NotificationView> {
           duration: const Duration(seconds: 2),
         ),
       );
-    } catch (e) {
-      if (!mounted) return;
-
-      // Hiển thị thông báo lỗi khi xóa không thành công
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.error_outline_rounded,
                 color: Colors.white,
                 size: 20,
@@ -272,8 +278,8 @@ class _NotificationViewState extends State<NotificationView> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Không xóa được thông báo: $e',
-                  style: TextStyle(fontSize: 14, color: Colors.white),
+                  'Có lỗi xảy ra khi xóa một số thông báo: $firstError',
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
               ),
             ],
@@ -397,7 +403,9 @@ class _NotificationViewState extends State<NotificationView> {
       height: 46,
       padding: const EdgeInsets.all(4.0),
       decoration: BoxDecoration(
-        color: context.isDarkMode ? Colors.grey.shade800 : context.textSecondary.withOpacity(0.08),
+        color: context.isDarkMode
+            ? Colors.grey.shade800
+            : context.textSecondary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: LayoutBuilder(
@@ -418,7 +426,7 @@ class _NotificationViewState extends State<NotificationView> {
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -498,7 +506,7 @@ class _NotificationViewState extends State<NotificationView> {
       'dd/MM/yyyy HH:mm',
     ).format(notification.createdAt);
 
-    return Material(
+    final itemWidget = Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _openNotificationDetail(notification),
@@ -525,8 +533,8 @@ class _NotificationViewState extends State<NotificationView> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: notification.isRead
-                      ? Colors.grey.withOpacity(0.08)
-                      : AppColors.primary.withOpacity(0.08),
+                      ? Colors.grey.withValues(alpha: 0.08)
+                      : AppColors.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -585,6 +593,88 @@ class _NotificationViewState extends State<NotificationView> {
           ),
         ),
       ),
+    );
+
+    if (_isSelectionMode) {
+      return itemWidget;
+    }
+
+    return Dismissible(
+      key: Key('notification_${notification.id}'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text('Xóa thông báo'),
+            content: const Text('Bạn có chắc muốn xóa thông báo này không?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Hủy'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+      },
+      onDismissed: (direction) async {
+        final viewModel = context.read<NotificationViewModel>();
+        try {
+          await viewModel.deleteNotification(notification);
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Đã xóa thông báo'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          );
+        } catch (e) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi khi xóa thông báo: $e'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          viewModel.loadNotifications();
+        }
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.red.shade400,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(Icons.delete_outline, color: Colors.white, size: 24),
+            SizedBox(width: 6),
+            Text(
+              'Xóa',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      child: itemWidget,
     );
   }
 }

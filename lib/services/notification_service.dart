@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../models/notification_model.dart';
 import 'base_service.dart';
 
@@ -6,12 +7,12 @@ class NotificationService extends BaseService {
   Future<List<Notification>> fetchNotifications() async {
     try {
       // Gọi API để lấy danh sách thông báo và token tự động được thêm vào header bởi BaseService
-      final response = await get( 
+      final response = await get(
         'api/auth/notifications',
-        requiresAuth: true, 
+        requiresAuth: true,
       );
 
-      print('DỮ LIỆU TỪ LARAVEL TRẢ VỀ: $response');
+      debugPrint('DỮ LIỆU TỪ LARAVEL TRẢ VỀ: $response');
       if (response != null && response is List) {
         return response.map((json) => Notification.fromJson(json)).toList();
       }
@@ -22,7 +23,7 @@ class NotificationService extends BaseService {
 
       return [];
     } catch (e) {
-      print('LỖI KHI PARSE MODEL NOTIFICATION: $e');
+      debugPrint('LỖI KHI PARSE MODEL NOTIFICATION: $e');
       rethrow;
     }
   }
@@ -33,12 +34,12 @@ class NotificationService extends BaseService {
       await update(
         'api/auth/notifications/${notification.id}',
         body: {
-          'is_read': '1', 
+          'is_read': '1',
         },
-        requiresAuth: true, 
+        requiresAuth: true,
       );
     } catch (e) {
-      print('LỖI KHI CẬP NHẬT THÔNG BÁO ĐÃ ĐỌC: $e');
+      debugPrint('LỖI KHI CẬP NHẬT THÔNG BÁO ĐÃ ĐỌC: $e');
       rethrow;
     }
   }
@@ -48,10 +49,10 @@ class NotificationService extends BaseService {
     try {
       await delete(
         'api/auth/notifications/${notification.id}',
-        requiresAuth: true, 
+        requiresAuth: true,
       );
     } catch (e) {
-      print('LỖI KHI XÓA THÔNG BÁO: $e');
+      debugPrint('LỖI KHI XÓA THÔNG BÁO: $e');
       rethrow;
     }
   }
