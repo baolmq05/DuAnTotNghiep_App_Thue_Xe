@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -1903,6 +1902,32 @@ class _BookingCarViewState extends State<BookingCarView> {
                               }
                             }
 
+                            String? defaultCarAddress = car?.carLocation?.address;
+                            if (defaultCarAddress == null ||
+                                defaultCarAddress.trim().isEmpty) {
+                              if (car?.carLocation?.city != null &&
+                                  car!.carLocation!.city!.trim().isNotEmpty) {
+                                defaultCarAddress = car!.carLocation!.city;
+                              } else if (carLatitude != null &&
+                                  carLongitude != null) {
+                                defaultCarAddress =
+                                    "$carLatitude, $carLongitude";
+                              } else {
+                                defaultCarAddress = "Nhận xe tại vị trí xe";
+                              }
+                            }
+
+                            String? defaultCarLocation =
+                                car?.carLocation?.location;
+                            if (defaultCarLocation == null ||
+                                defaultCarLocation.trim().isEmpty) {
+                              if (carLatitude != null &&
+                                  carLongitude != null) {
+                                defaultCarLocation =
+                                    "$carLatitude,$carLongitude";
+                              }
+                            }
+
                             Map<String, dynamic> requestBody = {
                               'car_id': car!.id,
                               'trip_type': 0,
@@ -1919,10 +1944,10 @@ class _BookingCarViewState extends State<BookingCarView> {
                               'discount_amount': totalDiscountAmount,
                               'delivery_address': isDeliveryToLocation
                                   ? _addressController.text
-                                  : null,
+                                  : defaultCarAddress,
                               'delivery_location': isDeliveryToLocation
                                   ? "$customerLatitude,$customerLongitude"
-                                  : null,
+                                  : defaultCarLocation,
                               'promo_code': _promoController.text.isNotEmpty
                                   ? _promoController.text
                                   : null,
