@@ -8,6 +8,7 @@ import '../services/trip_service.dart';
 import '../models/conversation_model.dart';
 import '../widgets/app_toast.dart';
 import 'package:provider/provider.dart';
+import '../components/payment/zalopay_checkout_sheet.dart';
 
 class OrderDetailView extends StatefulWidget {
   final int orderId;
@@ -26,6 +27,24 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrderDetailViewModel>().fetchTripDetail(widget.orderId);
     });
+  }
+
+  void _showZaloPayCheckoutSheet(TripModel trip) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => ZaloPayCheckoutSheet(
+        trip: trip,
+        onPaymentSuccess: () {
+          setState(() {
+            trip.status = 2; // Đã xác nhận / Đã cọc
+            trip.statusText = 'Đã cọc';
+          });
+          context.read<OrderDetailViewModel>().fetchTripDetail(widget.orderId);
+        },
+      ),
+    );
   }
 
   String _formatPrice(double price) {
@@ -201,7 +220,32 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           top: 10,
           bottom: MediaQuery.of(context).padding.bottom + 10,
         ),
-        child: _buildBottomActionButtons(trip),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (trip.status == 1) ...[
+              ElevatedButton.icon(
+                onPressed: () => _showZaloPayCheckoutSheet(trip),
+                icon: const Icon(Icons.payment, color: Colors.white),
+                label: const Text(
+                  'Thanh toán đặt cọc qua ZaloPay',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+            _buildBottomActionButtons(trip),
+          ],
+        ),
       ),
     );
   }

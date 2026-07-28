@@ -4,7 +4,7 @@ class TripModel {
   final double discountAmount;
   final double deliveryFee;
   final double paidAmount;
-  final int status;
+  int status;
   final int tripType;
   final DateTime startAt;
   final DateTime endAt;
@@ -13,7 +13,7 @@ class TripModel {
   final int userId;
   final String? deliveryAddress;
   final String? deliveryLocation;
-  final String? statusText;
+  String? statusText;
   final String? tripTypeText;
   final CarModel? car;
 
