@@ -264,5 +264,40 @@ class TripService extends BaseService {
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
     }
   }
+
+  // Gửi đánh giá cho chuyến đi
+  Future<Map<String, dynamic>> submitReview(
+    int tripId, {
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final response = await store(
+        'api/trips/$tripId/reviews',
+        body: {
+          'rating': rating,
+          if (comment != null && comment.isNotEmpty) 'comment': comment,
+        },
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Gửi đánh giá thành công!',
+          'data': response['data'],
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể gửi đánh giá.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi gửi đánh giá cho chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra khi gửi đánh giá: $e'};
+    }
+  }
 }
+
 

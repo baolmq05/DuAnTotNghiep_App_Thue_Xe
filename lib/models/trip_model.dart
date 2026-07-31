@@ -1,3 +1,41 @@
+class TripReviewModel {
+  final int id;
+  final int tripId;
+  final int reviewerId;
+  final int targetId;
+  final int? carId;
+  final double rating;
+  final String? comment;
+  final int reviewType; // 0: owner -> renter, 1: renter -> owner
+  final DateTime? createdAt;
+
+  TripReviewModel({
+    required this.id,
+    required this.tripId,
+    required this.reviewerId,
+    required this.targetId,
+    this.carId,
+    required this.rating,
+    this.comment,
+    required this.reviewType,
+    this.createdAt,
+  });
+
+  factory TripReviewModel.fromJson(Map<String, dynamic> json) {
+    return TripReviewModel(
+      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      tripId: json['trip_id'] is int ? json['trip_id'] as int : int.tryParse(json['trip_id']?.toString() ?? '') ?? 0,
+      reviewerId: json['reviewer_id'] is int ? json['reviewer_id'] as int : int.tryParse(json['reviewer_id']?.toString() ?? '') ?? 0,
+      targetId: json['target_id'] is int ? json['target_id'] as int : int.tryParse(json['target_id']?.toString() ?? '') ?? 0,
+      carId: json['car_id'] is int ? json['car_id'] as int : int.tryParse(json['car_id']?.toString() ?? ''),
+      rating: double.tryParse(json['rating']?.toString() ?? '0') ?? 0.0,
+      comment: json['comment']?.toString(),
+      reviewType: json['review_type'] is int ? json['review_type'] as int : int.tryParse(json['review_type']?.toString() ?? '0') ?? 0,
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
+    );
+  }
+}
+
 class TripExtensionModel {
   final int id;
   final int tripId;
@@ -74,6 +112,7 @@ class TripModel {
   final String? tripTypeText;
   final CarModel? car;
   final TripExtensionModel? latestExtension;
+  final List<TripReviewModel> reviews;
 
   TripModel({
     required this.id,
@@ -94,6 +133,7 @@ class TripModel {
     this.tripTypeText,
     this.car,
     this.latestExtension,
+    this.reviews = const [],
   });
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
@@ -159,6 +199,15 @@ class TripModel {
       parsedExtension = TripExtensionModel.fromJson(json['latest_extension'] as Map<String, dynamic>);
     }
 
+    // Parse reviews
+    List<TripReviewModel> parsedReviews = [];
+    if (json['reviews'] != null && json['reviews'] is List) {
+      parsedReviews = (json['reviews'] as List)
+          .where((r) => r != null && r is Map<String, dynamic>)
+          .map((r) => TripReviewModel.fromJson(r as Map<String, dynamic>))
+          .toList();
+    }
+
     return TripModel(
       id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       cost: double.tryParse(json['cost']?.toString() ?? json['total_cost']?.toString() ?? json['price']?.toString() ?? '0') ?? 0.0,
@@ -180,7 +229,17 @@ class TripModel {
       tripTypeText: json['trip_type_text']?.toString(),
       car: parsedCar,
       latestExtension: parsedExtension,
+      reviews: parsedReviews,
     );
+  }
+
+  TripReviewModel? get renterReview {
+    for (var r in reviews) {
+      if (r.reviewType == 1) {
+        return r;
+      }
+    }
+    return null;
   }
 
   // Tiện ích định dạng trạng thái

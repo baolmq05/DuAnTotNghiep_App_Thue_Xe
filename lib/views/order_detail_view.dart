@@ -228,6 +228,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         _buildPriceCard(trip),
                         const SizedBox(height: 20),
                         _buildStatusTimeline(trip),
+                        if (trip.status == 4) ...[
+                          const SizedBox(height: 20),
+                          _buildCompletedReviewCard(trip),
+                        ],
                         const SizedBox(height: 16),
                       ],
                     ),
@@ -358,6 +362,29 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+            ],
+            if (trip.status == 4 && trip.renterReview == null) ...[
+              ElevatedButton.icon(
+                onPressed: () => _showReviewDialog(trip),
+                icon: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
+                label: const Text(
+                  'Đánh giá chủ xe & chuyến đi',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF059669),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
               ),
               const SizedBox(height: 10),
             ],
@@ -2248,4 +2275,370 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       ),
     );
   }
+
+  Widget _buildCompletedReviewCard(TripModel trip) {
+    final renterReview = trip.renterReview;
+    final isDark = context.isDarkMode;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1B382B) : const Color(0xFFECFDF5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.green.shade800 : Colors.green.shade200,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle_rounded,
+                  color: Color(0xFF059669),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chuyến đi đã kết thúc',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isDark
+                            ? Colors.green.shade100
+                            : Colors.green.shade900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Cảm ơn bạn đã sử dụng dịch vụ! Chuyến đi đã được hoàn thành thành công.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark
+                            ? Colors.green.shade200
+                            : Colors.green.shade800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Divider(
+            height: 1,
+            color: isDark ? Colors.green.shade800 : Colors.green.shade200,
+          ),
+          const SizedBox(height: 14),
+          if (renterReview != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: context.cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: context.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Đánh giá của bạn về chủ xe:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                      Row(
+                        children: List.generate(5, (index) {
+                          final starValue = index + 1;
+                          return Icon(
+                            starValue <= renterReview.rating
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            color: starValue <= renterReview.rating
+                                ? Colors.amber
+                                : Colors.grey.shade400,
+                            size: 18,
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                  if (renterReview.comment != null &&
+                      renterReview.comment!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '"${renterReview.comment}"',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontStyle: FontStyle.italic,
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Không có bình luận.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ] else ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _showReviewDialog(trip),
+                icon: const Icon(Icons.star_rounded, color: Colors.white, size: 18),
+                label: const Text(
+                  'Đánh giá chủ xe & chuyến đi',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF059669),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _showReviewDialog(TripModel trip) {
+    int selectedRating = 5;
+    final commentController = TextEditingController();
+    bool isSubmitting = false;
+
+    String getRatingLabel(int rating) {
+      switch (rating) {
+        case 1:
+          return 'Rất kém 😠';
+        case 2:
+          return 'Kém 🙁';
+        case 3:
+          return 'Bình thường 😐';
+        case 4:
+          return 'Tốt 🙂';
+        case 5:
+          return 'Tuyệt vời 🥰';
+        default:
+          return 'Chọn số sao';
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Row(
+              children: const [
+                Icon(Icons.star_rounded, color: Colors.amber, size: 24),
+                SizedBox(width: 8),
+                Text(
+                  'Đánh giá chuyến đi',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (trip.car?.owner != null) ...[
+                    Text(
+                      'Chủ xe: ${trip.car!.owner!.name}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                  Text(
+                    'Hãy chia sẻ trải nghiệm của bạn về chủ xe và chuyến đi vừa rồi nhé!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: context.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      final starValue = index + 1;
+                      return IconButton(
+                        onPressed: isSubmitting
+                            ? null
+                            : () {
+                                setDialogState(() {
+                                  selectedRating = starValue;
+                                });
+                              },
+                        icon: Icon(
+                          starValue <= selectedRating
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          color: starValue <= selectedRating
+                              ? Colors.amber
+                              : Colors.grey.shade400,
+                          size: 36,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        constraints: const BoxConstraints(),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    getRatingLabel(selectedRating),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: commentController,
+                    enabled: !isSubmitting,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'Nhập ý kiến đánh giá của bạn (không bắt buộc)...',
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade400,
+                      ),
+                      filled: true,
+                      fillColor: context.cardColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.primary),
+                      ),
+                      contentPadding: const EdgeInsets.all(12),
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: isSubmitting ? null : () => Navigator.pop(dialogCtx),
+                child: Text(
+                  'Hủy',
+                  style: TextStyle(color: context.textSecondary),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: isSubmitting
+                    ? null
+                    : () async {
+                        final currentContext = this.context;
+                        final nav = Navigator.of(dialogCtx);
+                        final viewModel =
+                            currentContext.read<OrderDetailViewModel>();
+
+                        setDialogState(() => isSubmitting = true);
+
+                        final result = await TripService().submitReview(
+                          trip.id,
+                          rating: selectedRating,
+                          comment: commentController.text.trim(),
+                        );
+
+                        nav.pop();
+
+                        if (!mounted) return;
+                        if (currentContext.mounted) {
+                          if (result['success'] == true) {
+                            AppToast.show(
+                              currentContext,
+                              message: result['message'] ?? 'Gửi đánh giá thành công!',
+                              type: ToastType.success,
+                            );
+                            viewModel.fetchTripDetail(trip.id);
+                          } else {
+                            AppToast.show(
+                              currentContext,
+                              message: result['message'] ?? 'Gửi đánh giá thất bại.',
+                              type: ToastType.error,
+                            );
+                          }
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF059669),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: isSubmitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Gửi đánh giá',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
+
