@@ -31,4 +31,28 @@ class OrderDetailViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Gửi yêu cầu gia hạn chuyến đi
+  Future<Map<String, dynamic>> requestExtension({
+    required int tripId,
+    required String endDate,
+    required int extendedDays,
+    required double extensionAmount,
+  }) async {
+    try {
+      final result = await _tripService.requestExtension(
+        tripId,
+        endDate: endDate,
+        extendedDays: extendedDays,
+        extensionAmount: extensionAmount,
+      );
+      if (result['success'] == true) {
+        // Refresh trip detail after success
+        await fetchTripDetail(tripId);
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }

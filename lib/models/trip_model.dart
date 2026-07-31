@@ -1,3 +1,60 @@
+class TripExtensionModel {
+  final int id;
+  final int tripId;
+  final double extensionAmount;
+  final int status; // 0: Chưa gia hạn, 1: Chờ duyệt, 2: Chờ thanh toán, 3: Đã gia hạn, 4: Bị từ chối
+  final String? startDate;
+  final String? endDate;
+  final int? extendedDays;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  TripExtensionModel({
+    required this.id,
+    required this.tripId,
+    required this.extensionAmount,
+    required this.status,
+    this.startDate,
+    this.endDate,
+    this.extendedDays,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory TripExtensionModel.fromJson(Map<String, dynamic> json) {
+    return TripExtensionModel(
+      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      tripId: json['trip_id'] is int ? json['trip_id'] as int : int.tryParse(json['trip_id']?.toString() ?? '') ?? 0,
+      extensionAmount: double.tryParse(json['extension_amount']?.toString() ?? '0') ?? 0.0,
+      status: json['status'] is int ? json['status'] as int : int.tryParse(json['status']?.toString() ?? '0') ?? 0,
+      startDate: json['start_date']?.toString(),
+      endDate: json['end_date']?.toString(),
+      extendedDays: json['extended_days'] is int
+          ? json['extended_days'] as int
+          : int.tryParse(json['extended_days']?.toString() ?? ''),
+      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
+    );
+  }
+
+  String getStatusText() {
+    switch (status) {
+      case 0:
+        return 'Chưa gia hạn';
+      case 1:
+        return 'Chờ duyệt';
+      case 2:
+        return 'Chờ thanh toán';
+      case 3:
+        return 'Đã gia hạn';
+      case 4:
+        return 'Bị từ chối';
+      default:
+        return 'Không xác định';
+    }
+  }
+}
+
 class TripModel {
   final int id;
   final double cost;
@@ -16,6 +73,7 @@ class TripModel {
   String? statusText;
   final String? tripTypeText;
   final CarModel? car;
+  final TripExtensionModel? latestExtension;
 
   TripModel({
     required this.id,
@@ -35,6 +93,7 @@ class TripModel {
     this.statusText,
     this.tripTypeText,
     this.car,
+    this.latestExtension,
   });
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
@@ -94,6 +153,12 @@ class TripModel {
       parsedPaidAmount = double.tryParse(json['paid_amount'].toString()) ?? 0.0;
     }
 
+    // Parse latest_extension
+    TripExtensionModel? parsedExtension;
+    if (json['latest_extension'] != null && json['latest_extension'] is Map<String, dynamic>) {
+      parsedExtension = TripExtensionModel.fromJson(json['latest_extension'] as Map<String, dynamic>);
+    }
+
     return TripModel(
       id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       cost: double.tryParse(json['cost']?.toString() ?? json['total_cost']?.toString() ?? json['price']?.toString() ?? '0') ?? 0.0,
@@ -114,6 +179,7 @@ class TripModel {
       statusText: json['status_text']?.toString() ?? json['status_name']?.toString(),
       tripTypeText: json['trip_type_text']?.toString(),
       car: parsedCar,
+      latestExtension: parsedExtension,
     );
   }
 
@@ -137,6 +203,10 @@ class TripModel {
         return 'Người thuê hủy';
       case 6:
         return 'Chủ xe hủy';
+      case 7:
+        return 'Chờ gia hạn';
+      case 8:
+        return 'Chờ trả xe';
       default:
         return 'Không xác định';
     }

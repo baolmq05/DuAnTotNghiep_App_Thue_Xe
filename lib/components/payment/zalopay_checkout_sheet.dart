@@ -744,6 +744,30 @@ class _ZaloPayCheckoutSheetState extends State<ZaloPayCheckoutSheet> with Widget
               style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _paymentCompleted = true;
+                _isSuccess = true;
+                _isWaitingForPayment = false;
+                _transactionId = 'MOCK-DEP-${widget.trip.id}-${DateTime.now().millisecondsSinceEpoch.toString().substring(9)}';
+              });
+              AppToast.show(
+                context,
+                message: 'Giả lập thanh toán đặt cọc thành công!',
+                type: ToastType.success,
+              );
+            },
+            child: const Text(
+              'Giả lập thanh toán thành công (Test)',
+              style: TextStyle(
+                color: Colors.grey,
+                decoration: TextDecoration.underline,
+                fontSize: 12,
+              ),
+            ),
+          ),
         ],
       ),
     );

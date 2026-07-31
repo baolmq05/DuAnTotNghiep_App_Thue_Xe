@@ -161,5 +161,108 @@ class TripService extends BaseService {
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
     }
   }
+
+  // Gửi yêu cầu gia hạn chuyến đi
+  Future<Map<String, dynamic>> requestExtension(
+    int tripId, {
+    required String endDate,
+    required int extendedDays,
+    required double extensionAmount,
+  }) async {
+    try {
+      final response = await store(
+        'api/trips/$tripId/extension-request',
+        body: {
+          'end_date': endDate,
+          'extended_days': extendedDays,
+          'extension_amount': extensionAmount,
+        },
+        requiresAuth: true,
+      );
+
+      if (response != null) {
+        return {
+          'success': response['success'] ?? false,
+          'message': response['message'] ?? 'Gửi yêu cầu gia hạn thành công',
+          'data': response['data'],
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Không nhận được phản hồi từ hệ thống.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi gửi yêu cầu gia hạn: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Tạo giao dịch ZaloPay để thanh toán phí gia hạn
+  Future<Map<String, dynamic>> createExtensionPayment(int tripId) async {
+    try {
+      final response = await store(
+        'api/auth/zalopay/create-payment',
+        body: {
+          'trip_id': tripId,
+          'payment_type': 'extension',
+        },
+        requiresAuth: true,
+      );
+
+      if (response != null) {
+        final success = response['success'] ?? (response['return_code'] == 1) ?? false;
+        final data = response['data'] ?? response;
+
+        final appTransId = response['app_trans_id'] ??
+            response['appTransId'] ??
+            (response['zalopay'] != null ? response['zalopay']['app_trans_id'] : null) ??
+            (response['data'] != null ? response['data']['app_trans_id'] : null);
+
+        return {
+          'success': success,
+          'message': response['message'] ?? response['return_message'] ?? 'Thành công',
+          'order_url': response['payment_url'] ?? data['order_url'] ?? data['orderUrl'] ?? response['order_url'],
+          'zp_trans_token': data['zp_trans_token'] ?? data['zpTransToken'] ?? response['zp_trans_token'],
+          'app_trans_id': appTransId,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Không nhận được phản hồi từ backend.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi gọi API thanh toán gia hạn ZaloPay: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Gửi yêu cầu trả xe
+  Future<Map<String, dynamic>> requestReturn(int tripId) async {
+    try {
+      final response = await store(
+        'api/trips/$tripId/return-request',
+        body: {},
+        requiresAuth: true,
+      );
+
+      if (response != null) {
+        return {
+          'success': response['success'] ?? false,
+          'message': response['message'] ?? 'Gửi yêu cầu trả xe thành công',
+          'data': response['data'],
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Không nhận được phản hồi từ hệ thống.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi gửi yêu cầu trả xe: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }
 

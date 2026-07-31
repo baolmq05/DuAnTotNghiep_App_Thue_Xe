@@ -526,10 +526,10 @@ class _VehicleListViewState extends State<VehicleListView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: hasFilters ? AppColors.primary : Colors.white,
+          color: hasFilters ? AppColors.primary : context.cardColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: hasFilters ? AppColors.primary : AppColors.border,
+            color: hasFilters ? AppColors.primary : context.border,
           ),
         ),
         child: Row(
@@ -621,7 +621,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -631,7 +631,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                         ),
                       ],
                       border: Border.all(
-                        color: AppColors.border.withOpacity(0.5),
+                        color: context.border.withOpacity(0.5),
                       ),
                     ),
                     child: Row(
@@ -817,7 +817,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                       color: context.textSecondary,
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: context.cardColor,
                     prefixIcon: Icon(
                       Icons.search_rounded,
                       color: AppColors.primary,
@@ -838,13 +838,13 @@ class _VehicleListViewState extends State<VehicleListView> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: AppColors.border.withOpacity(0.5),
+                        color: context.border.withOpacity(0.5),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: AppColors.border.withOpacity(0.5),
+                        color: context.border.withOpacity(0.5),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -881,7 +881,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                         color: AppColors.primary,
                       ),
                       label: Text('${filteredCars.length} xe phù hợp'),
-                      backgroundColor: Colors.white,
+                      backgroundColor: context.cardColor,
                       side: BorderSide(
                         color: AppColors.primary.withOpacity(0.12),
                       ),
@@ -914,7 +914,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                           });
                           _fetchCars();
                         },
-                        backgroundColor: Colors.white,
+                        backgroundColor: context.cardColor,
                         side: BorderSide(color: Colors.red.withOpacity(0.2)),
                         labelStyle: TextStyle(
                           color: Colors.red,
@@ -950,7 +950,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                         Text(
                           _errorMessage ?? 'Đã xảy ra lỗi',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.black54),
+                          style: TextStyle(color: context.textSecondary),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(

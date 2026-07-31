@@ -171,12 +171,24 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
   }
 
   Widget _datePickerTheme(BuildContext context, Widget? child) {
+    final isDark = context.isDarkMode;
     return Theme(
       data: Theme.of(context).copyWith(
-        colorScheme: ColorScheme.light(
-          primary: AppColors.primary,
-          onPrimary: Colors.white,
-          onSurface: context.textPrimary,
+        colorScheme: isDark
+            ? ColorScheme.dark(
+                primary: AppColors.primary,
+                onPrimary: Colors.white,
+                surface: context.cardColor,
+                onSurface: context.textPrimary,
+              )
+            : ColorScheme.light(
+                primary: AppColors.primary,
+                onPrimary: Colors.white,
+                surface: context.cardColor,
+                onSurface: context.textPrimary,
+              ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: context.cardColor,
         ),
       ),
       child: Localizations.override(
@@ -258,7 +270,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
         bottom: 20 + bottomInset,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -271,7 +283,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: context.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -332,11 +344,11 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                         : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: context.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(color: context.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -380,7 +392,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.border),
+                                border: Border.all(color: context.border),
                                 borderRadius: BorderRadius.circular(8),
                                 color: context.cardColor,
                               ),
@@ -407,7 +419,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.border),
+                                border: Border.all(color: context.border),
                                 borderRadius: BorderRadius.circular(8),
                                 color: context.cardColor,
                               ),
@@ -447,7 +459,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.border),
+                                border: Border.all(color: context.border),
                                 borderRadius: BorderRadius.circular(8),
                                 color: context.cardColor,
                               ),
@@ -474,7 +486,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.border),
+                                border: Border.all(color: context.border),
                                 borderRadius: BorderRadius.circular(8),
                                 color: context.cardColor,
                               ),
@@ -530,7 +542,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                 ),
                                 backgroundColor: context.cardColor,
                                 side: BorderSide(
-                                  color: isSelected ? AppColors.primary : AppColors.border,
+                                  color: isSelected ? AppColors.primary : context.border,
                                 ),
                                 showCheckmark: false,
                               ),
@@ -561,7 +573,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                         ),
                         backgroundColor: context.cardColor,
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.border,
+                          color: isSelected ? AppColors.primary : context.border,
                         ),
                         showCheckmark: false,
                       ),
@@ -592,7 +604,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                         ),
                         backgroundColor: context.cardColor,
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.border,
+                          color: isSelected ? AppColors.primary : context.border,
                         ),
                         showCheckmark: false,
                       ),
@@ -623,7 +635,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                         ),
                         backgroundColor: context.cardColor,
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.border,
+                          color: isSelected ? AppColors.primary : context.border,
                         ),
                         showCheckmark: false,
                       ),
@@ -657,7 +669,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                     _formatPriceValue(_priceRange.end),
                   ),
                   activeColor: AppColors.primary,
-                  inactiveColor: AppColors.border,
+                  inactiveColor: context.border,
                   onChanged: (values) {
                     setState(() {
                       _priceRange = values;
