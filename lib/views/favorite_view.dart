@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../themes/app_colors.dart';
-import '../models/car_model.dart';
 import '../viewmodels/favorite_viewmodel.dart';
+import '../components/favorite_components/favorite_car_card.dart';
 
 class FavoriteView extends StatefulWidget {
   const FavoriteView({super.key});
@@ -23,15 +23,6 @@ class _FavoriteViewState extends State<FavoriteView> {
     });
   }
 
-  String _formatPrice(num price) {
-    final value = price.toInt();
-    final formatted = value.toString().replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (match) => '.',
-    );
-    return '$formattedđ';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,13 +31,13 @@ class _FavoriteViewState extends State<FavoriteView> {
         backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
           color: context.textPrimary,
         ),
-        title: Text(
+        title: const Text(
           'Yêu thích',
           style: TextStyle(
             color: AppColors.primary,
@@ -59,11 +50,11 @@ class _FavoriteViewState extends State<FavoriteView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'Danh sách yêu thích',
                   style: TextStyle(color: AppColors.primary, fontSize: 16),
@@ -76,7 +67,6 @@ class _FavoriteViewState extends State<FavoriteView> {
               ],
             ),
           ),
-          // phần tìm kiếm xe
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -130,7 +120,6 @@ class _FavoriteViewState extends State<FavoriteView> {
               ],
             ),
           ),
-          // danh sách xe yêu thích dạng lưới 2 cột
           Expanded(
             child: Consumer<FavoriteViewModel>(
               builder: (context, favoriteVM, child) {
@@ -145,17 +134,17 @@ class _FavoriteViewState extends State<FavoriteView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error_outline, size: 48, color: Colors.red),
+                          const Icon(Icons.error_outline, size: 48, color: Colors.red),
                           const SizedBox(height: 16),
                           Text(
                             favoriteVM.errorMessage!,
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
+                            style: const TextStyle(color: Colors.grey),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () => favoriteVM.fetchFavorites(),
-                            child: Text('Thử lại'),
+                            child: const Text('Thử lại'),
                           ),
                         ],
                       ),
@@ -176,7 +165,7 @@ class _FavoriteViewState extends State<FavoriteView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.favorite_border_rounded,
                           size: 64,
                           color: Colors.black12,
@@ -186,7 +175,7 @@ class _FavoriteViewState extends State<FavoriteView> {
                           searchQuery.isNotEmpty
                               ? 'Không tìm thấy xe phù hợp'
                               : 'Danh sách yêu thích trống',
-                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                          style: const TextStyle(color: Colors.grey, fontSize: 15),
                         ),
                       ],
                     ),
@@ -200,11 +189,14 @@ class _FavoriteViewState extends State<FavoriteView> {
                     final car = cars[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: GestureDetector(
+                      child: FavoriteCarCard(
+                        car: car,
                         onTap: () {
                           context.push('/car_detail/${car.id}');
                         },
-                        child: _buildCarCard(context, car),
+                        onFavoriteTap: () {
+                          favoriteVM.toggleFavorite(carId: car.id, car: car);
+                        },
                       ),
                     );
                   },
@@ -216,301 +208,4 @@ class _FavoriteViewState extends State<FavoriteView> {
       ),
     );
   }
-
-  Widget _buildCarCard(BuildContext context, Car car) {
-    // Lấy ảnh thumbnail hoặc ảnh đầu tiên
-    final String image = car.images.isEmpty
-        ? 'https://via.placeholder.com/600x300'
-        : car.images.firstWhere((img) => img.isThumbnail, orElse: () => car.images.first).imageUrl;
-
-    // Tính phần trăm giảm giá
-    String discount = '';
-    if (car.unitPrice > 0 && car.discountValue > 0) {
-      final pct = ((car.discountValue / car.unitPrice) * 100).round();
-      discount = 'GIẢM $pct%';
-    }
-
-    final ownerName = car.owner?.name ?? 'Chủ xe';
-    final ownerAvatar = car.owner?.avatar ?? 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=500';
-    final rating = car.reviewsAvgRating.toStringAsFixed(1);
-    final location = car.carLocation?.location ?? car.carLocation?.address ?? 'Chưa xác định';
-    final seats = '${car.seatCount} chỗ';
-    final transmission = car.transmission.toLowerCase().contains('tự động') ||
-            car.transmission.toLowerCase().contains('auto')
-        ? 'Tự động'
-        : 'Số sàn';
-    final fuel = car.fuelType;
-    final trips = '${car.tripsCount} chuyến';
-    final price = _formatPrice(car.unitPrice - car.discountValue);
-
-    return Container(
-      height: 140,
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Row(
-          children: [
-            // Left side: Image and overlays
-            SizedBox(
-              width: 130,
-              height: double.infinity,
-              child: Stack(
-                children: [
-                  Image.network(
-                    image,
-                    width: 130,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      width: 130,
-                      height: double.infinity,
-                      color: Colors.grey.shade200,
-                      child: Icon(
-                        Icons.directions_car_rounded,
-                        color: Colors.grey,
-                        size: 36,
-                      ),
-                    ),
-                  ),
-                  // Owner avatar + name overlay (Top Left)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              ownerAvatar,
-                              width: 18,
-                              height: 18,
-                              fit: BoxFit.cover,
-                              errorBuilder: (c, e, s) => Icon(
-                                Icons.account_circle,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            ownerName,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Right side: Info details
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top row: Discount Tag (if any) & Heart Icon
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (discount.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF4D6D),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.local_offer_outlined,
-                                  color: Colors.white,
-                                  size: 10,
-                                ),
-                                const SizedBox(width: 2),
-                                Text(
-                                  discount,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          const SizedBox(),
-                        GestureDetector(
-                          onTap: () {
-                            context.read<FavoriteViewModel>().toggleFavorite(carId: car.id, car: car);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 2,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.favorite_rounded,
-                              color: Color(0xFFFF4D6D),
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    // Name & Rating
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            car.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: context.textPrimary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.star_rounded,
-                              color: Colors.amber,
-                              size: 14,
-                            ),
-                            Text(
-                              ' $rating',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    // Location
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: context.textSecondary,
-                          size: 12,
-                        ),
-                        const SizedBox(width: 2),
-                        Expanded(
-                          child: Text(
-                            location,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: context.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    // Specifications: e.g. "4 chỗ • Số tự động • Xăng"
-                    Text(
-                      '$seats • $transmission • $fuel',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: context.textSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const Spacer(),
-                    // Bottom Row: Trips and Rent Price
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Đã chạy $trips',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: context.textSecondary,
-                          ),
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              price,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            Text(
-                              '/ngày',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: context.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
 }

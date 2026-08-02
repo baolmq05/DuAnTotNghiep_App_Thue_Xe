@@ -1,22 +1,23 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import '../themes/app_colors.dart';
-import '../models/trip_model.dart';
-import '../viewmodels/trip_viewmodel.dart';
-import '../services/car_service.dart';
-import '../services/goong_map_service.dart';
-import '../services/promotion_service.dart';
-import '../services/base_service.dart';
-import '../widgets/app_toast.dart';
-import 'package:go_router/go_router.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/trip_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/services/car_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/promotion_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/base_service.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
+
+// Components
+import 'package:duantotnghiep_app_thue_xe/components/booking_components/booking_car_info_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/booking_components/booking_rental_time_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/booking_components/booking_delivery_method_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/booking_components/booking_promo_code_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/booking_components/booking_price_breakdown_card.dart';
 
 class BookingCarView extends StatefulWidget {
-  final int carId; // Nhận duy nhất ID xe từ trang chi tiết truyền sang
+  final int carId;
 
   const BookingCarView({super.key, required this.carId});
 
@@ -25,16 +26,10 @@ class BookingCarView extends StatefulWidget {
 }
 
 class _BookingCarViewState extends State<BookingCarView> {
-  final String goongMaptilesKey = "lvcebA0VIPS4ZP4omHIRxH...";
-  final String goongApiKey = "Gmptoo7f9LZDC6Mrcib9N...";
-
   CarModel? car;
   bool isPageLoading = true;
   List<TripModel> carActiveTrips = [];
-  List<Map<String, String>> _suggestions = [];
-  final MapController _mapController = MapController();
 
-  // --- BIẾN THỜI GIAN ĐÃ ĐƯỢC CHUYỂN THÀNH STATE ĐỂ KHÁCH TỰ CHỌN ---
   DateTime? startDate;
   DateTime? endDate;
 
@@ -58,7 +53,6 @@ class _BookingCarViewState extends State<BookingCarView> {
   double distanceInKm = 0.0;
   double promoDiscount = 0.0;
 
-  // Hàm hiển thị thông báo lỗi dạng Toast
   final List<BoxShadow> _cardShadow = [
     BoxShadow(
       color: Colors.black.withValues(alpha: 0.02),
@@ -72,8 +66,6 @@ class _BookingCarViewState extends State<BookingCarView> {
     super.initState();
     _promoController.text = "";
 
-    // Khởi tạo thời gian mẫu và mặc định cho khách hàng khi mở trang đặt xe lần đầu tiên
-    // Khách hàng có thể đổi lại mốc thời gian này bằng nút bấm chọn lịch
     final now = DateTime.now();
     startDate = DateTime(now.year, now.month, now.day + 1, 9, 0);
     endDate = DateTime(now.year, now.month, now.day + 3, 17, 0);
@@ -86,14 +78,12 @@ class _BookingCarViewState extends State<BookingCarView> {
     });
   }
 
-  // Hàm tính toán số ngày dựa trên mốc startDate và endDate hiện tại
   void _updateTotalDays() {
     if (startDate != null && endDate != null) {
       int diffMinutes = endDate!.difference(startDate!).inMinutes;
       totalDays = (diffMinutes / 1440).ceil();
       if (totalDays < 1) totalDays = 1;
 
-      // Tính lại giá xe theo số ngày mới
       if (car != null) {
         baseRentalPrice = car!.unitPrice * totalDays;
         carDiscountTotal = car!.discountValue * totalDays;
@@ -105,16 +95,14 @@ class _BookingCarViewState extends State<BookingCarView> {
     }
   }
 
-  // Sự kiện khi người dùng chọn xong thời gian mới từ bộ lịch (DatePicker/Modal)
   void onDateTimeChanged(DateTime newStart, DateTime newEnd) {
     setState(() {
       startDate = newStart;
       endDate = newEnd;
-      _updateTotalDays(); // Tính toán lại toàn bộ bảng giá tiền lập tức
+      _updateTotalDays();
     });
   }
 
-  // Kiểm tra xem xe có bận trong khoảng thời gian start-end hay không
   bool _isCarBusy(DateTime start, DateTime end) {
     for (var trip in carActiveTrips) {
       if (start.isBefore(trip.endAt) && end.isAfter(trip.startAt)) {
@@ -124,7 +112,6 @@ class _BookingCarViewState extends State<BookingCarView> {
     return false;
   }
 
-  // Lấy chuyến đi đang bận trùng với khoảng thời gian start-end nếu có
   TripModel? _getOverlappingTrip(DateTime start, DateTime end) {
     for (var trip in carActiveTrips) {
       if (start.isBefore(trip.endAt) && end.isAfter(trip.startAt)) {
@@ -134,7 +121,6 @@ class _BookingCarViewState extends State<BookingCarView> {
     return null;
   }
 
-  // Hàm hiển thị thông báo lỗi dạng Toast
   Future<void> _selectPickupDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -169,19 +155,16 @@ class _BookingCarViewState extends State<BookingCarView> {
       startDate?.minute ?? 0,
     );
 
-    // Nếu thời gian mặc định/đang chọn nằm ở quá khứ so với thời điểm hiện tại
     if (newStart.isBefore(DateTime.now())) {
-      // Tự động đẩy giờ nhận lên cách hiện tại 1 tiếng
       final suggested = DateTime.now().add(const Duration(hours: 1));
       newStart = DateTime(
         pickedDate.year,
         pickedDate.month,
         pickedDate.day,
         suggested.hour,
-        0, // Làm tròn phút về 00
+        0,
       );
 
-      // Nếu sau khi điều chỉnh vẫn bị quá khứ (ví dụ chọn ngày hôm trước)
       if (newStart.isBefore(DateTime.now())) {
         _showToastError('Thời gian nhận xe không thể ở quá khứ!');
         return;
@@ -209,7 +192,6 @@ class _BookingCarViewState extends State<BookingCarView> {
     });
   }
 
-  // hàm chọn giờ nhận xe
   Future<void> _selectPickupTime() async {
     if (!mounted) return;
     final TimeOfDay? pickedTime = await showTimePicker(
@@ -272,7 +254,6 @@ class _BookingCarViewState extends State<BookingCarView> {
     });
   }
 
-  // hàm chọn ngày trả xe
   Future<void> _selectReturnDate() async {
     if (startDate == null) {
       _showToastError('Vui lòng chọn ngày nhận xe trước!');
@@ -393,17 +374,8 @@ class _BookingCarViewState extends State<BookingCarView> {
     });
   }
 
-  void _updateMapView() {
-    if (customerLatitude != null && customerLongitude != null) {
-      _mapController.move(LatLng(customerLatitude!, customerLongitude!), 13);
-    } else if (carLatitude != null && carLongitude != null) {
-      _mapController.move(LatLng(carLatitude!, carLongitude!), 13);
-    }
-  }
-
   Future<void> _fetchCarDetailFromServer() async {
     try {
-      // 1. Gọi API lấy xe từ Laravel (Ví dụ)
       final response = await CarService().get('/api/cars/${widget.carId}');
 
       List<TripModel> activeTrips = [];
@@ -464,14 +436,12 @@ class _BookingCarViewState extends State<BookingCarView> {
         if (car != null && car!.carLocation?.location != null) {
           final coords = car!.carLocation!.location!.split(',');
           if (coords.length == 2) {
-            // Gán thẳng vị trí thực tế của chủ xe đăng ký từ database vào State
             carLatitude = double.tryParse(coords[0].trim());
             carLongitude = double.tryParse(coords[1].trim());
           }
         }
         isPageLoading = false;
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) => _updateMapView());
     } catch (e) {
       setState(() => isPageLoading = false);
       _showToastError('Lỗi tải vị trí xe.');
@@ -480,33 +450,26 @@ class _BookingCarViewState extends State<BookingCarView> {
 
   @override
   void dispose() {
-    _mapController.dispose();
     _addressController.dispose();
     _promoController.dispose();
     super.dispose();
   }
 
   double get calculatedDeliveryFee {
-    // Nếu không giao xe đến địa chỉ khách hàng hoặc chưa có dữ liệu xe thì phí giao luôn là 0
     if (!isDeliveryToLocation || car == null) return 0.0;
     final option = car!.deliveryOption;
     if (option == null) return 0.0;
-    // Nếu chưa có dữ liệu khoảng cách thì phí giao luôn là 0
-    final double freeDist = option.freeDistance
-        .toDouble(); // Ngưỡng miễn phí (km)
-    final double feeDist = option.feeDistance
-        .toDouble(); // Đơn giá mỗi km vượt ngưỡng (VNĐ)
+    final double freeDist = option.freeDistance.toDouble();
+    final double feeDist = option.feeDistance.toDouble();
 
     if (distanceInKm <= freeDist) {
-      return 0.0; // Miễn phí
+      return 0.0;
     }
 
-    // Tính phí theo khoảng cách thực tế vượt quá ngưỡng miễn phí và ko làm tròn
     final double chargeableKm = double.parse(
       (distanceInKm - freeDist).toStringAsFixed(1),
     );
     final double rawFee = chargeableKm * feeDist;
-    // Làm tròn đến 1.000đ gần nhất
     return (rawFee / 1000).round() * 1000.0;
   }
 
@@ -519,10 +482,8 @@ class _BookingCarViewState extends State<BookingCarView> {
     return finalCost < 0 ? 0.0 : finalCost;
   }
 
-  // tổng tiền giảm =  tiền giảm thuê xe + tiền mã giảm giá
   double get totalDiscountAmount => carDiscountTotal + promoDiscount;
 
-  // Áp dụng mã giảm giá
   Future<void> _applyPromoCode({bool showFeedback = true}) async {
     final codeText = _promoController.text.trim();
     if (codeText.isEmpty) {
@@ -550,10 +511,15 @@ class _BookingCarViewState extends State<BookingCarView> {
 
       if (showFeedback) {
         if (!mounted) return;
+        final formatter = NumberFormat.currency(
+          locale: 'vi_VN',
+          symbol: 'đ',
+          decimalDigits: 0,
+        );
         AppToast.show(
           context,
           message:
-              'Áp dụng mã $codeText thành công! Giảm ${_formatCurrency(promoDiscount)}',
+              'Áp dụng mã $codeText thành công! Giảm ${formatter.format(promoDiscount)}',
           type: ToastType.success,
         );
       }
@@ -571,140 +537,21 @@ class _BookingCarViewState extends State<BookingCarView> {
     }
   }
 
-  // Xác minh địa chỉ từ ID địa điểm và thông báo
-  Future<void> _verifyAddressFromPlaceId(
-    String placeId,
-    String formattedAddress,
-  ) async {
+  void _onAddressVerified({
+    required double distance,
+    required double? customerLat,
+    required double? customerLng,
+    required bool hasError,
+    required bool isCalculating,
+  }) {
     setState(() {
-      isCalculatingMap = true;
-      hasDistanceError = false;
+      distanceInKm = distance;
+      customerLatitude = customerLat;
+      customerLongitude = customerLng;
+      hasDistanceError = hasError;
+      isCalculatingMap = isCalculating;
+      _updateTotalDays();
     });
-
-    try {
-      final latLng = await GoongMapService().getPlaceLatLng(placeId);
-      if (latLng != null) {
-        final cLat = latLng['lat'];
-        final cLng = latLng['lng'];
-        double dist = 0.0;
-        bool errorOccurred = false;
-
-        if (carLatitude != null &&
-            carLongitude != null &&
-            cLat != null &&
-            cLng != null) {
-          final drivingDist = await GoongMapService().getDrivingDistance(
-            carLatitude!,
-            carLongitude!,
-            cLat,
-            cLng,
-          );
-          if (drivingDist != null) {
-            dist = drivingDist;
-          } else {
-            _showToastError(
-              'Không thể lấy khoảng cách lái xe, vui lòng thử lại!',
-            );
-            dist = 0.0;
-            errorOccurred = true;
-          }
-        }
-
-        setState(() {
-          _addressController.text = formattedAddress;
-          customerLatitude = cLat;
-          customerLongitude = cLng;
-          distanceInKm = double.parse(dist.toStringAsFixed(1));
-          hasDistanceError = errorOccurred;
-          isCalculatingMap = false;
-        });
-        _updateMapView();
-      } else {
-        _showToastError('Không tìm thấy vị trí tương ứng.');
-        setState(() {
-          hasDistanceError = true;
-          isCalculatingMap = false;
-        });
-      }
-    } catch (e) {
-      _showToastError('Lỗi tính toán khoảng cách.');
-      setState(() {
-        hasDistanceError = true;
-        isCalculatingMap = false;
-      });
-    }
-  }
-
-  // --- HÀM TÌM ĐỊA CHỈ THẬT QUA GOONG MAPS (ĐÃ BỎ GEOLOCATOR) ---
-  Future<void> _searchAndVerifyAddress(String addressInput) async {
-    if (addressInput.isEmpty) return;
-
-    setState(() {
-      isCalculatingMap = true;
-      hasDistanceError = false;
-    });
-
-    final String url =
-        "https://rsapi.goong.io/Geocode?address=${Uri.encodeComponent(addressInput)}&api_key=$goongApiKey";
-
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        if (data['results'] != null && data['results'].isNotEmpty) {
-          // 1. Lấy chuỗi địa chỉ định dạng chuẩn từ Goong Maps
-          final String formattedAddress =
-              data['results'][0]['formatted_address'];
-          final location = data['results'][0]['geometry']['location'];
-          final cLat = double.parse(location['lat'].toString());
-          final cLng = double.parse(location['lng'].toString());
-          double dist = 0.0;
-          bool errorOccurred = false;
-
-          if (carLatitude != null && carLongitude != null) {
-            final drivingDist = await GoongMapService().getDrivingDistance(
-              carLatitude!,
-              carLongitude!,
-              cLat,
-              cLng,
-            );
-            if (drivingDist != null) {
-              dist = drivingDist;
-            } else {
-              _showToastError(
-                'Không thể lấy khoảng cách lái xe, vui lòng thử lại!',
-              );
-              dist = 0.0;
-              errorOccurred = true;
-            }
-          }
-
-          setState(() {
-            // Điền địa chỉ chuẩn vào ô nhập liệu cho đẹp mắt
-            _addressController.text = formattedAddress;
-            customerLatitude = cLat;
-            customerLongitude = cLng;
-            distanceInKm = double.parse(dist.toStringAsFixed(1));
-            hasDistanceError = errorOccurred;
-            isCalculatingMap = false;
-          });
-          _updateMapView();
-        } else {
-          _showToastError('Không tìm thấy vị trí tương ứng.');
-          setState(() {
-            hasDistanceError = true;
-            isCalculatingMap = false;
-          });
-        }
-      }
-    } catch (e) {
-      _showToastError('Lỗi kiểm tra vị trí: $e');
-      setState(() {
-        hasDistanceError = true;
-        isCalculatingMap = false;
-      });
-    }
   }
 
   void _showToastError(String message) {
@@ -726,8 +573,8 @@ class _BookingCarViewState extends State<BookingCarView> {
     }
 
     if (car == null) {
-      return Scaffold(
-        body: const Center(
+      return const Scaffold(
+        body: Center(
           child: Text('Không tìm thấy dữ liệu xe. Vui lòng thử lại!'),
         ),
       );
@@ -771,15 +618,61 @@ class _BookingCarViewState extends State<BookingCarView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCarInfoCard(),
+                  BookingCarInfoCard(
+                    car: car!,
+                    shadow: _cardShadow,
+                  ),
                   const SizedBox(height: 16),
-                  _buildRentalTimeCard(), // Khối hiển thị & chọn thời gian thuê xe
+                  BookingRentalTimeCard(
+                    startDate: startDate,
+                    endDate: endDate,
+                    onSelectPickupDate: _selectPickupDate,
+                    onSelectPickupTime: _selectPickupTime,
+                    onSelectReturnDate: _selectReturnDate,
+                    onSelectReturnTime: _selectReturnTime,
+                    shadow: _cardShadow,
+                  ),
                   const SizedBox(height: 16),
-                  _buildDeliveryMethodCard(),
+                  BookingDeliveryMethodCard(
+                    car: car!,
+                    isDeliveryToLocation: isDeliveryToLocation,
+                    distanceInKm: distanceInKm,
+                    customerLatitude: customerLatitude,
+                    customerLongitude: customerLongitude,
+                    carLatitude: carLatitude,
+                    carLongitude: carLongitude,
+                    addressController: _addressController,
+                    isCalculatingMap: isCalculatingMap,
+                    hasDistanceError: hasDistanceError,
+                    calculatedDeliveryFee: calculatedDeliveryFee,
+                    onDeliveryMethodChanged: (value) {
+                      setState(() {
+                        isDeliveryToLocation = value;
+                        _updateTotalDays();
+                      });
+                    },
+                    onAddressVerified: _onAddressVerified,
+                    shadow: _cardShadow,
+                  ),
                   const SizedBox(height: 16),
-                  _buildPromoCodeCard(),
+                  BookingPromoCodeCard(
+                    controller: _promoController,
+                    onApply: () => _applyPromoCode(showFeedback: true),
+                    shadow: _cardShadow,
+                  ),
                   const SizedBox(height: 16),
-                  _buildPriceBreakdownCard(),
+                  BookingPriceBreakdownCard(
+                    car: car!,
+                    totalDays: totalDays,
+                    baseRentalPrice: baseRentalPrice,
+                    isDeliveryToLocation: isDeliveryToLocation,
+                    calculatedDeliveryFee: calculatedDeliveryFee,
+                    carDiscountTotal: carDiscountTotal,
+                    promoDiscount: promoDiscount,
+                    totalAmount: totalAmount,
+                    totalDiscountAmount: totalDiscountAmount,
+                    shadow: _cardShadow,
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -791,986 +684,6 @@ class _BookingCarViewState extends State<BookingCarView> {
     );
   }
 
-  Widget _buildCarInfoCard() {
-    return GestureDetector(
-      onTap: () {
-        if (car != null) {
-          context.push('/car_detail/${car!.id}');
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: context.cardColor,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: _cardShadow,
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                car!.getFirstImageUrl(),
-                width: 95,
-                height: 70,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    car!.name,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: context.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.star_rounded,
-                        color: AppColors.warning,
-                        size: 18,
-                      ),
-                      Text(
-                        ' 5.0 ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: context.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        '• Ghế: ${car!.seatCount} • Biển: ${car!.licensePlate}',
-                        style: TextStyle(
-                          color: context.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      car!.transmission ?? 'Tự động',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRentalTimeCard() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: _cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today_rounded,
-                size: 16,
-                color: AppColors.primary,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Thời gian thuê',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: context.textSecondary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // NHẬN XE row
-          Text(
-            'Nhận xe',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: context.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: _buildSubInputBox(
-                  startDate != null
-                      ? DateFormat('dd/MM/yyyy').format(startDate!)
-                      : 'Chọn ngày',
-                  Icons.calendar_today_rounded,
-                  _selectPickupDate,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: _buildSubInputBox(
-                  startDate != null
-                      ? DateFormat('HH:mm').format(startDate!)
-                      : 'Chọn giờ',
-                  Icons.access_time_rounded,
-                  _selectPickupTime,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          // TRẢ XE row
-          Text(
-            'Trả xe',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: context.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: _buildSubInputBox(
-                  endDate != null
-                      ? DateFormat('dd/MM/yyyy').format(endDate!)
-                      : 'Chọn ngày',
-                  Icons.calendar_today_rounded,
-                  _selectReturnDate,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 2,
-                child: _buildSubInputBox(
-                  endDate != null
-                      ? DateFormat('HH:mm').format(endDate!)
-                      : 'Chọn giờ',
-                  Icons.access_time_rounded,
-                  _selectReturnTime,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- HÀM XÂY DỰNG Ô NHẬP LIỆU NHỎ (DÙNG CHO NGÀY & GIỜ) ---
-  Widget _buildSubInputBox(String text, IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        decoration: BoxDecoration(
-          color: context.cardColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 14, color: AppColors.primary),
-            const SizedBox(width: 6),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: context.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // --- HÀM XÂY DỰNG KHỐI CHỌN HÌNH THỨC NHẬN XE ---
-  Widget _buildDeliveryMethodCard() {
-    double maxDist = car!.deliveryOption?.maxDistance ?? 10.0;
-    bool isTooFar = isDeliveryToLocation && (distanceInKm > maxDist);
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: _cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.local_shipping_rounded,
-                size: 16,
-                color: AppColors.primary,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Hình thức nhận xe',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: context.textSecondary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _buildDeliveryButton(
-                false,
-                'Tại vị trí xe',
-                Icons.location_on_outlined,
-              ),
-              const SizedBox(width: 12),
-              _buildDeliveryButton(
-                true,
-                'Giao tận nơi',
-                Icons.electric_car_outlined,
-              ),
-            ],
-          ),
-          if (!isDeliveryToLocation) ...[
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: context.cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Địa chỉ nhận xe',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: context.textSecondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          car?.carLocation?.address ??
-                              'Đang cập nhật địa chỉ...',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.textPrimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          if (isDeliveryToLocation) ...[
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: context.cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.location_on_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Vị trí xe hiện tại',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: context.textSecondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          car?.carLocation?.address ??
-                              'Đang cập nhật địa chỉ...',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.textPrimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _addressController,
-              onChanged: (value) async {
-                if (value.trim().isEmpty) {
-                  setState(() => _suggestions = []);
-                  return;
-                }
-                final suggestions = await GoongMapService()
-                    .getSuggestionsWithPlaceId(value);
-                setState(() {
-                  _suggestions = suggestions;
-                });
-              },
-              onSubmitted: (value) async {
-                setState(() => _suggestions = []);
-                await _searchAndVerifyAddress(value);
-              },
-              decoration: InputDecoration(
-                hintText: 'Nhập địa chỉ nhận xe...',
-                prefixIcon: isCalculatingMap
-                    ? Padding(
-                        padding: EdgeInsets.all(12.0),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.primary,
-                        ),
-                      )
-                    : Icon(
-                        Icons.map_rounded,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                fillColor: context.cardColor,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
-                    width: 1.5,
-                  ),
-                ),
-              ),
-            ),
-            if (_suggestions.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Container(
-                constraints: const BoxConstraints(maxHeight: 200),
-                decoration: BoxDecoration(
-                  color: context.cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.border),
-                  boxShadow: _cardShadow,
-                ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  itemCount: _suggestions.length,
-                  separatorBuilder: (context, index) =>
-                      Divider(height: 1, color: AppColors.border),
-                  itemBuilder: (context, index) {
-                    final suggestion = _suggestions[index];
-                    final desc = suggestion['description'] ?? '';
-                    final pid = suggestion['place_id'] ?? '';
-                    return ListTile(
-                      dense: true,
-                      leading: Icon(
-                        Icons.location_on_outlined,
-                        size: 18,
-                        color: AppColors.primary,
-                      ),
-                      title: Text(
-                        desc,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: context.textPrimary,
-                        ),
-                      ),
-                      onTap: () async {
-                        _addressController.text = desc;
-                        setState(() {
-                          _suggestions = [];
-                        });
-                        if (pid.isNotEmpty) {
-                          await _verifyAddressFromPlaceId(pid, desc);
-                        } else {
-                          await _searchAndVerifyAddress(desc);
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Khoảng cách: $distanceInKm km',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  'Giới hạn giao xe: ${maxDist.toInt()} km',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-            if (isTooFar) ...[
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.error_outline_rounded,
-                    color: AppColors.error,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      'Vị trí quá xa! Chủ xe này chỉ nhận giao xe dưới ${maxDist.toInt()} km.',
-                      style: TextStyle(
-                        color: AppColors.error,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            // Hiển thị phí giao xe ước tính ngay trong section chọn địa chỉ
-            if (distanceInKm > 0 && !isTooFar) ...[
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: calculatedDeliveryFee == 0
-                      ? AppColors.success.withValues(alpha: 0.08)
-                      : AppColors.secondary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: calculatedDeliveryFee == 0
-                        ? AppColors.success.withValues(alpha: 0.4)
-                        : AppColors.secondary.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          calculatedDeliveryFee == 0
-                              ? Icons.check_circle_outline_rounded
-                              : Icons.electric_car_outlined,
-                          size: 16,
-                          color: calculatedDeliveryFee == 0
-                              ? AppColors.success
-                              : AppColors.secondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Phí giao xe',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: calculatedDeliveryFee == 0
-                                ? AppColors.success
-                                : context.textPrimary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      calculatedDeliveryFee == 0
-                          ? 'Miễn phí'
-                          : _formatCurrency(calculatedDeliveryFee),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: calculatedDeliveryFee == 0
-                            ? AppColors.success
-                            : AppColors.secondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            Container(
-              height: 250,
-              width: double.infinity,
-              margin: const EdgeInsets.only(top: 14),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: LatLng(
-                      carLatitude ?? 10.7760,
-                      carLongitude ?? 106.7009,
-                    ),
-                    initialZoom: 13,
-                    interactionOptions: const InteractionOptions(
-                      flags:
-                          InteractiveFlag.drag |
-                          InteractiveFlag.pinchZoom |
-                          InteractiveFlag.doubleTapZoom,
-                    ),
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        if (carLatitude != null && carLongitude != null)
-                          Marker(
-                            point: LatLng(carLatitude!, carLongitude!),
-                            width: 80,
-                            height: 80,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.directions_car_filled_rounded,
-                                  color: AppColors.primary,
-                                  size: 30,
-                                ),
-                                Card(
-                                  margin: EdgeInsets.only(top: 2),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                      vertical: 2,
-                                    ),
-                                    child: Text(
-                                      'Vị trí xe',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        if (customerLatitude != null &&
-                            customerLongitude != null)
-                          Marker(
-                            point: LatLng(
-                              customerLatitude!,
-                              customerLongitude!,
-                            ),
-                            width: 80,
-                            height: 80,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.person_pin_circle_rounded,
-                                  color: AppColors.success,
-                                  size: 30,
-                                ),
-                                Card(
-                                  margin: EdgeInsets.only(top: 2),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                      vertical: 2,
-                                    ),
-                                    child: Text(
-                                      'Điểm nhận',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // --- HÀM XÂY DỰNG NÚT CHỌN HÌNH THỨC NHẬN XE (TẠI VỊ TRÍ XE HOẶC GIAO TẬN NƠI) ---
-  Widget _buildDeliveryButton(bool isForLocation, String title, IconData icon) {
-    bool isSelected = isForLocation == isDeliveryToLocation;
-    return Expanded(
-      child: InkWell(
-        onTap: () => setState(() => isDeliveryToLocation = isForLocation),
-        borderRadius: BorderRadius.circular(10),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryDark : context.cardColor,
-            border: Border.all(
-              color: isSelected ? Colors.transparent : AppColors.border,
-            ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                color: isSelected
-                    ? AppColors.background
-                    : context.textPrimary,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  color: isSelected
-                      ? AppColors.background
-                      : context.textPrimary,
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- HÀM XÂY DỰNG KHỐI NHẬP MÃ KHUYẾN MÃI ---
-  Widget _buildPromoCodeCard() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: _cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.confirmation_num_rounded,
-                size: 16,
-                color: AppColors.primary,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Mã giảm giá',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: context.textSecondary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _promoController,
-                  decoration: InputDecoration(
-                    hintText: 'Nhập mã khuyến mãi...',
-                    hintStyle: TextStyle(
-                      color: context.textSecondary,
-                      fontSize: 14,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    fillColor: context.cardColor,
-                    filled: true,
-                    prefixIcon: Icon(
-                      Icons.discount_outlined,
-                      size: 18,
-                      color: AppColors.warning,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () => _applyPromoCode(showFeedback: true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryDark,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  'Áp dụng',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- HÀM XÂY DỰNG KHỐI HIỂN THỊ BẢNG TÍNH GIÁ CHI TIẾT ---
-  Widget _buildPriceBreakdownCard() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: _cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bảng tính giá chi tiết',
-            style: TextStyle(
-              fontSize: 13,
-              color: context.textSecondary,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildPriceRow(
-            'Đơn giá thuê',
-            '${_formatCurrency(car!.unitPrice)}/ngày',
-          ),
-          const SizedBox(height: 12),
-          _buildPriceRow(
-            'Tổng tiền thuê ($totalDays ngày)',
-            _formatCurrency(baseRentalPrice),
-          ),
-          const SizedBox(height: 12),
-          if (isDeliveryToLocation)
-            _buildPriceRow(
-              'Phí giao xe tận nơi',
-              calculatedDeliveryFee == 0
-                  ? 'Miễn phí'
-                  : _formatCurrency(calculatedDeliveryFee),
-              isFree: calculatedDeliveryFee == 0,
-            ),
-          if (car!.discountValue > 0)
-            _buildPriceRow(
-              'Giảm giá từ chủ xe',
-              '-${_formatCurrency(carDiscountTotal)}',
-              isDiscount: true,
-            ),
-          if (promoDiscount > 0)
-            _buildPriceRow(
-              'Mã voucher giảm thêm',
-              '-${_formatCurrency(promoDiscount)}',
-              isDiscount: true,
-            ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Divider(height: 1, thickness: 1, color: AppColors.border),
-          ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.accentSurface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.secondary.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Tổng cộng',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      _formatCurrency(totalAmount),
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryDark,
-                      ),
-                    ),
-                    if (totalDiscountAmount > 0) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'Tiết kiệm ${_formatCurrency(totalDiscountAmount)}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.success,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- HÀM XÂY DỰNG HÀNG HIỂN THỊ GIÁ TRONG BẢNG TÍNH GIÁ ---
-  Widget _buildPriceRow(
-    String label,
-    String value, {
-    bool isDiscount = false,
-    bool isFree = false,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(color: context.textSecondary, fontSize: 14),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            color: isDiscount || isFree
-                ? AppColors.success
-                : context.textPrimary,
-            fontSize: 14,
-            fontWeight: isDiscount || isFree
-                ? FontWeight.bold
-                : FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatCurrency(double amount) {
-    final formatter = NumberFormat.currency(
-      locale: 'vi_VN',
-      symbol: 'đ',
-      decimalDigits: 0,
-    );
-    return formatter.format(amount);
-  }
-
-  // -- HÀM XÂY DỰNG THANH HÀNH ĐỘNG Ở CUỐI MÀN HÌNH (NÚT ĐẶT XE) ---
   Widget _buildBottomActionBar(bool isTablet, TripViewModel tripViewModel) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1890,7 +803,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                                 _showToastError(
                                   'Không thể tính toán khoảng cách lái xe từ địa chỉ này, vui lòng nhập/chọn lại địa chỉ khác!',
                                 );
-                                return;
+                                  return;
                               }
                               double maxDist =
                                   car!.deliveryOption?.maxDistance ?? 10.0;
@@ -1940,7 +853,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                               ).format(endDate!),
                               'cost':
                                   baseRentalPrice +
-                                  calculatedDeliveryFee, // Tổng tiền thuê + phí giao xe (chưa trừ giảm giá)
+                                  calculatedDeliveryFee,
                               'discount_amount': totalDiscountAmount,
                               'delivery_address': isDeliveryToLocation
                                   ? _addressController.text
@@ -1976,15 +889,15 @@ class _BookingCarViewState extends State<BookingCarView> {
                                         Icons.error_outline,
                                         color: AppColors.error,
                                       ),
-                                      SizedBox(width: 8),
-                                      Text('Đặt xe thất bại'),
+                                      const SizedBox(width: 8),
+                                      const Text('Đặt xe thất bại'),
                                     ],
                                   ),
                                   content: Text(tripViewModel.errorMessage),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
-                                      child: Text(
+                                      child: const Text(
                                         'Đóng',
                                         style: TextStyle(
                                           color: AppColors.primary,
@@ -2014,7 +927,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                               strokeWidth: 2,
                             ),
                           )
-                        : Text(
+                        : const Text(
                             'Gửi yêu cầu đặt xe',
                             style: TextStyle(
                               fontSize: 15,

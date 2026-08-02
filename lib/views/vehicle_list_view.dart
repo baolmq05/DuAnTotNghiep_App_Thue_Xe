@@ -9,6 +9,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../widgets/app_toast.dart';
 
+// Components
+import 'package:duantotnghiep_app_thue_xe/components/vehicle_list_components/vehicle_list_search_header.dart';
+import 'package:duantotnghiep_app_thue_xe/components/vehicle_list_components/vehicle_list_quick_filters.dart';
+import 'package:duantotnghiep_app_thue_xe/components/vehicle_list_components/vehicle_list_empty_state.dart';
+
 class VehicleListView extends StatefulWidget {
   final Map<String, String> queryParameters;
 
@@ -179,19 +184,7 @@ class _VehicleListViewState extends State<VehicleListView> {
     return TimeOfDay(hour: hour, minute: minute);
   }
 
-  String _formatDate(DateTime date) {
-    const weekdays = ['Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'CN'];
-    final weekday = weekdays[date.weekday - 1];
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    return '$weekday, $day/$month/${date.year}';
-  }
 
-  String _formatTime(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
 
   String _formatBackendDateTime(DateTime dateTime) {
     final year = dateTime.year.toString().padLeft(4, '0');
@@ -229,7 +222,6 @@ class _VehicleListViewState extends State<VehicleListView> {
     if (rawAddress.isEmpty) return '';
     final lower = rawAddress.toLowerCase();
 
-    // Check for common cities in Vietnam
     if (lower.contains('hồ chí minh') ||
         lower.contains('hcm') ||
         lower.contains('sài gòn') ||
@@ -271,7 +263,6 @@ class _VehicleListViewState extends State<VehicleListView> {
       return 'Lâm Đồng';
     }
 
-    // Split by comma and try to take the last segment (which is usually the city/province)
     final segments = rawAddress.split(',');
     if (segments.isNotEmpty) {
       final lastSegment = segments.last.trim();
@@ -299,10 +290,8 @@ class _VehicleListViewState extends State<VehicleListView> {
     final q = query.toLowerCase();
     final c = carAddress.toLowerCase();
 
-    // 1. Direct check
     if (c.contains(q) || q.contains(c)) return true;
 
-    // 2. City-based check
     final qIsHCM =
         q.contains('hồ chí minh') ||
         q.contains('hcm') ||
@@ -323,7 +312,6 @@ class _VehicleListViewState extends State<VehicleListView> {
     final cIsDN = c.contains('đà nẵng') || c.contains('da nang');
     if (qIsDN && cIsDN) return true;
 
-    // 3. Segment match (excluding common words)
     final qSegments = q
         .split(RegExp(r'[,.\-\s]+'))
         .map((s) => s.trim())
@@ -412,7 +400,6 @@ class _VehicleListViewState extends State<VehicleListView> {
   List<Car> get _filteredCars {
     var cars = List<Car>.from(_cars);
 
-    // Apply local fuzzy matching for address
     if (_address.isNotEmpty) {
       cars = cars.where((car) {
         final carAddress =
@@ -432,7 +419,6 @@ class _VehicleListViewState extends State<VehicleListView> {
       }).toList();
     }
 
-    // Filter by transmission (local filter)
     if (_selectedTransmission != null) {
       final trans = _selectedTransmission!.toLowerCase();
       cars = cars.where((car) {
@@ -445,7 +431,6 @@ class _VehicleListViewState extends State<VehicleListView> {
       }).toList();
     }
 
-    // Filter by fuel type (local filter)
     if (_selectedFuelType != null) {
       final fuel = _selectedFuelType!.toLowerCase();
       cars = cars.where((car) {
@@ -517,67 +502,6 @@ class _VehicleListViewState extends State<VehicleListView> {
     }
   }
 
-  Widget _buildFilterTriggerChip() {
-    final count = _activeFiltersCount;
-    final hasFilters = count > 0;
-    return InkWell(
-      onTap: _showFilterSheet,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: hasFilters ? AppColors.primary : context.cardColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: hasFilters ? AppColors.primary : context.border,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.tune_rounded,
-              size: 16,
-              color: hasFilters ? Colors.white : context.textPrimary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              hasFilters ? 'Bộ lọc ($count)' : 'Bộ lọc',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: hasFilters ? Colors.white : context.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickFilterChip({
-    required String label,
-    required bool isSelected,
-    required ValueChanged<bool> onSelected,
-  }) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: onSelected,
-      selectedColor: AppColors.primary,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        color: isSelected ? Colors.white : context.textPrimary,
-      ),
-      backgroundColor: context.cardColor,
-      side: BorderSide(
-        color: isSelected ? AppColors.primary : context.border,
-      ),
-      showCheckmark: false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final filteredCars = _filteredCars;
@@ -608,197 +532,44 @@ class _VehicleListViewState extends State<VehicleListView> {
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Search Bar header
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: InkWell(
-                  onTap: _showFilterSheet,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.cardColor,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                      border: Border.all(
-                        color: context.border.withOpacity(0.5),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.search_rounded,
-                          color: AppColors.primary,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _address.isNotEmpty
-                                    ? _address
-                                    : 'Tất cả địa điểm',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textPrimary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${_formatDate(_pickupDate!)} (${_formatTime(_pickupTime!)}) - ${_formatDate(_returnDate!)} (${_formatTime(_returnTime!)})',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: context.textSecondary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.edit_location_alt_outlined,
-                            color: AppColors.primary,
-                            size: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              child: VehicleListSearchHeader(
+                address: _address,
+                pickupDate: _pickupDate!,
+                pickupTime: _pickupTime!,
+                returnDate: _returnDate!,
+                returnTime: _returnTime!,
+                onTap: _showFilterSheet,
               ),
             ),
-
-            // Quick filters horizontal scroll
             SliverToBoxAdapter(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  spacing: 8,
-                  children: [
-                    // Main Filter Trigger
-                    _buildFilterTriggerChip(),
-
-                    // Seats Quick Chips
-                    _buildQuickFilterChip(
-                      label: '4 chỗ',
-                      isSelected: _selectedSeatCount == '4',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedSeatCount = selected ? '4' : null;
-                          _visibleCount = 8;
-                        });
-                        _fetchCars();
-                      },
-                    ),
-                    _buildQuickFilterChip(
-                      label: '5 chỗ',
-                      isSelected: _selectedSeatCount == '5',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedSeatCount = selected ? '5' : null;
-                          _visibleCount = 8;
-                        });
-                        _fetchCars();
-                      },
-                    ),
-                    _buildQuickFilterChip(
-                      label: '7 chỗ',
-                      isSelected: _selectedSeatCount == '7',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedSeatCount = selected ? '7' : null;
-                          _visibleCount = 8;
-                        });
-                        _fetchCars();
-                      },
-                    ),
-
-                    // Transmission Quick Chips
-                    _buildQuickFilterChip(
-                      label: 'Tự động',
-                      isSelected: _selectedTransmission == 'Tự động',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedTransmission = selected ? 'Tự động' : null;
-                          _visibleCount = 8;
-                        });
-                      },
-                    ),
-                    _buildQuickFilterChip(
-                      label: 'Số sàn',
-                      isSelected: _selectedTransmission == 'Số sàn',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedTransmission = selected ? 'Số sàn' : null;
-                          _visibleCount = 8;
-                        });
-                      },
-                    ),
-
-                    // Fuel Quick Chips
-                    _buildQuickFilterChip(
-                      label: 'Điện',
-                      isSelected: _selectedFuelType == 'Điện',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedFuelType = selected ? 'Điện' : null;
-                          _visibleCount = 8;
-                        });
-                      },
-                    ),
-                    _buildQuickFilterChip(
-                      label: 'Xăng',
-                      isSelected: _selectedFuelType == 'Xăng',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedFuelType = selected ? 'Xăng' : null;
-                          _visibleCount = 8;
-                        });
-                      },
-                    ),
-                    _buildQuickFilterChip(
-                      label: 'Dầu',
-                      isSelected: _selectedFuelType == 'Dầu',
-                      onSelected: (selected) {
-                        setState(() {
-                          _selectedFuelType = selected ? 'Dầu' : null;
-                          _visibleCount = 8;
-                        });
-                      },
-                    ),
-                  ],
-                ),
+              child: VehicleListQuickFilters(
+                activeFiltersCount: _activeFiltersCount,
+                selectedSeatCount: _selectedSeatCount,
+                selectedTransmission: _selectedTransmission,
+                selectedFuelType: _selectedFuelType,
+                onShowFilterSheet: _showFilterSheet,
+                onSeatCountSelected: (value) {
+                  setState(() {
+                    _selectedSeatCount = value;
+                    _visibleCount = 8;
+                  });
+                  _fetchCars();
+                },
+                onTransmissionSelected: (value) {
+                  setState(() {
+                    _selectedTransmission = value;
+                    _visibleCount = 8;
+                  });
+                },
+                onFuelTypeSelected: (value) {
+                  setState(() {
+                    _selectedFuelType = value;
+                    _visibleCount = 8;
+                  });
+                },
               ),
             ),
-
-            // Text search field
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
@@ -833,18 +604,18 @@ class _VehicleListViewState extends State<VehicleListView> {
                                 _visibleCount = 8;
                               });
                             },
-                            icon: Icon(Icons.clear_rounded, size: 20),
+                            icon: const Icon(Icons.clear_rounded, size: 20),
                           ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: context.border.withOpacity(0.5),
+                        color: context.border.withValues(alpha: 0.5),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: context.border.withOpacity(0.5),
+                        color: context.border.withValues(alpha: 0.5),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -862,8 +633,6 @@ class _VehicleListViewState extends State<VehicleListView> {
                 ),
               ),
             ),
-
-            // Result count chip info
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -883,7 +652,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                       label: Text('${filteredCars.length} xe phù hợp'),
                       backgroundColor: context.cardColor,
                       side: BorderSide(
-                        color: AppColors.primary.withOpacity(0.12),
+                        color: AppColors.primary.withValues(alpha: 0.12),
                       ),
                       labelStyle: TextStyle(
                         color: context.textPrimary,
@@ -893,12 +662,12 @@ class _VehicleListViewState extends State<VehicleListView> {
                     ),
                     if (_activeFiltersCount > 0)
                       ActionChip(
-                        avatar: Icon(
+                        avatar: const Icon(
                           Icons.clear_all_rounded,
                           size: 16,
                           color: Colors.red,
                         ),
-                        label: Text('Xóa tất cả bộ lọc'),
+                        label: const Text('Xóa tất cả bộ lọc'),
                         onPressed: () {
                           setState(() {
                             _address = '';
@@ -915,8 +684,8 @@ class _VehicleListViewState extends State<VehicleListView> {
                           _fetchCars();
                         },
                         backgroundColor: context.cardColor,
-                        side: BorderSide(color: Colors.red.withOpacity(0.2)),
-                        labelStyle: TextStyle(
+                        side: BorderSide(color: Colors.red.withValues(alpha: 0.2)),
+                        labelStyle: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
@@ -941,7 +710,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.error_outline_rounded,
                           size: 52,
                           color: Colors.red,
@@ -958,7 +727,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                           ),
-                          child: Text(
+                          child: const Text(
                             'Thử lại',
                             style: TextStyle(color: Colors.white),
                           ),
@@ -971,69 +740,22 @@ class _VehicleListViewState extends State<VehicleListView> {
             else if (filteredCars.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            color: context.isDarkMode ? const Color(0xFF1F3D45) : const Color(0xFFE9F3F4),
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          child: Icon(
-                            Icons.directions_car_outlined,
-                            size: 42,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Không tìm thấy xe phù hợp',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: context.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Thử đổi địa điểm hoặc từ khóa tìm kiếm để xem thêm xe.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: context.textSecondary,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              _address = '';
-                              _selectedSeatCount = null;
-                              _selectedTransmission = null;
-                              _selectedFuelType = null;
-                              _selectedBrandId = null;
-                              _minPrice = null;
-                              _maxPrice = null;
-                              _searchQuery = '';
-                              _searchController.clear();
-                              _visibleCount = 8;
-                            });
-                            _fetchCars();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            side: const BorderSide(color: AppColors.primary),
-                          ),
-                          child: Text('Xem tất cả xe'),
-                        ),
-                      ],
-                    ),
-                  ),
+                child: VehicleListEmptyState(
+                  onClearFilters: () {
+                    setState(() {
+                      _address = '';
+                      _selectedSeatCount = null;
+                      _selectedTransmission = null;
+                      _selectedFuelType = null;
+                      _selectedBrandId = null;
+                      _minPrice = null;
+                      _maxPrice = null;
+                      _searchQuery = '';
+                      _searchController.clear();
+                      _visibleCount = 8;
+                    });
+                    _fetchCars();
+                  },
                 ),
               )
             else

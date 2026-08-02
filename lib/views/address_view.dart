@@ -6,6 +6,10 @@ import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/address_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/models/address_model.dart';
 
+// Components
+import 'package:duantotnghiep_app_thue_xe/components/address_components/address_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/address_components/address_empty_state.dart';
+
 class AddressView extends StatefulWidget {
   const AddressView({super.key});
 
@@ -52,7 +56,7 @@ class _AddressViewState extends State<AddressView> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             isEdit ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới',
-            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
           ),
           content: TextField(
             controller: _addressController,
@@ -146,13 +150,13 @@ class _AddressViewState extends State<AddressView> {
       builder: (dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
+          title: const Text(
             'Xóa địa chỉ',
             style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error),
           ),
           content: Text(
             'Bạn có chắc chắn muốn xóa địa chỉ này?\n\n"${address.addressName}"',
-            style: TextStyle(fontSize: 14, height: 1.4),
+            style: const TextStyle(fontSize: 14, height: 1.4),
           ),
           actions: [
             TextButton(
@@ -190,7 +194,7 @@ class _AddressViewState extends State<AddressView> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 elevation: 0,
               ),
-              child: Text('Xóa'),
+              child: const Text('Xóa'),
             ),
           ],
         );
@@ -209,7 +213,7 @@ class _AddressViewState extends State<AddressView> {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        title: Text(
+        title: const Text(
           'Địa chỉ của tôi',
           style: TextStyle(
             color: AppColors.primary,
@@ -230,7 +234,7 @@ class _AddressViewState extends State<AddressView> {
         actions: [
           if (user != null)
             IconButton(
-              icon: Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 26),
+              icon: const Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 26),
               onPressed: () => _showAddressDialog(),
               tooltip: 'Thêm địa chỉ',
             ),
@@ -239,7 +243,7 @@ class _AddressViewState extends State<AddressView> {
       body: Consumer<AddressViewModel>(
         builder: (context, addressVM, child) {
           if (addressVM.isLoading && addressVM.addresses.isEmpty) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               ),
@@ -247,59 +251,8 @@ class _AddressViewState extends State<AddressView> {
           }
 
           if (addressVM.addresses.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.location_off_outlined,
-                        size: 72,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Chưa có địa chỉ nào',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: context.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Hãy lưu lại các địa chỉ thường sử dụng để đặt xe hoặc giao nhận xe nhanh chóng hơn.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: context.textSecondary,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () => _showAddressDialog(),
-                      icon: Icon(Icons.add, color: Colors.white),
-                      label: Text('Thêm địa chỉ đầu tiên', style: TextStyle(fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            return AddressEmptyState(
+              onAddAddress: () => _showAddressDialog(),
             );
           }
 
@@ -313,88 +266,11 @@ class _AddressViewState extends State<AddressView> {
                   itemCount: addressVM.addresses.length,
                   itemBuilder: (context, index) {
                     final address = addressVM.addresses[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade100, width: 1.2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.08),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.place_rounded,
-                                  color: AppColors.primary,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Địa chỉ ${index + 1}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary.withValues(alpha: 0.8),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      address.addressName,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: context.textPrimary,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.edit_outlined, color: AppColors.secondary, size: 20),
-                                    onPressed: () => _showAddressDialog(address: address),
-                                    constraints: const BoxConstraints(),
-                                    padding: const EdgeInsets.all(8),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
-                                    onPressed: () => _confirmDelete(address),
-                                    constraints: const BoxConstraints(),
-                                    padding: const EdgeInsets.all(8),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    return AddressCard(
+                      address: address,
+                      index: index,
+                      onEdit: () => _showAddressDialog(address: address),
+                      onDelete: () => _confirmDelete(address),
                     );
                   },
                 ),
@@ -402,7 +278,7 @@ class _AddressViewState extends State<AddressView> {
               if (addressVM.isLoading)
                 Container(
                   color: Colors.black.withValues(alpha: 0.15),
-                  child: Center(
+                  child: const Center(
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                     ),
@@ -421,7 +297,7 @@ class _AddressViewState extends State<AddressView> {
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 4,
-            child: Icon(Icons.add_location_rounded, size: 26),
+            child: const Icon(Icons.add_location_rounded, size: 26),
           );
         },
       ),

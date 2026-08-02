@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-import '../models/user_model.dart';
 import '../providers/auth_provider.dart';
 import '../themes/app_colors.dart';
 import '../widgets/app_toast.dart';
+import '../components/edit_profile_components/edit_profile_avatar.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({super.key});
@@ -19,7 +19,6 @@ class EditProfileView extends StatefulWidget {
 
 class _EditProfileViewState extends State<EditProfileView> {
   final _formKey = GlobalKey<FormState>();
-  final ImagePicker _picker = ImagePicker();
 
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
@@ -45,122 +44,6 @@ class _EditProfileViewState extends State<EditProfileView> {
     _phoneController.dispose();
     _dobController.dispose();
     super.dispose();
-  }
-
-  ImageProvider _getAvatarImage(UserModel? user) {
-    if (_selectedAvatar != null) {
-      if (kIsWeb) {
-        return NetworkImage(_selectedAvatar!.path);
-      }
-      return FileImage(File(_selectedAvatar!.path));
-    }
-    
-    final avatar = user?.avatar;
-    if (avatar != null && avatar.trim().isNotEmpty) {
-      if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
-        return NetworkImage(avatar);
-      }
-      if (avatar.startsWith('assets/') || avatar.startsWith('lib/assets/')) {
-        return AssetImage(avatar);
-      }
-    }
-    return const NetworkImage(
-      'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
-    );
-  }
-
-  Future<void> _pickImage(ImageSource source) async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        imageQuality: 85,
-        maxWidth: 800,
-        maxHeight: 800,
-      );
-      if (image != null) {
-        setState(() {
-          _selectedAvatar = image;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        AppToast.show(
-          context,
-          message: 'Không thể mở máy ảnh hoặc thư viện hình ảnh.',
-          type: ToastType.error,
-        );
-      }
-    }
-  }
-
-  void _showImageSourceBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Text(
-                  'Thay đổi ảnh đại diện',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.camera_alt_outlined, color: AppColors.primary),
-                  ),
-                  title: Text('Chụp ảnh mới', style: TextStyle(fontWeight: FontWeight.w500)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.camera);
-                  },
-                ),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.photo_library_outlined, color: AppColors.primary),
-                  ),
-                  title: Text('Chọn từ thư viện', style: TextStyle(fontWeight: FontWeight.w500)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.gallery);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   void _saveProfile() async {
@@ -238,48 +121,14 @@ class _EditProfileViewState extends State<EditProfileView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Avatar section
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                              border: Border.all(color: Colors.white, width: 4),
-                            ),
-                            child: CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Colors.grey.shade200,
-                              backgroundImage: _getAvatarImage(user),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 4,
-                            child: GestureDetector(
-                              onTap: _showImageSourceBottomSheet,
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.camera_alt_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      EditProfileAvatar(
+                        user: user,
+                        selectedAvatar: _selectedAvatar,
+                        onImagePicked: (image) {
+                          setState(() {
+                            _selectedAvatar = image;
+                          });
+                        },
                       ),
                       const SizedBox(height: 32),
                       
@@ -438,7 +287,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : Text(
+                      : const Text(
                           'Lưu thay đổi',
                           style: TextStyle(
                             color: Colors.white,

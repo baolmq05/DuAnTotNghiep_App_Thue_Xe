@@ -235,16 +235,7 @@ class _PolicyViewState extends State<PolicyView> {
     );
   }
 
-  Widget _buildAlertBanner() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.accentSurface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.secondary.withOpacity(0.5)),
-      ),
-    );
-  }
+
 
   Widget _buildSectionCard(PolicySection section, GlobalKey key) {
     return Card(
