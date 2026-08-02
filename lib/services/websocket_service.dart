@@ -25,11 +25,10 @@ class WebSocketService extends BaseService {
     if (channel != null) return;
 
     socketId = null;
-    final host = (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
-        ? '10.0.2.2'
-        : '127.0.0.1';
-    final url =
-        'ws://$host:8080/app/bp54cuveeawxyvoq2yk9?protocol=7&client=js&version=7.0.6';
+    const pusherKey = 'd12b4780e213182ca9ff';
+    const pusherCluster = 'ap1';
+    const url =
+        'wss://ws-$pusherCluster.pusher.com/app/$pusherKey?protocol=7&client=js&version=7.0.6';
 
     try {
       debugPrint('Connecting to WebSocket: $url');
