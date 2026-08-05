@@ -85,7 +85,7 @@ class OrderDetailHeader extends StatelessWidget {
     }
 
     return Container(
-      color: AppColors.primary,
+      color: context.primaryColor,
       padding: const EdgeInsets.fromLTRB(20, 5, 20, 36),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

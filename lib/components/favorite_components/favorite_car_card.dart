@@ -281,10 +281,10 @@ class FavoriteCarCard extends StatelessWidget {
                           children: [
                             Text(
                               price,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                               ),
                             ),
                             Text(

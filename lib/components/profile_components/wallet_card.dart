@@ -26,9 +26,7 @@ class WalletCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: context.isDarkMode
-                  ? const Color(0xFF3B2F25)
-                  : const Color(0xFFFAF2EC),
+              color: context.accentSurface,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -61,16 +59,12 @@ class WalletCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.isDarkMode
-                  ? const Color(0xFF3B2F25)
-                  : const Color(0xFFFAF2EC),
+              backgroundColor: context.accentSurface,
               foregroundColor: context.secondaryColor,
               elevation: 0,
               shadowColor: Colors.transparent,
               side: BorderSide(
-                color: context.isDarkMode
-                    ? const Color(0xFF5A4638)
-                    : const Color(0xFFF0DCD0),
+                color: context.secondaryColor.withValues(alpha: 0.3),
                 width: 1,
               ),
               shape: RoundedRectangleBorder(

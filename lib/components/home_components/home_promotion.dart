@@ -53,10 +53,10 @@ class _HomePromotionState extends State<HomePromotion> {
                         minimumSize: const Size(50, 30),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Xem tất cả',
                         style: TextStyle(
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -127,7 +127,7 @@ class _HomePromotionState extends State<HomePromotion> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(3.0),
                                 color: isActive
-                                    ? AppColors.primary
+                                    ? context.primaryColor
                                     : Colors.grey.shade300,
                               ),
                             ),

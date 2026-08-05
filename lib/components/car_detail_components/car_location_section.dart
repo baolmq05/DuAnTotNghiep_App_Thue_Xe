@@ -16,7 +16,7 @@ class CarLocationSection extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start, // Căn lề icon và text thẳng hàng từ trên xuống
         children: [
-          Icon(Icons.location_on, color: AppColors.primary, size: 20),
+          Icon(Icons.location_on, color: context.primaryColor, size: 20),
           const SizedBox(width: 8.0),
           Expanded(
             child: Text(

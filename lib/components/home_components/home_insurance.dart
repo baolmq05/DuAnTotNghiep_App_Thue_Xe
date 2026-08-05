@@ -39,7 +39,7 @@ class HomeInsurance extends StatelessWidget {
                     return Container(
                       width: double.infinity,
                       height: 160,
-                      color: AppColors.primaryDark,
+                      color: context.primaryDark,
                       child: const Center(
                         child: Icon(
                           Icons.verified_user_outlined,

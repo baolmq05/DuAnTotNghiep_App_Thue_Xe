@@ -165,7 +165,7 @@ class HomeCarCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
               child: Text(
                 discount,

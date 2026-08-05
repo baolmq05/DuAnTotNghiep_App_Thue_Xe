@@ -31,7 +31,7 @@ class SupportInfoGrid extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: AppColors.primary, size: 28),
+              Icon(icon, color: context.primaryColor, size: 28),
               const SizedBox(height: 8),
               Text(
                 title,

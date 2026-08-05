@@ -72,7 +72,7 @@ class _HomeFilterState extends State<HomeFilter> {
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.primaryDark,
+        color: context.primaryDark,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(12),
@@ -150,7 +150,7 @@ class _HomeFilterState extends State<HomeFilter> {
                       children: [
                         Icon(
                           Icons.location_on_outlined,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                           size: 20,
                         ),
                         Expanded(
@@ -308,7 +308,7 @@ class _HomeFilterState extends State<HomeFilter> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -428,7 +428,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -461,7 +461,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -489,7 +489,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -517,7 +517,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -617,7 +617,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                 hintText: 'Nhập thành phố, quận huyện...',
                 prefixIcon: Icon(
                   Icons.location_on_outlined,
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                 ),
                 suffixIcon: IconButton(
                   icon: Icon(Icons.clear, color: Colors.grey),
@@ -638,8 +638,8 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
+                  borderSide: BorderSide(
+                    color: context.primaryColor,
                     width: 1.5,
                   ),
                 ),
@@ -685,7 +685,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                         dense: true,
                         leading: Icon(
                           Icons.location_on_outlined,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                           size: 18,
                         ),
                         title: Text(
@@ -769,7 +769,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                               Icon(
                                 Icons.calendar_month_outlined,
                                 size: 18,
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                               ),
                             ],
                           ),
@@ -803,7 +803,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                               Icon(
                                 Icons.access_time,
                                 size: 18,
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                               ),
                             ],
                           ),
@@ -857,7 +857,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                               Icon(
                                 Icons.calendar_month_outlined,
                                 size: 18,
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                               ),
                             ],
                           ),
@@ -891,7 +891,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                               Icon(
                                 Icons.access_time,
                                 size: 18,
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                               ),
                             ],
                           ),
@@ -909,7 +909,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
             ElevatedButton(
               onPressed: _applyFilter,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

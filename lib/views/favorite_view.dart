@@ -37,10 +37,10 @@ class _FavoriteViewState extends State<FavoriteView> {
           },
           color: context.textPrimary,
         ),
-        title: const Text(
+        title: Text(
           'Yêu thích',
           style: TextStyle(
-            color: AppColors.primary,
+            color: context.primaryColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -50,19 +50,19 @@ class _FavoriteViewState extends State<FavoriteView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Danh sách yêu thích',
-                  style: TextStyle(color: AppColors.primary, fontSize: 16),
+                  style: TextStyle(color: context.primaryColor, fontSize: 16),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Các xe bạn đã đánh dấu yêu thích',
-                  style: TextStyle(color: AppColors.primary, fontSize: 14),
+                  style: TextStyle(color: context.primaryColor, fontSize: 14),
                 ),
               ],
             ),

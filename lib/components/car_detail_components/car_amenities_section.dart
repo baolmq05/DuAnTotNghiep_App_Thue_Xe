@@ -20,12 +20,12 @@ class CarAmenitiesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Tiện ích',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: context.primaryColor,
             ),
           ),
           const SizedBox(height: 16),
@@ -62,7 +62,7 @@ class CarAmenitiesSection extends StatelessWidget {
           height: 50,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primary.withAlpha(13), // Tạo màu nền mờ cho icon thêm đẹp
+            color: context.primaryColor.withAlpha(13), // Tạo màu nền mờ cho icon thêm đẹp
             borderRadius: BorderRadius.circular(12),
           ),
           child: Image.network(
@@ -70,9 +70,9 @@ class CarAmenitiesSection extends StatelessWidget {
             fit: BoxFit.contain,
             // Xử lý lỗi load ảnh tiện ích
             errorBuilder: (context, error, stackTrace) {
-              return const Icon(
+              return Icon(
                 Icons.image_outlined,
-                color: AppColors.primary,
+                color: context.primaryColor,
                 size: 24,
               );
             },

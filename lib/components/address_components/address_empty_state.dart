@@ -20,13 +20,13 @@ class AddressEmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
+                color: context.primaryColor.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.location_off_outlined,
                 size: 72,
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
             ),
             const SizedBox(height: 24),
@@ -54,7 +54,7 @@ class AddressEmptyState extends StatelessWidget {
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text('Thêm địa chỉ đầu tiên', style: TextStyle(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

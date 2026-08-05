@@ -88,7 +88,7 @@ class _PolicyViewState extends State<PolicyView> {
           if (viewModel.isLoading) {
             return Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: AlwaysStoppedAnimation<Color>(context.primaryColor),
               ),
             );
           }
@@ -113,7 +113,7 @@ class _PolicyViewState extends State<PolicyView> {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: context.primaryColor,
                       ),
                       onPressed: () => viewModel.loadPolicy(),
                       child: Text(
@@ -208,20 +208,20 @@ class _PolicyViewState extends State<PolicyView> {
               label: Text(
                 shortTitle,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.primary,
+                  color: isSelected ? Colors.white : context.primaryColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
               ),
               selected: isSelected,
-              selectedColor: AppColors.primary,
+              selectedColor: context.primaryColor,
               backgroundColor: context.isDarkMode
                   ? Colors.grey.shade800
                   : Colors.grey.shade100,
               checkmarkColor: Colors.white,
               showCheckmark: false,
               side: BorderSide(
-                color: isSelected ? AppColors.primary : Colors.grey.shade300,
+                color: isSelected ? context.primaryColor : Colors.grey.shade300,
               ),
               onSelected: (selected) {
                 if (selected) {
@@ -258,7 +258,7 @@ class _PolicyViewState extends State<PolicyView> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
             ),
             Divider(color: AppColors.border, height: 24, thickness: 1),
@@ -281,7 +281,7 @@ class _PolicyViewState extends State<PolicyView> {
             children: [
               Padding(
                 padding: EdgeInsets.only(top: 4.0, right: 8.0),
-                child: Icon(Icons.circle, size: 6, color: AppColors.primary),
+                child: Icon(Icons.circle, size: 6, color: context.primaryColor),
               ),
               Expanded(
                 child: Text(
@@ -319,7 +319,7 @@ class _PolicyViewState extends State<PolicyView> {
             style: TextStyle(
               fontSize: isSubTitle ? 14.5 : 13.5,
               fontWeight: isSubTitle ? FontWeight.bold : FontWeight.normal,
-              color: isSubTitle ? AppColors.primaryDark : context.textPrimary,
+              color: isSubTitle ? context.primaryDark : context.textPrimary,
               height: 1.5,
             ),
           ),
@@ -347,7 +347,7 @@ class _PolicyViewState extends State<PolicyView> {
         children: [
           // Header Row
           TableRow(
-            decoration: BoxDecoration(color: AppColors.primaryDark),
+            decoration: BoxDecoration(color: context.primaryDark),
             children: element.tableHeaders!.map((header) {
               return Padding(
                 padding: const EdgeInsets.symmetric(
@@ -463,7 +463,7 @@ class _PolicyViewState extends State<PolicyView> {
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: 12.0,
-                        color: AppColors.primaryDark,
+                        color: context.primaryDark,
                         height: 1.4,
                       ),
                     ),
@@ -541,7 +541,7 @@ class _PolicyViewState extends State<PolicyView> {
                           }
                         }
                       : null, // Vô hiệu hóa checkbox nếu chưa cuộn hết trang
-                  activeColor: AppColors.primary,
+                  activeColor: context.primaryColor,
                 ),
                 Expanded(
                   child: Text(
@@ -561,7 +561,7 @@ class _PolicyViewState extends State<PolicyView> {
             // Confirm Button
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.primaryColor,
                 disabledBackgroundColor: Colors.grey.shade300,
                 minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(

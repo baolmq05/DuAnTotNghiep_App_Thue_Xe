@@ -65,10 +65,10 @@ class OrderDetailTimeCard extends StatelessWidget {
             children: [
               Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.circle,
                     size: 12,
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                   ),
                   Container(
                     width: 2,

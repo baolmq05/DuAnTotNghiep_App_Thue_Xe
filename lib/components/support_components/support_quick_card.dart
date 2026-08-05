@@ -44,22 +44,22 @@ class SupportQuickCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: onCall,
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.phone_outlined,
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                     size: 20,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Gọi điện',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: AppColors.primary,
+                    side: BorderSide(
+                      color: context.primaryColor,
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(

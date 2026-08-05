@@ -30,7 +30,7 @@ class BookingPromoCodeCard extends StatelessWidget {
               Icon(
                 Icons.confirmation_num_rounded,
                 size: 16,
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
               const SizedBox(width: 8),
               Text(
@@ -78,7 +78,7 @@ class BookingPromoCodeCard extends StatelessWidget {
               ElevatedButton(
                 onPressed: onApply,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryDark,
+                  backgroundColor: context.primaryDark,
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,

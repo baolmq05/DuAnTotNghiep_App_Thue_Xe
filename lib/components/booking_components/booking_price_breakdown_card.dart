@@ -146,7 +146,7 @@ class BookingPriceBreakdownCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primaryDark,
+                    color: context.primaryDark,
                   ),
                 ),
                 Column(
@@ -157,7 +157,7 @@ class BookingPriceBreakdownCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryDark,
+                        color: context.primaryDark,
                       ),
                     ),
                     if (totalDiscountAmount > 0) ...[

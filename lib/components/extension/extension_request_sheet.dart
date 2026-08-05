@@ -84,7 +84,7 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               surface: context.cardColor,
               onSurface: context.textPrimary,
@@ -110,7 +110,7 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               surface: context.cardColor,
               onSurface: context.textPrimary,
@@ -217,12 +217,12 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: context.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.calendar_month_outlined,
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                     size: 22,
                   ),
                 ),
@@ -313,7 +313,7 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                         ),
                       ),
                     ],
@@ -359,10 +359,10 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(isDark ? 0.15 : 0.05),
+                color: context.primaryColor.withOpacity(isDark ? 0.15 : 0.05),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: AppColors.primary.withOpacity(isDark ? 0.3 : 0.15),
+                  color: context.primaryColor.withOpacity(isDark ? 0.3 : 0.15),
                 ),
               ),
               child: Column(
@@ -383,14 +383,14 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                         ),
                       ),
                     ],
                   ),
                   Divider(
                     height: 20,
-                    color: AppColors.primary.withOpacity(0.15),
+                    color: context.primaryColor.withOpacity(0.15),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -408,7 +408,7 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                         ),
                       ),
                     ],
@@ -481,7 +481,7 @@ class _ExtensionRequestSheetState extends State<ExtensionRequestSheet> {
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _submitExtension,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: context.primaryColor,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

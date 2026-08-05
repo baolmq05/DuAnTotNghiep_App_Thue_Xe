@@ -891,7 +891,7 @@ class _ZaloPayCheckoutSheetState extends State<ZaloPayCheckoutSheet> with Widget
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isSuccess ? AppColors.primary : Colors.grey.shade800,
+                backgroundColor: _isSuccess ? context.primaryColor : Colors.grey.shade800,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

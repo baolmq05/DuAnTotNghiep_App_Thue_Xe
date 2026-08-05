@@ -32,10 +32,10 @@ class VehicleListQuickFilters extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: hasFilters ? AppColors.primary : context.cardColor,
+          color: hasFilters ? context.primaryColor : context.cardColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: hasFilters ? AppColors.primary : context.border,
+            color: hasFilters ? context.primaryColor : context.border,
           ),
         ),
         child: Row(
@@ -71,7 +71,7 @@ class VehicleListQuickFilters extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: onSelected,
-      selectedColor: AppColors.primary,
+      selectedColor: context.primaryColor,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.bold,
@@ -79,7 +79,7 @@ class VehicleListQuickFilters extends StatelessWidget {
       ),
       backgroundColor: context.cardColor,
       side: BorderSide(
-        color: isSelected ? AppColors.primary : context.border,
+        color: isSelected ? context.primaryColor : context.border,
       ),
       showCheckmark: false,
     );

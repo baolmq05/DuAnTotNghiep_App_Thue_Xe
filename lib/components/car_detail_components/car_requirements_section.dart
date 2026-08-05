@@ -12,12 +12,12 @@ class CarRequirementsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Giấy tờ thuê xe',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: context.primaryColor,
             ),
           ),
           const SizedBox(height: 12),
@@ -61,7 +61,7 @@ class CarRequirementsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primary, size: 24),
+          Icon(icon, color: context.primaryColor, size: 24),
           const SizedBox(height: 8),
           Text(
             title,

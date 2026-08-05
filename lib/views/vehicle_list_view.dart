@@ -591,7 +591,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                     fillColor: context.cardColor,
                     prefixIcon: Icon(
                       Icons.search_rounded,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 20,
                     ),
                     suffixIcon: _searchQuery.isEmpty
@@ -620,8 +620,8 @@ class _VehicleListViewState extends State<VehicleListView> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primary,
+                      borderSide: BorderSide(
+                        color: context.primaryColor,
                         width: 1.2,
                       ),
                     ),
@@ -647,12 +647,12 @@ class _VehicleListViewState extends State<VehicleListView> {
                       avatar: Icon(
                         Icons.directions_car_outlined,
                         size: 16,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                       ),
                       label: Text('${filteredCars.length} xe phù hợp'),
                       backgroundColor: context.cardColor,
                       side: BorderSide(
-                        color: AppColors.primary.withValues(alpha: 0.12),
+                        color: context.primaryColor.withValues(alpha: 0.12),
                       ),
                       labelStyle: TextStyle(
                         color: context.textPrimary,
@@ -725,7 +725,7 @@ class _VehicleListViewState extends State<VehicleListView> {
                         ElevatedButton(
                           onPressed: _fetchCars,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: context.primaryColor,
                           ),
                           child: const Text(
                             'Thử lại',

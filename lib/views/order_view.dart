@@ -68,7 +68,7 @@ class _OrderViewState extends State<OrderView>
                 controller: _tabController,
                 isScrollable: true,
                 indicator: BoxDecoration(
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
@@ -99,8 +99,8 @@ class _OrderViewState extends State<OrderView>
           ),
           Expanded(
             child: viewModel.isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                ? Center(
+                    child: CircularProgressIndicator(color: context.primaryColor),
                   )
                 : viewModel.errorMessage.isNotEmpty
                 ? Center(
@@ -115,7 +115,7 @@ class _OrderViewState extends State<OrderView>
                         ElevatedButton(
                           onPressed: () => viewModel.fetchTrips(),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: context.primaryColor,
                           ),
                           child: const Text(
                             'Thử lại',
@@ -134,7 +134,7 @@ class _OrderViewState extends State<OrderView>
                   )
                 : RefreshIndicator(
                     onRefresh: () async => viewModel.fetchTrips(),
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: viewModel.filteredTrips.length,

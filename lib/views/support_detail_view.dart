@@ -56,20 +56,20 @@ class SupportDetailView extends StatelessWidget {
               Container(
                 height: 200,
                 padding: const EdgeInsets.all(24),
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: context.primaryColor.withValues(alpha: 0.1),
                 child: Image.asset(
                   imageUrl!,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.05),
+                        color: context.primaryColor.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(
                         Icons.menu_book_rounded,
                         size: 64,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                       ),
                     );
                   },
@@ -80,8 +80,8 @@ class SupportDetailView extends StatelessWidget {
                 height: 180,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryDark],
+                  gradient: LinearGradient(
+                    colors: [context.primaryColor, context.primaryDark],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -150,7 +150,7 @@ class SupportDetailView extends StatelessWidget {
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
@@ -187,17 +187,17 @@ class SupportDetailView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.05),
+                      color: context.primaryColor.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: context.primaryColor.withValues(alpha: 0.1),
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.info_outline_rounded,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -205,7 +205,7 @@ class SupportDetailView extends StatelessWidget {
                             'Nếu cần thêm trợ giúp, vui lòng liên hệ hotline 1900 9217 để được nhân viên tư vấn trực tiếp.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.primaryDark.withValues(alpha: 0.9),
+                              color: context.primaryDark.withValues(alpha: 0.9),
                             ),
                           ),
                         ),

@@ -67,10 +67,10 @@ class _DriverLicenseViewState extends State<DriverLicenseView> {
           icon: Icon(Icons.arrow_back, color: context.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Giấy phép lái xe",
           style: TextStyle(
-            color: AppColors.primary,
+            color: context.primaryColor,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -319,7 +319,7 @@ class _DriverLicenseViewState extends State<DriverLicenseView> {
       child: ElevatedButton(
         onPressed: isDisabled ? null : _submit,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: context.primaryColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

@@ -70,12 +70,12 @@ class _NotificationViewState extends State<NotificationView> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: context.primaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.mail_outline_rounded,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 22,
                       ),
                     ),
@@ -136,7 +136,7 @@ class _NotificationViewState extends State<NotificationView> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: context.primaryColor,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -359,7 +359,7 @@ class _NotificationViewState extends State<NotificationView> {
           Expanded(
             child: viewModel.isLoading
                 ? Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                    child: CircularProgressIndicator(color: context.primaryColor),
                   )
                 : displayedNotifications.isEmpty
                 ? Center(
@@ -449,7 +449,7 @@ class _NotificationViewState extends State<NotificationView> {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: _isAllTab
-                                ? AppColors.primary
+                                ? context.primaryColor
                                 : context.textSecondary,
                           ),
                         ),
@@ -469,7 +469,7 @@ class _NotificationViewState extends State<NotificationView> {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: !_isAllTab
-                                ? AppColors.primary
+                                ? context.primaryColor
                                 : context.textSecondary,
                           ),
                         ),
@@ -494,7 +494,7 @@ class _NotificationViewState extends State<NotificationView> {
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: AppColors.primary,
+          color: context.primaryColor,
         ),
       ),
     );
@@ -524,7 +524,7 @@ class _NotificationViewState extends State<NotificationView> {
                     value: _selectedNotificationIds.contains(notification.id),
                     onChanged: (_) =>
                         _toggleNotificationSelection(notification.id),
-                    activeColor: AppColors.primary,
+                    activeColor: context.primaryColor,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -534,7 +534,7 @@ class _NotificationViewState extends State<NotificationView> {
                 decoration: BoxDecoration(
                   color: notification.isRead
                       ? Colors.grey.withValues(alpha: 0.08)
-                      : AppColors.primary.withValues(alpha: 0.08),
+                      : context.primaryColor.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -543,7 +543,7 @@ class _NotificationViewState extends State<NotificationView> {
                       : Icons.notifications_active_rounded,
                   color: notification.isRead
                       ? context.textSecondary
-                      : AppColors.primary,
+                      : context.primaryColor,
                   size: 22,
                 ),
               ),
@@ -586,7 +586,7 @@ class _NotificationViewState extends State<NotificationView> {
                   height: 7,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                   ),
                 ),
             ],

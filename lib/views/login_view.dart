@@ -110,7 +110,7 @@ class _LoginViewState extends State<LoginView> {
                 style: TextStyle(
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -137,7 +137,7 @@ class _LoginViewState extends State<LoginView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.email_outlined,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 22.0,
                     ),
                   ),
@@ -163,7 +163,7 @@ class _LoginViewState extends State<LoginView> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       width: 1.5,
                     ),
                   ),
@@ -181,7 +181,7 @@ class _LoginViewState extends State<LoginView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.lock,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 22.0,
                     ),
                   ),
@@ -224,7 +224,7 @@ class _LoginViewState extends State<LoginView> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
                     borderSide: BorderSide(
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       width: 1.5,
                     ),
                   ),
@@ -262,7 +262,7 @@ class _LoginViewState extends State<LoginView> {
                     child: ElevatedButton(
                       onPressed: auth.isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: context.primaryColor,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
@@ -373,7 +373,7 @@ class _LoginViewState extends State<LoginView> {
                     child: Text(
                       'Đăng ký ngay',
                       style: TextStyle(
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
                       ),

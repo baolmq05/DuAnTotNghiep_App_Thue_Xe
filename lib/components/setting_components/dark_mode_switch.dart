@@ -1,3 +1,4 @@
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class DarkModeSwitch extends StatelessWidget {
@@ -18,11 +19,13 @@ class DarkModeSwitch extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(18),
+              color: context.isDarkMode 
+                  ? Colors.black.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.05),
               blurRadius: 12,
               spreadRadius: 0,
               offset: const Offset(0, 2),
@@ -34,14 +37,26 @@ class DarkModeSwitch extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.dark_mode_outlined),
+                Icon(
+                  Icons.dark_mode_outlined,
+                  color: context.textPrimary,
+                ),
                 const SizedBox(width: 8),
-                Text(title),
+                Text(
+                  title,
+                  style: TextStyle(color: context.textPrimary),
+                ),
               ],
             ),
             Row(
               spacing: 12,
-              children: [Switch(value: value, onChanged: onTap)],
+              children: [
+                Switch(
+                  value: value,
+                  onChanged: onTap,
+                  activeColor: context.primaryColor,
+                )
+              ],
             ),
           ],
         ),

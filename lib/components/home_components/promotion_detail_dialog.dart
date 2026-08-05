@@ -42,7 +42,7 @@ class PromotionDetailDialog extends StatelessWidget {
             ),
           ],
         ),
-        backgroundColor: AppColors.primary,
+        backgroundColor: context.primaryColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         duration: const Duration(seconds: 2),
@@ -119,16 +119,16 @@ class PromotionDetailDialog extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
+                            color: context.primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.3),
+                              color: context.primaryColor.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Text(
                             discountText,
                             style: TextStyle(
-                              color: AppColors.primary,
+                              color: context.primaryColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -222,8 +222,8 @@ class PromotionDetailDialog extends StatelessWidget {
                             icon: Icon(Icons.copy, size: 18),
                             label: Text('Sao chép mã'),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.primary),
+                              foregroundColor: context.primaryColor,
+                              side: BorderSide(color: context.primaryColor),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -236,7 +236,7 @@ class PromotionDetailDialog extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () => Navigator.of(context).pop(),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
+                              backgroundColor: context.primaryColor,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(

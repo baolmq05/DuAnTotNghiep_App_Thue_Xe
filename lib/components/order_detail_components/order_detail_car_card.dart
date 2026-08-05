@@ -55,7 +55,7 @@ class OrderDetailCarCard extends StatelessWidget {
                       Icon(
                         Icons.location_on,
                         size: 14,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                       ),
                       const SizedBox(width: 4),
                       Expanded(

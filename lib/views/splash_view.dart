@@ -305,7 +305,7 @@ class _SplashViewState extends State<SplashView> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(
                                         0xFF286874,
-                                      ), // AppColors.primary
+                                      ), // context.primaryColor
                                       foregroundColor: Colors.white,
                                       elevation: 0,
                                       padding: const EdgeInsets.symmetric(

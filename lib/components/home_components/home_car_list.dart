@@ -151,7 +151,7 @@ class _HomeCarListState extends State<HomeCarList> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(3.0),
                                 color: isActive
-                                    ? AppColors.primary
+                                    ? context.primaryColor
                                     : Colors.grey.shade300,
                               ),
                             ),

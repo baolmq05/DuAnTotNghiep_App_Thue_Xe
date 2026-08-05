@@ -44,8 +44,8 @@ class PrivacyPolicyView extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primary,
-                      AppColors.primaryDark,
+                      context.primaryColor,
+                      context.primaryDark,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -53,7 +53,7 @@ class PrivacyPolicyView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20.0),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.25),
+                      color: context.primaryColor.withValues(alpha: 0.25),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
@@ -190,21 +190,21 @@ class PrivacyPolicyView extends StatelessWidget {
                         onPressed: () {
                           context.push('/policy');
                         },
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.menu_book_rounded,
                           size: 18,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                         ),
-                        label: const Text(
+                        label: Text(
                           'Xem Chính sách & Quy định',
                           style: TextStyle(
-                            color: AppColors.primary,
+                            color: context.primaryColor,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.primary),
+                          side: BorderSide(color: context.primaryColor),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -230,7 +230,7 @@ class PrivacyPolicyView extends StatelessWidget {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: context.primaryColor,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14.0),

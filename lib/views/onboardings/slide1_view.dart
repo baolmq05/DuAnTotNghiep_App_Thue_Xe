@@ -37,10 +37,10 @@ class Slide1View extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     "Tìm xe dễ dàng",
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
@@ -83,10 +83,10 @@ class Slide1View extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildDot(true),
-                      _buildDot(false),
-                      _buildDot(false),
-                      _buildDot(false),
+                      _buildDot(context, true),
+                      _buildDot(context, false),
+                      _buildDot(context, false),
+                      _buildDot(context, false),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -102,7 +102,7 @@ class Slide1View extends StatelessWidget {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: context.primaryColor,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -139,14 +139,14 @@ class Slide1View extends StatelessWidget {
   }
 
   // hàm để tạo các chấm chuyển trang
-  Widget _buildDot(bool isActive) {
+  Widget _buildDot(BuildContext context, bool isActive) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       height: 8,
       width: isActive ? 24 : 8,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.textSecondary,
+        color: isActive ? context.primaryColor : AppColors.textSecondary,
         borderRadius: BorderRadius.circular(4),
       ),
     );

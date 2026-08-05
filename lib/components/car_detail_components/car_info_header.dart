@@ -31,7 +31,7 @@ class CarInfoHeader extends StatelessWidget {
             style: TextStyle(
               fontSize: 22.0,
               fontWeight: FontWeight.bold,
-              color: context.isDarkMode ? const Color(0xFF4DD0E1) : AppColors.primary,
+              color: context.isDarkMode ? const Color(0xFF4DD0E1) : context.primaryColor,
             ),
           ),
           const SizedBox(height: 8.0),
@@ -83,10 +83,10 @@ class CarInfoHeader extends StatelessWidget {
                     ],
                     TextSpan(
                       text: formatPriceWithUnit(finalPrice.toString()),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20.0,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                       ),
                     ),
                     TextSpan(

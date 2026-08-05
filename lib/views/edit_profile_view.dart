@@ -31,7 +31,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   void initState() {
     super.initState();
     final user = context.read<AuthProvider>().user;
-    
+
     _nameController = TextEditingController(text: user?.name ?? '');
     _phoneController = TextEditingController(text: user?.phone ?? '');
     _dobController = TextEditingController(text: user?.dob ?? '');
@@ -54,7 +54,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     final dob = _dobController.text.trim();
 
     final authProvider = context.read<AuthProvider>();
-    
+
     final file = kIsWeb
         ? null
         : (_selectedAvatar != null ? File(_selectedAvatar!.path) : null);
@@ -79,7 +79,9 @@ class _EditProfileViewState extends State<EditProfileView> {
       } else {
         AppToast.show(
           context,
-          message: authProvider.errorMessage ?? 'Cập nhật thất bại. Vui lòng thử lại.',
+          message:
+              authProvider.errorMessage ??
+              'Cập nhật thất bại. Vui lòng thử lại.',
           type: ToastType.error,
         );
       }
@@ -92,13 +94,17 @@ class _EditProfileViewState extends State<EditProfileView> {
     final user = auth.user;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9FAFC),
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: context.textPrimary, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: context.textPrimary,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -109,6 +115,7 @@ class _EditProfileViewState extends State<EditProfileView> {
             color: context.textPrimary,
           ),
         ),
+        centerTitle: false,
       ),
       body: SafeArea(
         child: Column(
@@ -131,12 +138,15 @@ class _EditProfileViewState extends State<EditProfileView> {
                         },
                       ),
                       const SizedBox(height: 32),
-                      
+
                       // Full name input
                       _buildLabel('Họ và tên *'),
                       TextFormField(
                         controller: _nameController,
-                        style: TextStyle(fontSize: 15, color: context.textPrimary),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: context.textPrimary,
+                        ),
                         decoration: _buildInputDecoration(
                           hintText: 'Nhập họ và tên của bạn',
                           prefixIcon: Icons.person_outline_rounded,
@@ -155,11 +165,14 @@ class _EditProfileViewState extends State<EditProfileView> {
                       TextFormField(
                         initialValue: user?.email ?? '',
                         readOnly: true,
-                        style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey.shade600,
+                        ),
                         decoration: _buildInputDecoration(
                           hintText: 'Email',
                           prefixIcon: Icons.email_outlined,
-                          fillColor: Colors.grey.shade100,
+                          fillColor: context.inputBackground,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -169,7 +182,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                       TextFormField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
-                        style: TextStyle(fontSize: 15, color: context.textPrimary),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: context.textPrimary,
+                        ),
                         decoration: _buildInputDecoration(
                           hintText: 'Nhập số điện thoại',
                           prefixIcon: Icons.phone_android_rounded,
@@ -205,7 +221,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                       TextFormField(
                         controller: _dobController,
                         readOnly: true,
-                        style: TextStyle(fontSize: 15, color: context.textPrimary),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: context.textPrimary,
+                        ),
                         decoration: _buildInputDecoration(
                           hintText: 'Chọn ngày sinh (YYYY-MM-DD)',
                           prefixIcon: Icons.calendar_month_outlined,
@@ -213,7 +232,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                         onTap: () async {
                           DateTime initial = DateTime(2000);
                           if (_dobController.text.isNotEmpty) {
-                            final parsed = DateTime.tryParse(_dobController.text);
+                            final parsed = DateTime.tryParse(
+                              _dobController.text,
+                            );
                             if (parsed != null) initial = parsed;
                           }
                           final picked = await showDatePicker(
@@ -225,7 +246,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                               return Theme(
                                 data: Theme.of(context).copyWith(
                                   colorScheme: ColorScheme.light(
-                                    primary: AppColors.primary,
+                                    primary: context.primaryColor,
                                     onPrimary: Colors.white,
                                     onSurface: context.textPrimary,
                                   ),
@@ -251,15 +272,17 @@ class _EditProfileViewState extends State<EditProfileView> {
                 ),
               ),
             ),
-            
+
             // Bottom Action Button
             Container(
               padding: const EdgeInsets.all(24.0),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cardColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: context.isDarkMode
+                        ? Colors.black.withValues(alpha: 0.2)
+                        : Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, -4),
                   ),
@@ -271,8 +294,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                 child: ElevatedButton(
                   onPressed: auth.isLoading ? null : _saveProfile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
+                    backgroundColor: context.primaryColor,
+                    disabledBackgroundColor: context.primaryColor.withValues(
+                      alpha: 0.5,
+                    ),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
@@ -284,7 +309,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                           height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : const Text(
@@ -331,8 +358,8 @@ class _EditProfileViewState extends State<EditProfileView> {
           _selectedGender = selected ? value : null;
         });
       },
-      selectedColor: AppColors.primary,
-      backgroundColor: Colors.white,
+      selectedColor: context.primaryColor,
+      backgroundColor: context.cardColor,
       labelStyle: TextStyle(
         color: isSelected ? Colors.white : context.textPrimary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -341,7 +368,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: isSelected ? AppColors.primary : AppColors.border,
+          color: isSelected ? context.primaryColor : context.border,
           width: 1,
         ),
       ),
@@ -360,27 +387,27 @@ class _EditProfileViewState extends State<EditProfileView> {
       hintStyle: TextStyle(color: context.textSecondary, fontSize: 15),
       prefixIcon: Icon(prefixIcon, color: context.textSecondary, size: 22),
       filled: true,
-      fillColor: fillColor ?? Colors.white,
+      fillColor: fillColor ?? context.cardColor,
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border, width: 1),
+        borderSide: BorderSide(color: context.border, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border, width: 1),
+        borderSide: BorderSide(color: context.border, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        borderSide: BorderSide(color: context.primaryColor, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.error, width: 1),
+        borderSide: BorderSide(color: context.error, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+        borderSide: BorderSide(color: context.error, width: 1.5),
       ),
     );
   }

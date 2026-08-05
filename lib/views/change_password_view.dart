@@ -108,10 +108,10 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
+                    color: context.primaryColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: context.primaryColor.withValues(alpha: 0.1),
                     ),
                   ),
                   child: Row(
@@ -119,7 +119,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                     children: [
                       Icon(
                         Icons.info_outline_rounded,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 22,
                       ),
                       const SizedBox(width: 12),
@@ -127,7 +127,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                         child: Text(
                           'Mật khẩu mới của bạn phải có độ dài từ 6 đến 16 ký tự và khác mật khẩu hiện tại.',
                           style: TextStyle(
-                            color: AppColors.primary.withValues(alpha: 0.9),
+                            color: context.primaryColor.withValues(alpha: 0.9),
                             fontSize: 13.5,
                             height: 1.4,
                           ),
@@ -158,7 +158,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       padding: EdgeInsets.only(left: 16.0, right: 12.0),
                       child: Icon(
                         Icons.lock_outline_rounded,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 22.0,
                       ),
                     ),
@@ -204,8 +204,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(
-                        color: AppColors.primary,
+                      borderSide: BorderSide(
+                        color: context.primaryColor,
                         width: 1.5,
                       ),
                     ),
@@ -253,7 +253,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       padding: EdgeInsets.only(left: 16.0, right: 12.0),
                       child: Icon(
                         Icons.lock_reset_rounded,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 22.0,
                       ),
                     ),
@@ -298,8 +298,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(
-                        color: AppColors.primary,
+                      borderSide: BorderSide(
+                        color: context.primaryColor,
                         width: 1.5,
                       ),
                     ),
@@ -350,7 +350,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                       padding: EdgeInsets.only(left: 16.0, right: 12.0),
                       child: Icon(
                         Icons.lock_person_outlined,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 22.0,
                       ),
                     ),
@@ -396,8 +396,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(
-                        color: AppColors.primary,
+                      borderSide: BorderSide(
+                        color: context.primaryColor,
                         width: 1.5,
                       ),
                     ),
@@ -434,7 +434,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   child: ElevatedButton(
                     onPressed: isLoading ? null : _handleSubmit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: context.primaryColor,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shadowColor: Colors.transparent,

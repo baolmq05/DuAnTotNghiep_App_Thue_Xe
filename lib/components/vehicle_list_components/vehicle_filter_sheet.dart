@@ -176,13 +176,13 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
       data: Theme.of(context).copyWith(
         colorScheme: isDark
             ? ColorScheme.dark(
-                primary: AppColors.primary,
+                primary: context.primaryColor,
                 onPrimary: Colors.white,
                 surface: context.cardColor,
                 onSurface: context.textPrimary,
               )
             : ColorScheme.light(
-                primary: AppColors.primary,
+                primary: context.primaryColor,
                 onPrimary: Colors.white,
                 surface: context.cardColor,
                 onSurface: context.textPrimary,
@@ -330,7 +330,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                     hintText: 'Nhập thành phố, quận huyện...',
                     prefixIcon: Icon(
                       Icons.location_on_outlined,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                     ),
                     suffixIcon: _addressController.text.isNotEmpty
                         ? IconButton(
@@ -352,8 +352,8 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primary,
+                      borderSide: BorderSide(
+                        color: context.primaryColor,
                         width: 1.5,
                       ),
                     ),
@@ -407,7 +407,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  Icon(Icons.calendar_month_outlined, size: 16, color: AppColors.primary),
+                                  Icon(Icons.calendar_month_outlined, size: 16, color: context.primaryColor),
                                 ],
                               ),
                             ),
@@ -430,7 +430,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                     _pickupTime != null ? _formatTime(_pickupTime!) : 'Chọn giờ',
                                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                                   ),
-                                  Icon(Icons.access_time, size: 16, color: AppColors.primary),
+                                  Icon(Icons.access_time, size: 16, color: context.primaryColor),
                                 ],
                               ),
                             ),
@@ -474,7 +474,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  Icon(Icons.calendar_month_outlined, size: 16, color: AppColors.primary),
+                                  Icon(Icons.calendar_month_outlined, size: 16, color: context.primaryColor),
                                 ],
                               ),
                             ),
@@ -497,7 +497,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                     _returnTime != null ? _formatTime(_returnTime!) : 'Chọn giờ',
                                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                                   ),
-                                  Icon(Icons.access_time, size: 16, color: AppColors.primary),
+                                  Icon(Icons.access_time, size: 16, color: context.primaryColor),
                                 ],
                               ),
                             ),
@@ -535,14 +535,14 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                                     _selectedBrandId = selected ? brand.id.toString() : null;
                                   });
                                 },
-                                selectedColor: AppColors.primary,
+                                selectedColor: context.primaryColor,
                                 labelStyle: TextStyle(
                                   color: isSelected ? Colors.white : context.textPrimary,
                                   fontWeight: FontWeight.w600,
                                 ),
                                 backgroundColor: context.cardColor,
                                 side: BorderSide(
-                                  color: isSelected ? AppColors.primary : context.border,
+                                  color: isSelected ? context.primaryColor : context.border,
                                 ),
                                 showCheckmark: false,
                               ),
@@ -566,14 +566,14 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                             _selectedSeatCount = selected ? seats : null;
                           });
                         },
-                        selectedColor: AppColors.primary,
+                        selectedColor: context.primaryColor,
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.white : context.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                         backgroundColor: context.cardColor,
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : context.border,
+                          color: isSelected ? context.primaryColor : context.border,
                         ),
                         showCheckmark: false,
                       ),
@@ -597,14 +597,14 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                             _selectedTransmission = selected ? trans : null;
                           });
                         },
-                        selectedColor: AppColors.primary,
+                        selectedColor: context.primaryColor,
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.white : context.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                         backgroundColor: context.cardColor,
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : context.border,
+                          color: isSelected ? context.primaryColor : context.border,
                         ),
                         showCheckmark: false,
                       ),
@@ -628,14 +628,14 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                             _selectedFuelType = selected ? fuel : null;
                           });
                         },
-                        selectedColor: AppColors.primary,
+                        selectedColor: context.primaryColor,
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.white : context.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                         backgroundColor: context.cardColor,
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : context.border,
+                          color: isSelected ? context.primaryColor : context.border,
                         ),
                         showCheckmark: false,
                       ),
@@ -652,7 +652,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                     Text(
                       '${_formatPriceValue(_priceRange.start)} - ${_formatPriceValue(_priceRange.end)}${_priceRange.end >= 3000000 ? '+' : ''}',
                       style: TextStyle(
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -668,7 +668,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
                     _formatPriceValue(_priceRange.start),
                     _formatPriceValue(_priceRange.end),
                   ),
-                  activeColor: AppColors.primary,
+                  activeColor: context.primaryColor,
                   inactiveColor: context.border,
                   onChanged: (values) {
                     setState(() {
@@ -687,7 +687,7 @@ class _VehicleFilterSheetState extends State<VehicleFilterSheet> {
           ElevatedButton(
             onPressed: _applyFilters,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: context.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

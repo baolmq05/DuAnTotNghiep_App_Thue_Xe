@@ -114,9 +114,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     final viewModel = context.watch<OrderDetailViewModel>();
 
     if (viewModel.isLoading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
+          child: CircularProgressIndicator(color: context.primaryColor),
         ),
       );
     }
@@ -124,7 +124,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     if (viewModel.errorMessage.isNotEmpty || viewModel.trip == null) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: AppColors.primary,
+          backgroundColor: context.primaryColor,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => context.go('/orders'),
@@ -145,7 +145,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ElevatedButton(
                 onPressed: () => viewModel.fetchTripDetail(widget.orderId),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: context.primaryColor,
                 ),
                 child: Text('Thử lại', style: TextStyle(color: Colors.white)),
               ),
@@ -163,7 +163,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: AppColors.primary,
+            backgroundColor: context.primaryColor,
             pinned: true,
             leading: IconButton(
               icon: Icon(Icons.arrow_back, color: Colors.white),
@@ -283,7 +283,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: context.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -336,7 +336,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: context.primaryColor,
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -549,8 +549,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
-          children: const [
-            Icon(Icons.call, color: AppColors.primary),
+          children: [
+            Icon(Icons.call, color: context.primaryColor),
             SizedBox(width: 8),
             Text(
               'Số điện thoại chủ xe',
@@ -576,7 +576,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.phone_android, color: AppColors.primary, size: 20),
+                  Icon(Icons.phone_android, color: context.primaryColor, size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: SelectableText(
@@ -596,7 +596,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Đóng', style: TextStyle(color: AppColors.primary)),
+            child: Text('Đóng', style: TextStyle(color: context.primaryColor)),
           ),
         ],
       ),
@@ -812,7 +812,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     bool isDanger = false,
     bool isSuccess = false,
   }) {
-    Color valColor = AppColors.primary;
+    Color valColor = context.primaryColor;
     if (isDanger) valColor = AppColors.error;
     if (isSuccess) valColor = AppColors.success;
 
@@ -856,7 +856,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ListTile(
               leading: Icon(
                 Icons.headset_mic_outlined,
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
               title: Text('Liên hệ trung tâm hỗ trợ'),
               onTap: () {
@@ -865,7 +865,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.article_outlined, color: AppColors.primary),
+              leading: Icon(Icons.article_outlined, color: context.primaryColor),
               title: Text('Chính sách & Quy định thuê xe'),
               onTap: () {
                 Navigator.pop(context);
@@ -874,7 +874,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
             if (trip.car?.owner != null)
               ListTile(
-                leading: Icon(Icons.person_outline, color: AppColors.primary),
+                leading: Icon(Icons.person_outline, color: context.primaryColor),
                 title: Text('Xem hồ sơ chủ xe'),
                 onTap: () {
                   Navigator.pop(context);
@@ -969,7 +969,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: context.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -1074,7 +1074,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: context.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -1219,7 +1219,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                               ),
                             ),
                           ],
@@ -1380,7 +1380,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.primaryColor,
               ),
               onPressed: isSubmitting
                   ? null
@@ -1683,10 +1683,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   const SizedBox(height: 6),
                   Text(
                     getRatingLabel(selectedRating),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -1712,7 +1712,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.primary),
+                        borderSide: BorderSide(color: context.primaryColor),
                       ),
                       contentPadding: const EdgeInsets.all(12),
                     ),

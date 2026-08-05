@@ -119,35 +119,31 @@ class OrderItemCard extends StatelessWidget {
     final imageUrl = trip.car?.getFirstImageUrl();
     final locationText = _getLocationText(trip);
 
-    final isDark = context.isDarkMode;
     Color statusBgColor;
     Color statusTextColor;
     switch (trip.status) {
       case 0:
-        statusBgColor = isDark ? const Color(0xFF3E2C1A) : const Color(0xffFFF3E0);
-        statusTextColor = isDark ? const Color(0xFFFFB057) : const Color(0xffF57C00);
+        statusBgColor = context.warningSurface;
+        statusTextColor = context.warning;
         break;
       case 1:
-        statusBgColor = isDark ? const Color(0xFF1E354A) : const Color(0xffE3F2FD);
-        statusTextColor = isDark ? const Color(0xFF64B5F6) : const Color(0xff1976D2);
+        statusBgColor = context.infoSurface;
+        statusTextColor = context.info;
         break;
       case 2:
       case 3:
-        statusBgColor = isDark ? const Color(0xFF1A3E26) : const Color(0xffE8F5E9);
-        statusTextColor = isDark ? const Color(0xFF81C784) : const Color(0xff388E3C);
-        break;
       case 4:
-        statusBgColor = isDark ? const Color(0xFF1A3E26) : const Color(0xffE8F5E9);
-        statusTextColor = isDark ? const Color(0xFF81C784) : const Color(0xff388E3C);
+        statusBgColor = context.successSurface;
+        statusTextColor = context.success;
         break;
       case 5:
       case 6:
-        statusBgColor = isDark ? const Color(0xFF4A1F1F) : const Color(0xffFFEBEE);
-        statusTextColor = isDark ? const Color(0xFFE57373) : const Color(0xffD32F2F);
+        statusBgColor = context.errorSurface;
+        statusTextColor = context.error;
         break;
       default:
-        statusBgColor = isDark ? Colors.grey.shade800 : Colors.grey.shade200;
-        statusTextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade800;
+        statusBgColor = context.cardColor;
+        statusTextColor = context.textSecondary;
     }
 
     final double netTotal = (trip.cost - trip.discountAmount) < 0
@@ -170,7 +166,7 @@ class OrderItemCard extends StatelessWidget {
     if (trip.status == 5 || trip.status == 6) {
       payLabel = 'Trạng thái: ';
       payValue = 'Đã hủy chuyến';
-      payColor = AppColors.error;
+      payColor = context.error;
     } else if (!isDepositPaid) {
       payLabel = 'Thanh toán: ';
       payValue = 'Chưa cọc/thanh toán';
@@ -178,11 +174,11 @@ class OrderItemCard extends StatelessWidget {
     } else if (isFullPaid) {
       payLabel = 'Đã thanh toán (100%): ';
       payValue = _formatPrice(actualPaid);
-      payColor = AppColors.success;
+      payColor = context.success;
     } else {
       payLabel = 'Đã đặt cọc (40%): ';
       payValue = _formatPrice(actualPaid);
-      payColor = AppColors.success;
+      payColor = context.success;
     }
 
     return Container(
@@ -340,8 +336,8 @@ class OrderItemCard extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onTap,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
+                    foregroundColor: context.primaryColor,
+                    side: BorderSide(color: context.primaryColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

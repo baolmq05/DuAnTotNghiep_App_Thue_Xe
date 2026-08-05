@@ -86,7 +86,7 @@ class CarBottomBar extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                         ),
                       ),
                       TextSpan(
@@ -115,7 +115,7 @@ class CarBottomBar extends StatelessWidget {
                     },
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    isButtonDisabled ? Colors.grey.shade400 : AppColors.primary,
+                    isButtonDisabled ? Colors.grey.shade400 : context.primaryColor,
                 disabledBackgroundColor: Colors.grey.shade400,
                 disabledForegroundColor: Colors.white,
                 foregroundColor: Colors.white,

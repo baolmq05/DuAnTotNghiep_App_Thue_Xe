@@ -56,7 +56,7 @@ class _AddressViewState extends State<AddressView> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             isEdit ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới',
-            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: TextStyle(fontWeight: FontWeight.bold, color: context.primaryColor),
           ),
           content: TextField(
             controller: _addressController,
@@ -75,7 +75,7 @@ class _AddressViewState extends State<AddressView> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide: BorderSide(color: context.primaryColor, width: 1.5),
               ),
             ),
           ),
@@ -131,7 +131,7 @@ class _AddressViewState extends State<AddressView> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: context.primaryColor,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 elevation: 0,
@@ -213,10 +213,10 @@ class _AddressViewState extends State<AddressView> {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        title: const Text(
+        title: Text(
           'Địa chỉ của tôi',
           style: TextStyle(
-            color: AppColors.primary,
+            color: context.primaryColor,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -234,7 +234,7 @@ class _AddressViewState extends State<AddressView> {
         actions: [
           if (user != null)
             IconButton(
-              icon: const Icon(Icons.add_location_alt_outlined, color: AppColors.primary, size: 26),
+              icon: Icon(Icons.add_location_alt_outlined, color: context.primaryColor, size: 26),
               onPressed: () => _showAddressDialog(),
               tooltip: 'Thêm địa chỉ',
             ),
@@ -243,9 +243,9 @@ class _AddressViewState extends State<AddressView> {
       body: Consumer<AddressViewModel>(
         builder: (context, addressVM, child) {
           if (addressVM.isLoading && addressVM.addresses.isEmpty) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: AlwaysStoppedAnimation<Color>(context.primaryColor),
               ),
             );
           }
@@ -260,7 +260,7 @@ class _AddressViewState extends State<AddressView> {
             children: [
               RefreshIndicator(
                 onRefresh: () => addressVM.loadAddresses(),
-                color: AppColors.primary,
+                color: context.primaryColor,
                 child: ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   itemCount: addressVM.addresses.length,
@@ -278,9 +278,9 @@ class _AddressViewState extends State<AddressView> {
               if (addressVM.isLoading)
                 Container(
                   color: Colors.black.withValues(alpha: 0.15),
-                  child: const Center(
+                  child: Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(context.primaryColor),
                     ),
                   ),
                 ),
@@ -293,7 +293,7 @@ class _AddressViewState extends State<AddressView> {
           if (addressVM.addresses.isEmpty) return const SizedBox.shrink();
           return FloatingActionButton(
             onPressed: () => _showAddressDialog(),
-            backgroundColor: AppColors.primary,
+            backgroundColor: context.primaryColor,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 4,

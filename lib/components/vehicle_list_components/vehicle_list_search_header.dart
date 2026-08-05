@@ -63,7 +63,7 @@ class VehicleListSearchHeader extends StatelessWidget {
             children: [
               Icon(
                 Icons.search_rounded,
-                color: AppColors.primary,
+                color: context.primaryColor,
                 size: 24,
               ),
               const SizedBox(width: 12),
@@ -98,12 +98,12 @@ class VehicleListSearchHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: context.primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.edit_location_alt_outlined,
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                   size: 18,
                 ),
               ),

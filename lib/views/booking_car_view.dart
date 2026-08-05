@@ -131,7 +131,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -204,7 +204,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -269,7 +269,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -330,7 +330,7 @@ class _BookingCarViewState extends State<BookingCarView> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: context.primaryColor,
               onPrimary: Colors.white,
               onSurface: context.textPrimary,
             ),
@@ -565,9 +565,9 @@ class _BookingCarViewState extends State<BookingCarView> {
     final tripViewModel = Provider.of<TripViewModel>(context);
 
     if (isPageLoading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
+          child: CircularProgressIndicator(color: context.primaryColor),
         ),
       );
     }
@@ -718,7 +718,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                       height: 24,
                       child: Checkbox(
                         value: isTermsAgreed,
-                        activeColor: AppColors.primary,
+                        activeColor: context.primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -897,10 +897,10 @@ class _BookingCarViewState extends State<BookingCarView> {
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context),
-                                      child: const Text(
+                                      child: Text(
                                         'Đóng',
                                         style: TextStyle(
-                                          color: AppColors.primary,
+                                          color: context.primaryColor,
                                         ),
                                       ),
                                     ),
@@ -910,7 +910,7 @@ class _BookingCarViewState extends State<BookingCarView> {
                             }
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: context.primaryColor,
                       disabledBackgroundColor: AppColors.border,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(

@@ -67,7 +67,7 @@ class CarSpecSection extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary, size: 24),
+          Icon(icon, color: context.primaryColor, size: 24),
           const SizedBox(width: 8),
           Expanded(
             child: Column(

@@ -90,7 +90,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: AppColors.primary, size: 16),
+                          Icon(Icons.star, color: context.primaryColor, size: 16),
                           const Text(
                             ' 4.9 ',
                             style: TextStyle(fontWeight: FontWeight.bold),
@@ -122,17 +122,17 @@ class OrderDetailOwnerCard extends StatelessWidget {
                       ),
                       child: IconButton(
                         icon: isCreatingChat
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 18,
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: AppColors.primary,
+                                  color: context.primaryColor,
                                 ),
                               )
                             : Icon(
                                 Icons.chat_bubble_outline,
-                                color: AppColors.primary,
+                                color: context.primaryColor,
                                 size: 20,
                               ),
                         onPressed: isCreatingChat
@@ -156,7 +156,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
                     child: IconButton(
                       icon: Icon(
                         Icons.call,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 20,
                       ),
                       onPressed: () => onCall(owner),

@@ -36,7 +36,7 @@ class BookingRentalTimeCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 14, color: AppColors.primary),
+            Icon(icon, size: 14, color: context.primaryColor),
             const SizedBox(width: 6),
             Text(
               text,
@@ -69,7 +69,7 @@ class BookingRentalTimeCard extends StatelessWidget {
               Icon(
                 Icons.calendar_today_rounded,
                 size: 16,
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
               const SizedBox(width: 8),
               Text(

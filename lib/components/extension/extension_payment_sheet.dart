@@ -264,12 +264,12 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: context.primaryColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       Icons.payment_outlined,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 20,
                     ),
                   ),
@@ -372,7 +372,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
+                              color: context.primaryColor,
                             ),
                           ),
                         ],
@@ -432,7 +432,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
                       ),
                       Icon(
                         Icons.check_circle,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 22,
                       ),
                     ],
@@ -498,7 +498,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
           child: ElevatedButton(
             onPressed: _handlePayment,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: context.primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -550,7 +550,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: AppColors.primary),
+          CircularProgressIndicator(color: context.primaryColor),
           const SizedBox(height: 20),
           Text(
             _loadingMessage,
@@ -575,7 +575,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
             Icon(
               Icons.hourglass_top_outlined,
               size: 48,
-              color: AppColors.primary,
+              color: context.primaryColor,
             ),
             const SizedBox(height: 20),
             Text(
@@ -604,7 +604,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
                 fontWeight: FontWeight.bold,
                 color: _secondsRemaining < 120
                     ? AppColors.error
-                    : AppColors.primary,
+                    : context.primaryColor,
               ),
             ),
             const SizedBox(height: 24),
@@ -613,7 +613,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
               style: OutlinedButton.styleFrom(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                side: BorderSide(color: AppColors.primary),
+                side: BorderSide(color: context.primaryColor),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -621,7 +621,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
               child: Text(
                 'Kiểm tra trạng thái',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -709,7 +709,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: context.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

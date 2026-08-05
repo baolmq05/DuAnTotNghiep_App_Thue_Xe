@@ -49,7 +49,7 @@ class OrderDetailPriceCard extends StatelessWidget {
           style: TextStyle(
             color: isDiscount
                 ? AppColors.success
-                : (isTotal ? AppColors.primary : context.textPrimary),
+                : (isTotal ? context.primaryColor : context.textPrimary),
             fontWeight: isTotal || isDiscount ? FontWeight.bold : FontWeight.w600,
             fontSize: isTotal ? 18 : 14,
           ),

@@ -29,7 +29,7 @@ class VehicleListEmptyState extends StatelessWidget {
               child: Icon(
                 Icons.directions_car_outlined,
                 size: 42,
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
             ),
             const SizedBox(height: 16),
@@ -54,8 +54,8 @@ class VehicleListEmptyState extends StatelessWidget {
             OutlinedButton(
               onPressed: onClearFilters,
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
+                foregroundColor: context.primaryColor,
+                side: BorderSide(color: context.primaryColor),
               ),
               child: const Text('Xem tất cả xe'),
             ),

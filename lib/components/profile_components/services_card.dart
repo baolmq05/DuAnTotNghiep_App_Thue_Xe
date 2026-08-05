@@ -68,17 +68,13 @@ class ServicesCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: context.isDarkMode
-              ? const Color(0xFF3E2D13)
-              : Colors.amber.shade50,
+          color: context.warningSurface,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
           'Chưa xác thực',
           style: TextStyle(
-            color: context.isDarkMode
-                ? Colors.amber.shade400
-                : Colors.amber.shade800,
+            color: context.warning,
             fontSize: 10,
             fontWeight: FontWeight.w600,
           ),
@@ -89,9 +85,7 @@ class ServicesCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: context.isDarkMode
-              ? const Color(0xFF1E3A24)
-              : const Color(0xFFE8F5E9),
+          color: context.successSurface,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
@@ -107,15 +101,13 @@ class ServicesCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: context.isDarkMode
-            ? const Color(0xFF4A2B10)
-            : Colors.orange.shade50,
+        color: context.warningSurface,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         'Chờ duyệt',
         style: TextStyle(
-          color: context.isDarkMode ? Colors.orange.shade400 : Colors.orange,
+          color: context.warning,
           fontSize: 10,
           fontWeight: FontWeight.w600,
         ),

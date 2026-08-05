@@ -24,7 +24,7 @@ class OwnerProfileHeader extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primary, width: 2),
+                  border: Border.all(color: context.primaryColor, width: 2),
                 ),
                 child: CircleAvatar(
                   radius: 40,
@@ -125,7 +125,7 @@ class OwnerProfileHeader extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.directions_car_rounded,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                           size: 22,
                         ),
                         const SizedBox(width: 6),

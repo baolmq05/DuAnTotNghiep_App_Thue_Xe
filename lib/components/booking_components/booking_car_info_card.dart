@@ -82,14 +82,14 @@ class BookingCarInfoCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: context.primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       car.transmission ?? 'Tự động',
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

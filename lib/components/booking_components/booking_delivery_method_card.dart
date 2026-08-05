@@ -247,7 +247,7 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
           padding: const EdgeInsets.symmetric(vertical: 14),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryDark : context.cardColor,
+            color: isSelected ? context.primaryDark : context.cardColor,
             border: Border.all(
               color: isSelected ? Colors.transparent : AppColors.border,
             ),
@@ -303,7 +303,7 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
               Icon(
                 Icons.local_shipping_rounded,
                 size: 16,
-                color: AppColors.primary,
+                color: context.primaryColor,
               ),
               const SizedBox(width: 8),
               Text(
@@ -346,7 +346,7 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
                 children: [
                   Icon(
                     Icons.location_on_rounded,
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -391,7 +391,7 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
                 children: [
                   Icon(
                     Icons.location_on_rounded,
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -443,16 +443,16 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
               decoration: InputDecoration(
                 hintText: 'Nhập địa chỉ nhận xe...',
                 prefixIcon: widget.isCalculatingMap
-                    ? const Padding(
-                        padding: EdgeInsets.all(12.0),
+                    ? Padding(
+                        padding: const EdgeInsets.all(12.0),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                         ),
                       )
                     : Icon(
                         Icons.map_rounded,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         size: 20,
                       ),
                 contentPadding: const EdgeInsets.symmetric(
@@ -471,8 +471,8 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
+                  borderSide: BorderSide(
+                    color: context.primaryColor,
                     width: 1.5,
                   ),
                 ),
@@ -503,7 +503,7 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
                       leading: Icon(
                         Icons.location_on_outlined,
                         size: 18,
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                       ),
                       title: Text(
                         desc,
@@ -675,7 +675,7 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
                               children: [
                                 Icon(
                                   Icons.directions_car_filled_rounded,
-                                  color: AppColors.primary,
+                                  color: context.primaryColor,
                                   size: 30,
                                 ),
                                 Card(

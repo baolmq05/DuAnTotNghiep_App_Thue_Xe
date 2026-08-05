@@ -127,10 +127,10 @@ class OwnerProfileCars extends StatelessWidget {
                     minimumSize: const Size(60, 30),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Xem tất cả',
                     style: TextStyle(
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),

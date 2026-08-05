@@ -26,7 +26,7 @@ class OrderDetailTimeline extends StatelessWidget {
     required bool showLeftLine,
     required bool showRightLine,
   }) {
-    final Color color = isDone ? AppColors.primary : Colors.grey.shade300;
+    final Color color = isDone ? context.primaryColor : Colors.grey.shade300;
 
     return Column(
       children: [

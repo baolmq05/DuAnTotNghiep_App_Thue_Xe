@@ -72,7 +72,7 @@ class _EditProfileAvatarState extends State<EditProfileAvatar> {
   void _showImageSourceBottomSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -88,7 +88,7 @@ class _EditProfileAvatarState extends State<EditProfileAvatar> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 16.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: context.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -105,12 +105,12 @@ class _EditProfileAvatarState extends State<EditProfileAvatar> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: context.primaryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+                    child: Icon(Icons.camera_alt_outlined, color: context.primaryColor),
                   ),
-                  title: const Text('Chụp ảnh mới', style: TextStyle(fontWeight: FontWeight.w500)),
+                  title: Text('Chụp ảnh mới', style: TextStyle(fontWeight: FontWeight.w500, color: context.textPrimary)),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
@@ -120,12 +120,12 @@ class _EditProfileAvatarState extends State<EditProfileAvatar> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: context.primaryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.photo_library_outlined, color: AppColors.primary),
+                    child: Icon(Icons.photo_library_outlined, color: context.primaryColor),
                   ),
-                  title: const Text('Chọn từ thư viện', style: TextStyle(fontWeight: FontWeight.w500)),
+                  title: Text('Chọn từ thư viện', style: TextStyle(fontWeight: FontWeight.w500, color: context.textPrimary)),
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.gallery);
@@ -154,11 +154,11 @@ class _EditProfileAvatarState extends State<EditProfileAvatar> {
                 offset: const Offset(0, 4),
               ),
             ],
-            border: Border.all(color: Colors.white, width: 4),
+            border: Border.all(color: context.cardColor, width: 4),
           ),
           child: CircleAvatar(
             radius: 60,
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor: context.cardColor,
             backgroundImage: _getAvatarImage(widget.user),
           ),
         ),
@@ -169,8 +169,8 @@ class _EditProfileAvatarState extends State<EditProfileAvatar> {
             onTap: _showImageSourceBottomSheet,
             child: Container(
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
+              decoration: BoxDecoration(
+                color: context.primaryColor,
                 shape: BoxShape.circle,
               ),
               child: const Icon(

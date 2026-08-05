@@ -102,11 +102,11 @@ class _ConversationsViewState extends State<ConversationsView> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: conversation.isChatbot
-            ? AppColors.primary.withOpacity(0.08)
+            ? context.primaryColor.withOpacity(0.08)
             : null,
         border: Border.all(
           color: conversation.isChatbot
-              ? AppColors.primary.withOpacity(0.2)
+              ? context.primaryColor.withOpacity(0.2)
               : Colors.grey.shade100,
           width: 1.5,
         ),
@@ -121,7 +121,7 @@ class _ConversationsViewState extends State<ConversationsView> {
         child: Text(
           'D',
           style: TextStyle(
-            color: AppColors.primary,
+            color: context.primaryColor,
             fontWeight: FontWeight.bold,
             fontSize: 22,
           ),
@@ -187,11 +187,11 @@ class _ConversationsViewState extends State<ConversationsView> {
               ListTile(
                 leading: Icon(
                   Icons.message,
-                  color: _filterType == 'all' ? AppColors.primary : Colors.grey,
+                  color: _filterType == 'all' ? context.primaryColor : Colors.grey,
                 ),
                 title: const Text('Tất cả tin nhắn'),
                 trailing: _filterType == 'all'
-                    ? const Icon(Icons.check, color: AppColors.primary)
+                    ? Icon(Icons.check, color: context.primaryColor)
                     : null,
                 onTap: () {
                   setState(() => _filterType = 'all');
@@ -202,12 +202,12 @@ class _ConversationsViewState extends State<ConversationsView> {
                 leading: Icon(
                   Icons.mark_chat_unread,
                   color: _filterType == 'unread'
-                      ? AppColors.primary
+                      ? context.primaryColor
                       : Colors.grey,
                 ),
                 title: const Text('Chưa đọc'),
                 trailing: _filterType == 'unread'
-                    ? const Icon(Icons.check, color: AppColors.primary)
+                    ? Icon(Icons.check, color: context.primaryColor)
                     : null,
                 onTap: () {
                   setState(() => _filterType = 'unread');
@@ -218,12 +218,12 @@ class _ConversationsViewState extends State<ConversationsView> {
                 leading: Icon(
                   Icons.smart_toy,
                   color: _filterType == 'chatbot'
-                      ? AppColors.primary
+                      ? context.primaryColor
                       : Colors.grey,
                 ),
                 title: const Text('Hỗ trợ Drivio (Chatbot)'),
                 trailing: _filterType == 'chatbot'
-                    ? const Icon(Icons.check, color: AppColors.primary)
+                    ? Icon(Icons.check, color: context.primaryColor)
                     : null,
                 onTap: () {
                   setState(() => _filterType = 'chatbot');
@@ -371,7 +371,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                     child: Container(
                       height: 48,
                       decoration: BoxDecoration(
-                        color: context.isDarkMode ? Colors.grey.shade800 : const Color(0xFFF9FAFB),
+                        color: context.inputBackground,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: context.border,
@@ -440,7 +440,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: context.primaryColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -450,8 +450,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                         _filterType == 'unread'
                             ? 'Đang lọc: Chưa đọc'
                             : 'Đang lọc: Chatbot',
-                        style: const TextStyle(
-                          color: AppColors.primary,
+                        style: TextStyle(
+                          color: context.primaryColor,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -461,9 +461,9 @@ class _ConversationsViewState extends State<ConversationsView> {
                         onTap: () {
                           setState(() => _filterType = 'all');
                         },
-                        child: const Icon(
+                        child: Icon(
                           Icons.cancel,
-                          color: AppColors.primary,
+                          color: context.primaryColor,
                           size: 14,
                         ),
                       ),
@@ -519,7 +519,7 @@ class _ConversationsViewState extends State<ConversationsView> {
                               child: ElevatedButton(
                                 onPressed: () => viewModel.fetchConversations(),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: context.primaryColor,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
@@ -657,8 +657,8 @@ class _ConversationsViewState extends State<ConversationsView> {
                                               ),
                                               width: 20,
                                               height: 20,
-                                              decoration: const BoxDecoration(
-                                                color: AppColors.primary,
+                                              decoration: BoxDecoration(
+                                                color: context.primaryColor,
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Center(

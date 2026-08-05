@@ -76,7 +76,7 @@ class _SupportGuidesCarouselState extends State<SupportGuidesCarousel> {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.primary.withValues(alpha: 0.8),
+                                      color: context.primaryColor.withValues(alpha: 0.8),
                                       letterSpacing: 0.8,
                                     ),
                                   ),
@@ -103,20 +103,20 @@ class _SupportGuidesCarouselState extends State<SupportGuidesCarousel> {
                                 ],
                               ),
                               Row(
-                                children: const [
+                                children: [
                                   Text(
                                     'Xem chi tiết',
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                      color: context.primaryColor,
                                     ),
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Icon(
                                     Icons.arrow_forward_ios_rounded,
                                     size: 11,
-                                    color: AppColors.primary,
+                                    color: context.primaryColor,
                                   ),
                                 ],
                               ),
@@ -135,7 +135,7 @@ class _SupportGuidesCarouselState extends State<SupportGuidesCarousel> {
                                       ? Icons.home_work_rounded
                                       : Icons.gavel_rounded),
                               size: 110,
-                              color: AppColors.primary,
+                              color: context.primaryColor,
                             ),
                           ),
                         ),
@@ -162,7 +162,7 @@ class _SupportGuidesCarouselState extends State<SupportGuidesCarousel> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(3.0),
                   color: isActive
-                      ? AppColors.primary
+                      ? context.primaryColor
                       : Colors.grey.shade300,
                 ),
               ),

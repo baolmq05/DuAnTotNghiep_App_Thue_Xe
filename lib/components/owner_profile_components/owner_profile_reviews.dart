@@ -162,8 +162,8 @@ class OwnerProfileReviews extends StatelessWidget {
                     ),
                     label: const Text('Xem thêm đánh giá'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
+                      foregroundColor: context.primaryColor,
+                      side: BorderSide(color: context.primaryColor),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

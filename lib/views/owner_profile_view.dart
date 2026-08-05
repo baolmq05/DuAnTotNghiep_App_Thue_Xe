@@ -62,9 +62,9 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
   Widget build(BuildContext context) {
     final bool currentIsOwner = widget.isOwner;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -88,7 +88,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: AppColors.primary),
+                  CircularProgressIndicator(color: context.primaryColor),
                   const SizedBox(height: 16),
                   Text(
                     currentIsOwner
@@ -114,7 +114,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                     Icon(
                       Icons.error_outline_rounded,
                       size: 64,
-                      color: AppColors.error,
+                      color: context.error,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -136,7 +136,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                       icon: const Icon(Icons.refresh_rounded),
                       label: const Text('Thử lại'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: context.primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -173,7 +173,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                 Divider(
                   height: 24,
                   thickness: 1,
-                  color: AppColors.border,
+                  color: context.border,
                 ),
                 OwnerProfileReviews(
                   viewModel: viewModel,
@@ -188,7 +188,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   Divider(
                     height: 24,
                     thickness: 1,
-                    color: AppColors.border,
+                    color: context.border,
                   ),
                   OwnerProfileCars(
                     profile: profile,

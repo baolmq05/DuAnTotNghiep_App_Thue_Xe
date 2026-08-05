@@ -45,11 +45,9 @@ class BottomNavigation extends StatelessWidget {
           gap: 6,
           iconSize: 22,
           duration: const Duration(milliseconds: 300),
-          color: context.isDarkMode ? Colors.grey.shade400 : context.textSecondary, // Màu icon khi chưa chọn
-          activeColor: context.isDarkMode ? const Color(0xFF4DD0E1) : context.primaryColor, // Màu icon/chữ khi được chọn
-          tabBackgroundColor: context.isDarkMode
-              ? const Color(0xFF4DD0E1).withValues(alpha: 0.1)
-              : context.primaryColor.withValues(alpha: 0.08),
+          color: context.textSecondary, // Màu icon khi chưa chọn
+          activeColor: context.primaryColor, // Màu icon/chữ khi được chọn
+          tabBackgroundColor: context.primaryColor.withValues(alpha: 0.1),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
 
           tabs: [
@@ -84,8 +82,8 @@ class BottomNavigation extends StatelessWidget {
                   selectedIndex == 2 ? Icons.message : Icons.message_outlined,
                   size: 22,
                   color: selectedIndex == 2
-                      ? (context.isDarkMode ? const Color(0xFF4DD0E1) : context.primaryColor)
-                      : (context.isDarkMode ? Colors.grey.shade400 : context.textSecondary),
+                      ? context.primaryColor
+                      : context.textSecondary,
                 ),
               ),
             ),

@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:duantotnghiep_app_thue_xe/models/chat_message_model.dart';
 import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
@@ -25,9 +28,67 @@ class ChatDetailView extends StatefulWidget {
 class _ChatDetailViewState extends State<ChatDetailView> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final ImagePicker _picker = ImagePicker();
   late Conversation _conv;
   bool _isTyping = false;
   int _messageCount = 0;
+
+  void _pickAndSendImage(ImageSource source) async {
+    final errorColor = context.error;
+    final chatDetailViewModel = context.read<ChatDetailViewModel>();
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+      if (image != null) {
+        final newMsg = ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          senderId: 'me',
+          text: '',
+          timestamp: DateTime.now(),
+          isMe: true,
+          imageUrl: image.path,
+        );
+        setState(() {
+          chatDetailViewModel.messages.add(newMsg);
+        });
+        _scrollToBottom();
+
+        // Simulating chatbot or backend response
+        if (_conv.isChatbot) {
+          setState(() {
+            _isTyping = true;
+          });
+          Future.delayed(const Duration(seconds: 1), () {
+            if (mounted) {
+              final botMsg = ChatMessage(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                senderId: 'chatbot',
+                text: 'Tôi đã nhận được ảnh của bạn. Tôi có thể giúp gì thêm không?',
+                timestamp: DateTime.now(),
+                isMe: false,
+              );
+              setState(() {
+                chatDetailViewModel.messages.add(botMsg);
+                _isTyping = false;
+              });
+              _scrollToBottom();
+            }
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi mở máy ảnh/thư viện: $e'),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -168,9 +229,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.primary.withOpacity(0.08),
+          color: context.primaryColor.withValues(alpha: 0.08),
           border: Border.all(
-            color: AppColors.primary.withOpacity(0.2),
+            color: context.primaryColor.withValues(alpha: 0.2),
             width: 1.5,
           ),
         ),
@@ -183,7 +244,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                 child: Text(
                   'D',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: context.primaryColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -291,8 +352,10 @@ class _ChatDetailViewState extends State<ChatDetailView> {
           Expanded(
             child:
                 _conv.isChatbot && context.watch<ChatbotViewModel>().isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: context.primaryColor,
+                    ),
                   )
                 : ListView.builder(
                     controller: _scrollController,
@@ -316,15 +379,15 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                                   vertical: 10,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF3F4F6),
+                                  color: context.chatBubbleIncoming,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const SizedBox(
+                                child: SizedBox(
                                   width: 30,
                                   child: LinearProgressIndicator(
                                     backgroundColor: Colors.transparent,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.primary,
+                                      context.primaryColor,
                                     ),
                                     minHeight: 2,
                                   ),
@@ -352,7 +415,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
               color: context.cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, -3),
                 ),
@@ -360,49 +423,56 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             ),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.image_outlined,
-                    color: Color(0xFF9CA3AF),
-                  ),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.camera_alt_outlined,
-                    color: Color(0xFF9CA3AF),
-                  ),
-                  onPressed: () {},
-                ),
-                const SizedBox(width: 4),
-
-                Expanded(
-                  child: Container(
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: context.isDarkMode ? Colors.grey.shade800 : const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: context.border,
-                        width: 1,
-                      ),
+                if (!_conv.isChatbot) ...[
+                  IconButton(
+                    icon: const Icon(
+                      Icons.image_outlined,
+                      color: Color(0xFF9CA3AF),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Center(
-                      child: TextField(
-                        controller: _messageController,
-                        onSubmitted: (_) => _sendMessage(),
-                        decoration: const InputDecoration(
-                          hintText: 'Nhập tin nhắn...',
-                          hintStyle: TextStyle(
-                            color: Color(0xFF9CA3AF),
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
+                    onPressed: () => _pickAndSendImage(ImageSource.gallery),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.camera_alt_outlined,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                    onPressed: () => _pickAndSendImage(ImageSource.camera),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    onSubmitted: (_) => _sendMessage(),
+                    style: TextStyle(
+                      color: context.textPrimary,
+                      fontSize: 15,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Nhập tin nhắn...',
+                      hintStyle: const TextStyle(
+                        color: Color(0xFF9CA3AF),
+                        fontSize: 15,
                       ),
+                      fillColor: context.inputBackground,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 16,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(color: context.border, width: 1.2),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(color: context.border, width: 1.2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide(color: context.primaryColor, width: 1.2),
+                      ),
+                      isDense: true,
                     ),
                   ),
                 ),
@@ -411,14 +481,14 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                 GestureDetector(
                   onTap: _sendMessage,
                   child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: context.primaryColor,
                       shape: BoxShape.circle,
                     ),
                     child: const Center(
-                      child: Icon(Icons.send, color: Colors.white, size: 16),
+                      child: Icon(Icons.send, color: Colors.white, size: 18),
                     ),
                   ),
                 ),
@@ -453,10 +523,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                   ),
                   decoration: BoxDecoration(
                     color: msg.isMe
-                        ? AppColors.primary
-                        : (context.isDarkMode
-                            ? Colors.grey.shade800
-                            : const Color(0xFFF3F4F6)),
+                        ? context.primaryColor
+                        : context.chatBubbleIncoming,
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -468,14 +536,33 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                           : const Radius.circular(16),
                     ),
                   ),
-                  child: Text(
-                    msg.text,
-                    style: TextStyle(
-                      color: msg.isMe ? Colors.white : context.textPrimary,
-                      fontSize: 15,
-                      height: 1.3,
-                    ),
-                  ),
+                  child: msg.imageUrl != null
+                      ? Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: 200,
+                            maxHeight: 200,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: msg.imageUrl!.startsWith('http') || kIsWeb
+                                ? Image.network(
+                                    msg.imageUrl!,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.file(
+                                    File(msg.imageUrl!),
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+                        )
+                      : Text(
+                          msg.text,
+                          style: TextStyle(
+                            color: msg.isMe ? Colors.white : context.textPrimary,
+                            fontSize: 15,
+                            height: 1.3,
+                          ),
+                        ),
                 ),
               ),
             ],

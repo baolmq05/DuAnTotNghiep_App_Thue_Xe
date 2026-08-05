@@ -207,7 +207,7 @@ class _RegisterViewState extends State<RegisterView> {
                 style: TextStyle(
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: context.primaryColor,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -237,7 +237,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.person,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 22.0,
                     ),
                   ),
@@ -259,7 +259,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: BorderSide(color: context.primaryColor, width: 1.5),
                   ),
                 ),
               ),
@@ -278,7 +278,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.phone,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 22.0,
                     ),
                   ),
@@ -300,7 +300,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: BorderSide(color: context.primaryColor, width: 1.5),
                   ),
                 ),
               ),
@@ -319,7 +319,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.email_outlined,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 22.0,
                     ),
                   ),
@@ -341,7 +341,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: BorderSide(color: context.primaryColor, width: 1.5),
                   ),
                 ),
               ),
@@ -360,7 +360,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.lock,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 22.0,
                     ),
                   ),
@@ -399,7 +399,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: BorderSide(color: context.primaryColor, width: 1.5),
                   ),
                 ),
               ),
@@ -418,7 +418,7 @@ class _RegisterViewState extends State<RegisterView> {
                     padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: Icon(
                       Icons.lock,
-                      color: AppColors.primary,
+                      color: context.primaryColor,
                       size: 22.0,
                     ),
                   ),
@@ -457,7 +457,7 @@ class _RegisterViewState extends State<RegisterView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: BorderSide(color: context.primaryColor, width: 1.5),
                   ),
                 ),
               ),
@@ -473,7 +473,7 @@ class _RegisterViewState extends State<RegisterView> {
                         onChanged: (value) {
                           policyViewModel.setAccepted(value ?? false);
                         },
-                        activeColor: AppColors.primary,
+                        activeColor: context.primaryColor,
                       ),
                       Expanded(
                         child: Text.rich(
@@ -487,7 +487,7 @@ class _RegisterViewState extends State<RegisterView> {
                               TextSpan(
                                 text: 'Chính sách & Quy định',
                                 style: TextStyle(
-                                  color: AppColors.primary,
+                                  color: context.primaryColor,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),
@@ -520,7 +520,7 @@ class _RegisterViewState extends State<RegisterView> {
                     child: ElevatedButton(
                       onPressed: auth.isLoading ? null : _handleRegister,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: context.primaryColor,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
@@ -672,7 +672,7 @@ class _RegisterViewState extends State<RegisterView> {
                     child: Text(
                       'Đăng nhập ngay',
                       style: TextStyle(
-                        color: AppColors.primary,
+                        color: context.primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
                       ),
