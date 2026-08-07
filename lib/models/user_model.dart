@@ -13,6 +13,8 @@ class UserModel {
   final DrivingLicenseModel? drivingLicense;
   final int tripsCount;
   final double rating;
+  final String? bankName;
+  final String? bankAccountNumber;
 
   UserModel({
     required this.id,
@@ -29,6 +31,8 @@ class UserModel {
     this.drivingLicense,
     this.tripsCount = 0,
     this.rating = 0.0,
+    this.bankName,
+    this.bankAccountNumber,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +66,8 @@ class UserModel {
               userData['rating']?.toString() ??
               userData['reviews_avg_rating']?.toString() ??
               userData['avg_rating']?.toString() ?? '') ?? 0.0,
+      bankName: userData['bank_name'] as String?,
+      bankAccountNumber: userData['bank_account_number'] as String?,
     );
   }
 
@@ -81,6 +87,8 @@ class UserModel {
       'driving_license': drivingLicense?.toJson(),
       'trips_count': tripsCount,
       'rating': rating,
+      'bank_name': bankName,
+      'bank_account_number': bankAccountNumber,
     };
   }
 }
