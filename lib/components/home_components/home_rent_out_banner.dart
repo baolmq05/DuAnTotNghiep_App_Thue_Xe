@@ -12,9 +12,7 @@ class HomeRentOutBanner extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         image: const DecorationImage(
-          image: NetworkImage(
-            'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800',
-          ),
+          image: NetworkImage('lib/assets/images/home/dang_ky_chu_xe.png'),
           fit: BoxFit.cover,
         ),
       ),
@@ -57,7 +55,7 @@ class HomeRentOutBanner extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             // Action Button using Primary color from Theme
             ElevatedButton(
               onPressed: () {},
@@ -67,15 +65,15 @@ class HomeRentOutBanner extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 elevation: 0,
               ),
               child: const Text(
                 'Đăng ký ngay',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
           ],
