@@ -58,7 +58,7 @@ class AuthService extends BaseService {
     return UserModel.fromJson(response as Map<String, dynamic>);
   }
 
-  /// Cập nhật thông tin tài khoản (Họ tên, SĐT, Giới tính, Ngày sinh, Ảnh đại diện)
+  /// Cập nhật thông tin tài khoản (Họ tên, SĐT, Giới tính, Ngày sinh, Ảnh đại diện, Ngân hàng)
   Future<UserModel> updateProfile({
     required String name,
     String? phone,
@@ -66,6 +66,8 @@ class AuthService extends BaseService {
     String? dob,
     File? avatarFile,
     XFile? avatarXFile,
+    String? bankName,
+    String? bankAccountNumber,
   }) async {
     String? avatarUrl;
 
@@ -81,6 +83,8 @@ class AuthService extends BaseService {
         if (gender != null) 'gender': gender,
         if (dob != null) 'DOB': dob,
         if (avatarUrl != null) 'avatar': avatarUrl,
+        if (bankName != null) 'bank_name': bankName,
+        if (bankAccountNumber != null) 'bank_account_number': bankAccountNumber,
       },
       requiresAuth: true,
     );

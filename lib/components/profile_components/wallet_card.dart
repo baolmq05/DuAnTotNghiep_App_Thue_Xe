@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/wallet_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class WalletCard extends StatelessWidget {
   const WalletCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final walletVM = context.watch<WalletViewModel>();
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -46,7 +52,7 @@ class WalletCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '2.450.000đ',
+                  formatPriceWithUnit(walletVM.balance.toStringAsFixed(0)),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -57,7 +63,9 @@ class WalletCard extends StatelessWidget {
             ),
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              context.push('/my-wallet');
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: context.accentSurface,
               foregroundColor: context.secondaryColor,

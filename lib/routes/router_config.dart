@@ -33,6 +33,7 @@ import 'package:duantotnghiep_app_thue_xe/views/change_password_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/driver_license_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/privacy_policy_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/edit_profile_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/wallet_view.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -183,6 +184,11 @@ final drivioRouter = GoRouter(
       path: '/edit-profile',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const EditProfileView(),
+    ),
+    GoRoute(
+      path: '/my-wallet',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const WalletView(),
     ),
     GoRoute(
       path: '/vehicles',

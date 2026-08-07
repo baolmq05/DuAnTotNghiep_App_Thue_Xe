@@ -157,6 +157,8 @@ class AuthProvider extends ChangeNotifier {
     String? dob,
     File? avatarFile,
     XFile? avatarXFile,
+    String? bankName,
+    String? bankAccountNumber,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -170,6 +172,8 @@ class AuthProvider extends ChangeNotifier {
         dob: dob,
         avatarFile: avatarFile,
         avatarXFile: avatarXFile,
+        bankName: bankName,
+        bankAccountNumber: bankAccountNumber,
       );
       _user = updatedUser;
       await fetchProfile();
@@ -291,6 +295,8 @@ class AuthProvider extends ChangeNotifier {
         drivingLicense: profileUser.drivingLicense,
         tripsCount: tripsCount,
         rating: rating,
+        bankName: profileUser.bankName,
+        bankAccountNumber: profileUser.bankAccountNumber,
       );
       notifyListeners();
     } catch (_) {

@@ -4,6 +4,7 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/wallet_viewmodel.dart';
 
 // Components
 import 'package:duantotnghiep_app_thue_xe/components/profile_components/profile_card.dart';
@@ -24,6 +25,7 @@ class _ProfileViewState extends State<ProfileView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().fetchProfile();
+      context.read<WalletViewModel>().fetchWalletDetails();
     });
   }
 
