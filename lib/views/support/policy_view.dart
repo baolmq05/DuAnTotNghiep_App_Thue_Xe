@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../themes/app_colors.dart';
-import '../viewmodels/policy_viewmodel.dart';
-import '../models/policy_model.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/policy_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/models/policy_model.dart';
 
 class PolicyView extends StatefulWidget {
   final bool showAcceptance;

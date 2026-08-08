@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../themes/app_colors.dart';
-import '../viewmodels/favorite_viewmodel.dart';
-import '../components/favorite_components/favorite_car_card.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/components/favorite_components/favorite_car_card.dart';
 
 class FavoriteView extends StatefulWidget {
   const FavoriteView({super.key});

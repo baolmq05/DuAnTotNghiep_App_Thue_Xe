@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 
-class Slide3View extends StatelessWidget {
+class Slide4View extends StatelessWidget {
   final PageController? controller;
 
-  const Slide3View({super.key, this.controller});
+  const Slide4View({super.key, this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class Slide3View extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Bàn giao an toàn",
+                    "Hỗ trợ 24/7",
                     style: TextStyle(
                       color: context.primaryColor,
                       fontSize: 26,
@@ -48,7 +48,7 @@ class Slide3View extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Kiểm tra và chụp xe trước khi nhận, biên bản điện tử rõ ràng.",
+                    "Đội ngũ hỗ trợ luôn sẵn sàng khi bạn cần giúp đỡ.",
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 15,
@@ -68,7 +68,7 @@ class Slide3View extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 0.0),
                   child: Image.asset(
-                    'lib/assets/images/onboarding/slide3.png',
+                    'lib/assets/images/onboarding/slide4.png',
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -85,8 +85,8 @@ class Slide3View extends StatelessWidget {
                     children: [
                       _buildDot(context, false),
                       _buildDot(context, false),
-                      _buildDot(context, true),
                       _buildDot(context, false),
+                      _buildDot(context, true),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -98,7 +98,7 @@ class Slide3View extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         {
-                          context.go('/slide4');
+                          context.go('/login');
                         }
                       },
                       style: ElevatedButton.styleFrom(

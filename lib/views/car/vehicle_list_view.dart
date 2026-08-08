@@ -7,7 +7,7 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../widgets/app_toast.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 
 // Components
 import 'package:duantotnghiep_app_thue_xe/components/vehicle_list_components/vehicle_list_search_header.dart';

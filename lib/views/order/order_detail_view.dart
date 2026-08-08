@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../themes/app_colors.dart';
-import '../models/trip_model.dart';
-import '../viewmodels/order_detail_viewmodel.dart';
-import '../services/conversation_service.dart';
-import '../services/trip_service.dart';
-import '../models/conversation_model.dart';
-import '../widgets/app_toast.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/order_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/services/conversation_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 import 'package:provider/provider.dart';
-import '../components/payment/zalopay_checkout_sheet.dart';
-import '../components/extension/extension_request_sheet.dart';
-import '../components/extension/extension_payment_sheet.dart';
+import 'package:duantotnghiep_app_thue_xe/components/payment/zalopay_checkout_sheet.dart';
+import 'package:duantotnghiep_app_thue_xe/components/extension/extension_request_sheet.dart';
+import 'package:duantotnghiep_app_thue_xe/components/extension/extension_payment_sheet.dart';
 
 // Components
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_header.dart';

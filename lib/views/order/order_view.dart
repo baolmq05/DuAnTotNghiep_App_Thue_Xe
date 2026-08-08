@@ -1,7 +1,7 @@
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../viewmodels/order_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/order_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 // Components

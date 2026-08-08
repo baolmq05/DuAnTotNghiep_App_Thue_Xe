@@ -7,11 +7,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
-import '../models/bank_model.dart';
-import '../providers/auth_provider.dart';
-import '../themes/app_colors.dart';
-import '../widgets/app_toast.dart';
-import '../components/edit_profile_components/edit_profile_avatar.dart';
+import 'package:duantotnghiep_app_thue_xe/models/bank_model.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
+import 'package:duantotnghiep_app_thue_xe/components/edit_profile_components/edit_profile_avatar.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({super.key});

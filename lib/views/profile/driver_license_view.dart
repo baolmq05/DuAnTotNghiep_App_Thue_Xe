@@ -4,12 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/user_model.dart';
-import '../themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/models/user_model.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
-import '../viewmodels/driver_license_viewmodel.dart';
-import '../widgets/app_toast.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/driver_license_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 
 class DriverLicenseView extends StatefulWidget {
   const DriverLicenseView({super.key});

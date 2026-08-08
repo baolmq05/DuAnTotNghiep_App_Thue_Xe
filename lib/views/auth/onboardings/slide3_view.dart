@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 
-class Slide1View extends StatelessWidget {
+class Slide3View extends StatelessWidget {
   final PageController? controller;
 
-  const Slide1View({super.key, this.controller});
+  const Slide3View({super.key, this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class Slide1View extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    "Tìm xe dễ dàng",
+                    "Bàn giao an toàn",
                     style: TextStyle(
                       color: context.primaryColor,
                       fontSize: 26,
@@ -48,7 +48,7 @@ class Slide1View extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Tìm xe máy hoặc ô tô gần bạn chỉ trong vài bước.",
+                    "Kiểm tra và chụp xe trước khi nhận, biên bản điện tử rõ ràng.",
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 15,
@@ -68,7 +68,7 @@ class Slide1View extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 0.0),
                   child: Image.asset(
-                    'lib/assets/images/onboarding/slide1.png',
+                    'lib/assets/images/onboarding/slide3.png',
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -83,9 +83,9 @@ class Slide1View extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      _buildDot(context, false),
+                      _buildDot(context, false),
                       _buildDot(context, true),
-                      _buildDot(context, false),
-                      _buildDot(context, false),
                       _buildDot(context, false),
                     ],
                   ),
@@ -98,7 +98,7 @@ class Slide1View extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         {
-                          context.go('/slide2');
+                          context.go('/slide4');
                         }
                       },
                       style: ElevatedButton.styleFrom(

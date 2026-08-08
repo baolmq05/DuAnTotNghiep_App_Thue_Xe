@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart' hide Notification;
 import 'package:intl/intl.dart';
-import '../models/notification_model.dart';
-import '../themes/app_colors.dart';
-import '../viewmodels/notification_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/models/notification_model.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class NotificationView extends StatefulWidget {
