@@ -75,4 +75,25 @@ class NotificationViewModel extends ChangeNotifier {
       }
     }
   }
+
+  /// Thêm thông báo mới nhận từ push notification hoặc WebSocket vào đầu danh sách
+  void addNotificationFromPush({
+    required int id,
+    required String message,
+    required String userId,
+    DateTime? createdAt,
+  }) {
+    final newNotif = notification_model.Notification(
+      id: id,
+      message: message,
+      isRead: false,
+      userId: userId,
+      createdAt: createdAt ?? DateTime.now(),
+    );
+
+    // Tránh trùng lặp ID
+    _allNotifications.removeWhere((item) => item.id == id);
+    _allNotifications.insert(0, newNotif);
+    notifyListeners();
+  }
 }

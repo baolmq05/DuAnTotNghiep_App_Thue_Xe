@@ -5,6 +5,7 @@ import 'package:duantotnghiep_app_thue_xe/models/chatbot_session_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/conversation_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/chatbot_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/websocket_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/fcm_service.dart';
 import 'package:flutter/material.dart';
 
 class ConversationViewmodel extends ChangeNotifier {
@@ -139,6 +140,17 @@ class ConversationViewmodel extends ChangeNotifier {
         lastMessageObj: lastMsg,
         unreadCount: newUnreadCount,
       );
+
+      if (senderId == conv.otherUser.id) {
+        FcmService().showLocalNotification(
+          title: conv.otherUser.name,
+          body: type == 'image' ? '[Hình ảnh]' : text,
+          payload: jsonEncode({
+            'type': 'chat',
+            'conversation_id': conversationId,
+          }),
+        );
+      }
 
       _conversations.removeAt(index);
       
