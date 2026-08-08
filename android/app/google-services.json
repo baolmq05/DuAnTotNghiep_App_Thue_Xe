@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "406408015167",
+    "project_id": "thuexethongbao",
+    "storage_bucket": "thuexethongbao.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406408015167:android:1b2e1756e645d70a0a378a",
+        "android_client_info": {
+          "package_name": "com.example.duantotnghiep_app_thue_xe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbBcuuxVtBCwgWEOdCHJQfCcex1p_LmW0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

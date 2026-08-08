@@ -20,8 +20,35 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/policy_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/wallet_viewmodel.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:duantotnghiep_app_thue_xe/firebase_options.dart';
+import 'package:duantotnghiep_app_thue_xe/services/fcm_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Khởi tạo Firebase và FCM Service
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    final fcmService = FcmService();
+    await fcmService.initialize();
+
+    // Điều hướng khi người dùng nhấn vào thông báo đẩy
+    fcmService.onNotificationClick = (Map<String, dynamic> data) {
+      debugPrint('XỬ LÝ ĐIỀU HƯỚNG KHI CLICK THÔNG BÁO: $data');
+      final type = data['type'] ?? data['notification_type'];
+      if (type == 'chat' || data.containsKey('conversation_id')) {
+        drivioRouter.push('/conversations');
+      } else {
+        drivioRouter.push('/notifications');
+      }
+    };
+  } catch (e) {
+    debugPrint('Lỗi khởi tạo Firebase trong main: $e');
+  }
+
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,

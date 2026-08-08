@@ -6,6 +6,7 @@ import 'package:duantotnghiep_app_thue_xe/models/user_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/auth_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/owner_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/fcm_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -299,6 +300,12 @@ class AuthProvider extends ChangeNotifier {
         bankAccountNumber: profileUser.bankAccountNumber,
       );
       notifyListeners();
+
+      // Đồng bộ FCM token với backend khi xác thực người dùng
+      final fcmToken = FcmService().fcmToken;
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        FcmService().sendFcmTokenToServer(fcmToken);
+      }
     } catch (_) {
       // Có lỗi thì giữ thông tin cũ hoặc xử lý sau
     }
