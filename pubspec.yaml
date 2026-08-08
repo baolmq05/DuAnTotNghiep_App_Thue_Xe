@@ -82,10 +82,6 @@ flutter:
   assets:
     - lib/assets/images/onboarding/
     - lib/assets/images/home/
-    - assets/logo.png
-    - assets/splash_illustration.png
-    - assets/google_logo.svg
-    - assets/facebook_logo.svg
     - lib/assets/
     - lib/assets/images/
   #   - images/a_dot_ham.jpeg

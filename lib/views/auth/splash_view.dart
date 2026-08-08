@@ -95,7 +95,7 @@ class _SplashViewState extends State<SplashView> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Image.asset(
-                      'assets/logo.png',
+                      'lib/assets/images/logo.png',
                       height: 90.0,
                       fit: BoxFit.contain,
                       opacity: const AlwaysStoppedAnimation<double>(0.9),
@@ -152,7 +152,7 @@ class _SplashViewState extends State<SplashView> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16.0),
                       child: Image.asset(
-                        'assets/splash_illustration.png',
+                        'lib/assets/images/splash_illustration.png',
                         height: 260.0,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {

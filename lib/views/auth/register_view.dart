@@ -596,7 +596,7 @@ class _RegisterViewState extends State<RegisterView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SvgPicture.asset(
-                          'assets/google_logo.svg',
+                          'lib/assets/images/google_logo.svg',
                           height: 24.0,
                           width: 24.0,
                         ),
@@ -632,7 +632,7 @@ class _RegisterViewState extends State<RegisterView> {
               //     mainAxisAlignment: MainAxisAlignment.center,
               //     children: [
               //       SvgPicture.asset(
-              //         'assets/facebook_logo.svg',
+              //         'lib/assets/images/facebook_logo.svg',
               //         height: 24.0,
               //         width: 24.0,
               //       ),

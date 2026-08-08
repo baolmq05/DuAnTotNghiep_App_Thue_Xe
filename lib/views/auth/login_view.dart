@@ -333,7 +333,7 @@ class _LoginViewState extends State<LoginView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SvgPicture.asset(
-                          'assets/google_logo.svg',
+                          'lib/assets/images/google_logo.svg',
                           height: 24.0,
                           width: 24.0,
                         ),
