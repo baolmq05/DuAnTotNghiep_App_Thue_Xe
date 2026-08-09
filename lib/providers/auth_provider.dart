@@ -31,6 +31,11 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  int get roleId => _user?.roleId ?? 2;
+  bool get isOwner => _user?.isOwner ?? false;
+  bool get isCustomer => _user?.isCustomer ?? false;
+  bool get isAdmin => _user?.isAdmin ?? false;
+
   /// Đăng nhập
   Future<bool> login(String email, String password) async {
     _isLoading = true;

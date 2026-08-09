@@ -35,6 +35,32 @@ class UserModel {
     this.bankAccountNumber,
   });
 
+  bool get isOwner => roleId == 3;
+  bool get isCustomer => roleId == 2;
+  bool get isAdmin => roleId == 1;
+
+  static int _parseRoleId(Map<String, dynamic> data) {
+    final rawRoleId = data['role_id'] ?? data['roleId'];
+    if (rawRoleId != null) {
+      if (rawRoleId is int) return rawRoleId;
+      final parsed = int.tryParse(rawRoleId.toString());
+      if (parsed != null) return parsed;
+    }
+    final rawRole = data['role'];
+    if (rawRole is Map<String, dynamic>) {
+      final roleIdInObj = rawRole['id'];
+      if (roleIdInObj is int) return roleIdInObj;
+      final parsed = int.tryParse(roleIdInObj?.toString() ?? '');
+      if (parsed != null) return parsed;
+    } else if (rawRole is String) {
+      final lower = rawRole.toLowerCase();
+      if (lower == 'owner' || lower == 'chu_xe' || lower == 'chủ xe') return 3;
+      if (lower == 'admin') return 1;
+      if (lower == 'customer' || lower == 'user' || lower == 'khach_thue') return 2;
+    }
+    return 2;
+  }
+
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final userData = json['user'] is Map<String, dynamic>
         ? json['user'] as Map<String, dynamic>
@@ -51,7 +77,7 @@ class UserModel {
       gender: userData['gender'] is int ? userData['gender'] as int : int.tryParse(userData['gender']?.toString() ?? ''),
       dob: userData['DOB'] as String?,
       status: userData['status'] is int ? userData['status'] as int : int.tryParse(userData['status']?.toString() ?? '') ?? 1,
-      roleId: userData['role_id'] is int ? userData['role_id'] as int : int.tryParse(userData['role_id']?.toString() ?? '') ?? 2,
+      roleId: _parseRoleId(userData),
       walletId: userData['wallet_id'] is int ? userData['wallet_id'] as int : int.tryParse(userData['wallet_id']?.toString() ?? ''),
       drivingLicenseId: userData['driving_license_id'] is int ? userData['driving_license_id'] as int : int.tryParse(userData['driving_license_id']?.toString() ?? ''),
       drivingLicense: userData['driving_license'] != null
