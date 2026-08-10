@@ -178,10 +178,10 @@ class Conversation {
     }
     return updatedAt;
   }
-  bool get isChatbot => name.toLowerCase().contains('chatbot') || 
+  bool get isChatbot => id.startsWith('chatbot') ||
+                        name.toLowerCase().contains('chatbot') || 
                         name.toLowerCase().contains('hỗ trợ drivio') || 
-                        name.toLowerCase().contains('trợ lý ai') || 
-                        id == 'chatbot';
+                        name.toLowerCase().contains('trợ lý ai');
   String? get attachmentImageUrl => car?.image;
   bool get isOnline => status == 1;
 }

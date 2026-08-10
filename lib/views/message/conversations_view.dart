@@ -5,6 +5,13 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
 
+// Components
+import 'package:duantotnghiep_app_thue_xe/components/message_components/conversation_item_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/message_components/conversation_skeleton.dart';
+import 'package:duantotnghiep_app_thue_xe/components/message_components/conversation_empty_state.dart';
+import 'package:duantotnghiep_app_thue_xe/components/message_components/conversation_error_state.dart';
+import 'package:duantotnghiep_app_thue_xe/components/message_components/conversation_filter_sheet.dart';
+
 class ConversationsView extends StatefulWidget {
   const ConversationsView({super.key});
 
@@ -15,319 +22,15 @@ class ConversationsView extends StatefulWidget {
 class _ConversationsViewState extends State<ConversationsView> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _filterType = 'all';
+  String _filterType = 'all'; // 3 filters: 'all', 'unread', 'chatbot'
 
   @override
   void initState() {
     super.initState();
-
+    // Get conversations when screen starts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ConversationViewmodel>().fetchConversations();
     });
-  }
-
-  /// Filters the conversation list based on the search query and active filter type
-  List<Conversation> filteredConversations(
-    List<Conversation> allConversations,
-  ) {
-    final List<Conversation> results = [];
-
-    // STEP 1: Loop through each conversation to check search and filter criteria
-    for (var conversation in allConversations) {
-      final String userName = conversation.name.toLowerCase();
-      final String lastMessageText = conversation.lastMessage.toLowerCase();
-      final String searchQuery = _searchQuery.toLowerCase();
-
-      // 1. Check search match (Username or Last message)
-      final bool isSearchMatch =
-          userName.contains(searchQuery) ||
-          lastMessageText.contains(searchQuery);
-
-      // 2. Check filter match (Unread / Chatbot)
-      bool isFilterMatch = true;
-      if (_filterType == 'unread') {
-        isFilterMatch = conversation.unreadCount > 0;
-      } else if (_filterType == 'chatbot') {
-        isFilterMatch = conversation.isChatbot;
-      }
-
-      // 3. Add to results if both search and filter match
-      if (isSearchMatch && isFilterMatch) {
-        results.add(conversation);
-      }
-    }
-
-    // STEP 2: Sort the results (prioritize chatbots to the top)
-    results.sort((a, b) {
-      if (a.isChatbot && !b.isChatbot) return -1;
-      if (!a.isChatbot && b.isChatbot) return 1;
-      return 0;
-    });
-
-    return results;
-  }
-
-  Widget _buildAvatar(Conversation conversation) {
-    final bool hasAvatar =
-        conversation.avatarUrl.isNotEmpty &&
-        (conversation.avatarUrl.startsWith('http') ||
-            conversation.avatarUrl.startsWith('assets') ||
-            conversation.avatarUrl.startsWith('lib'));
-
-    Widget avatarWidget;
-    if (hasAvatar) {
-      final bool isNetwork = conversation.avatarUrl.startsWith('http');
-      avatarWidget = ClipOval(
-        child: isNetwork
-            ? Image.network(
-                conversation.avatarUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _buildPlaceholderAvatar(conversation),
-              )
-            : Image.asset(
-                conversation.avatarUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _buildPlaceholderAvatar(conversation),
-              ),
-      );
-    } else {
-      avatarWidget = _buildPlaceholderAvatar(conversation);
-    }
-
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: conversation.isChatbot
-            ? context.primaryColor.withOpacity(0.08)
-            : null,
-        border: Border.all(
-          color: conversation.isChatbot
-              ? context.primaryColor.withOpacity(0.2)
-              : Colors.grey.shade100,
-          width: 1.5,
-        ),
-      ),
-      child: avatarWidget,
-    );
-  }
-
-  Widget _buildPlaceholderAvatar(Conversation conversation) {
-    if (conversation.isChatbot) {
-      return Center(
-        child: Text(
-          'D',
-          style: TextStyle(
-            color: context.primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-      );
-    }
-
-    final colors = _getGradientColors(conversation.name);
-    // Lấy chữ cái đầu tiên của Tên (Ví dụ: "Bảo Lê" -> "B")
-    final String initialLetter = conversation.name.isNotEmpty
-        ? conversation.name[0].toUpperCase()
-        : '?';
-
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          initialLetter,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showFilterMenu() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Lọc tin nhắn',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.message,
-                  color: _filterType == 'all' ? context.primaryColor : Colors.grey,
-                ),
-                title: const Text('Tất cả tin nhắn'),
-                trailing: _filterType == 'all'
-                    ? Icon(Icons.check, color: context.primaryColor)
-                    : null,
-                onTap: () {
-                  setState(() => _filterType = 'all');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.mark_chat_unread,
-                  color: _filterType == 'unread'
-                      ? context.primaryColor
-                      : Colors.grey,
-                ),
-                title: const Text('Chưa đọc'),
-                trailing: _filterType == 'unread'
-                    ? Icon(Icons.check, color: context.primaryColor)
-                    : null,
-                onTap: () {
-                  setState(() => _filterType = 'unread');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.smart_toy,
-                  color: _filterType == 'chatbot'
-                      ? context.primaryColor
-                      : Colors.grey,
-                ),
-                title: const Text('Hỗ trợ Drivio (Chatbot)'),
-                trailing: _filterType == 'chatbot'
-                    ? Icon(Icons.check, color: context.primaryColor)
-                    : null,
-                onTap: () {
-                  setState(() => _filterType = 'chatbot');
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  List<Color> _getGradientColors(String name) {
-    final hash = name.hashCode;
-    final List<List<Color>> palettes = [
-      [const Color(0xFF6366F1), const Color(0xFF4F46E5)], // Indigo
-      [const Color(0xFFEC4899), const Color(0xFFD946EF)], // Pink/Fuchsia
-      [const Color(0xFF14B8A6), const Color(0xFF0D9488)], // Teal
-      [const Color(0xFFF59E0B), const Color(0xFFEAB308)], // Yellow/Amber
-      [const Color(0xFF0EA5E9), const Color(0xFF2563EB)], // Light Blue/Blue
-      [const Color(0xFF10B981), const Color(0xFF059669)], // Emerald
-    ];
-    return palettes[hash.abs() % palettes.length];
-  }
-
-  Widget _buildSkeletonLoader() {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: 4,
-      separatorBuilder: (context, index) => const Divider(
-        color: Color(0xFFF3F4F6),
-        height: 1,
-        indent: 86,
-        endIndent: 20,
-      ),
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar Circle Placeholder
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 110,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        Container(
-                          width: 40,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      width: double.infinity,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: 150,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -336,355 +39,284 @@ class _ConversationsViewState extends State<ConversationsView> {
     super.dispose();
   }
 
+  // Filter and sort conversations by search query and filter type
+  List<Conversation> _filterAndSortConversations(
+    List<Conversation> originalList,
+  ) {
+    final query = _searchQuery.toLowerCase();
+
+    var filtered = originalList.where((conv) {
+      final nameMatch = conv.name.toLowerCase().contains(query);
+      final lastMsgMatch = conv.lastMessage.toLowerCase().contains(query);
+      final searchMatch = nameMatch || lastMsgMatch;
+
+      if (_filterType == 'unread') {
+        return searchMatch && conv.unreadCount > 0;
+      } else if (_filterType == 'chatbot') {
+        return searchMatch && conv.isChatbot;
+      }
+      return searchMatch;
+    }).toList();
+
+    // Sort to show chatbot at the top
+    filtered.sort((a, b) {
+      if (a.isChatbot && !b.isChatbot) return -1;
+      if (!a.isChatbot && b.isChatbot) return 1;
+      return 0;
+    });
+
+    return filtered;
+  }
+
+  // Show conversation list for each Tab (Active or Completed)
+  Widget _buildConversationTabList(
+    ConversationViewmodel viewModel, {
+    required bool isCompleted,
+  }) {
+    // 1. Separate list by status (2 = Completed, other = Active)
+    final tabConversations = viewModel.conversations.where((conv) {
+      return isCompleted ? (conv.status == 2) : (conv.status != 2);
+    }).toList();
+
+    // 2. Filter and sort by search text and filter menu
+    final displayList = _filterAndSortConversations(tabConversations);
+
+    // 3. Handle loading, error, or empty list
+    if (viewModel.isLoading) {
+      return const ConversationSkeleton();
+    }
+    if (viewModel.errorMessage != null) {
+      return ConversationErrorState(
+        errorMessage: viewModel.errorMessage!,
+        onRetry: () => viewModel.fetchConversations(),
+      );
+    }
+    if (displayList.isEmpty) {
+      return ConversationEmptyState(isCompleted: isCompleted);
+    }
+
+    // 4. Show the main list
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: displayList.length,
+      separatorBuilder: (context, index) =>
+          Divider(color: context.border, height: 1, indent: 86, endIndent: 20),
+      itemBuilder: (context, index) {
+        final conv = displayList[index];
+
+        return ConversationItemCard(
+          conversation: conv,
+          onTap: () async {
+            context.read<ConversationViewmodel>().markAsReadLocally(conv.id);
+            await context.push('/chat/${conv.id}', extra: conv);
+            if (mounted) {
+              context.read<ConversationViewmodel>().fetchConversations();
+            }
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<ConversationViewmodel>();
-    final list = filteredConversations(viewModel.conversations);
 
-    return Scaffold(
-      backgroundColor: context.scaffoldBackgroundColor,
-      appBar: AppBar(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
         backgroundColor: context.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: 20.0,
-        title: Text(
-          'Tin nhắn',
-          style: TextStyle(
-            color: context.textPrimary,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.5,
+        appBar: AppBar(
+          backgroundColor: context.scaffoldBackgroundColor,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: false,
+          titleSpacing: 20.0,
+          title: Text(
+            'Tin nhắn',
+            style: TextStyle(
+              color: context.textPrimary,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: context.inputBackground,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: context.border,
-                          width: 1,
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search bar and Filter button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: context.inputBackground,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: context.border, width: 1),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (val) {
+                            setState(() {
+                              _searchQuery = val;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Tìm kiếm tin nhắn',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 15,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: Color(0xFF9CA3AF),
+                              size: 20,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
+                          ),
                         ),
                       ),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (val) {
-                          setState(() {
-                            _searchQuery = val;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Tìm kiếm tin nhắn',
-                          hintStyle: const TextStyle(
-                            color: Color(0xFF9CA3AF),
-                            fontSize: 15,
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
                           ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Color(0xFF9CA3AF),
+                          builder: (context) => ConversationFilterSheet(
+                            currentFilterType: _filterType,
+                            onFilterChanged: (type) {
+                              setState(() => _filterType = type);
+                            },
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: context.cardColor,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: context.border, width: 1),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.tune,
+                            color: context.textPrimary,
                             size: 20,
                           ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: _showFilterMenu,
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: context.cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: context.border,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(Icons.tune, color: context.textPrimary, size: 20),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 15),
-
-            if (_filterType != 'all')
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 5.0,
+                  ],
                 ),
+              ),
+              const SizedBox(height: 15),
+
+              // Tab bar for Active and Completed tabs
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: context.primaryColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
+                    color: context.inputBackground,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _filterType == 'unread'
-                            ? 'Đang lọc: Chưa đọc'
-                            : 'Đang lọc: Chatbot',
-                        style: TextStyle(
-                          color: context.primaryColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() => _filterType = 'all');
-                        },
-                        child: Icon(
-                          Icons.cancel,
-                          color: context.primaryColor,
-                          size: 14,
-                        ),
-                      ),
+                  child: TabBar(
+                    indicator: BoxDecoration(
+                      color: context.primaryColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: context.textSecondary,
+                    labelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    dividerColor: Colors.transparent,
+                    padding: const EdgeInsets.all(4),
+                    tabs: const [
+                      Tab(text: 'Đang'),
+                      Tab(text: 'Hoàn thành'),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 10),
 
-            Expanded(
-              child: viewModel.isLoading
-                  ? _buildSkeletonLoader()
-                  : viewModel.errorMessage != null
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.error_outline_rounded,
-                                size: 40,
-                                color: Colors.red.shade400,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Không thể kết nối danh sách',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              viewModel.errorMessage!,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            SizedBox(
-                              width: 130,
-                              height: 40,
-                              child: ElevatedButton(
-                                onPressed: () => viewModel.fetchConversations(),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: context.primaryColor,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Tải lại',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : list.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 48,
-                              color: Colors.grey.shade300,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Không tìm thấy cuộc hội thoại nào',
-                            style: TextStyle(
-                              color: Colors.grey.shade400,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: list.length,
-                      separatorBuilder: (context, index) => Divider(
-                        color: context.border,
-                        height: 1,
-                        indent: 86,
-                        endIndent: 20,
-                      ),
-                      itemBuilder: (context, index) {
-                        final conv = list[index];
-
-                        return InkWell(
-                          onTap: () async {
-                            // Mark read locally for instant UI response
-                            context.read<ConversationViewmodel>().markAsReadLocally(conv.id);
-                            
-                            // Navigate to chat detail screen
-                            await context.push('/chat/${conv.id}', extra: conv);
-                            
-                            // Refresh list when returning
-                            if (mounted) {
-                              context.read<ConversationViewmodel>().fetchConversations();
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20.0,
-                              vertical: 14.0,
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildAvatar(conv),
-                                const SizedBox(width: 14),
-
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              conv.name,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: context.textPrimary,
-                                                fontSize: 15.5,
-                                                fontWeight: conv.unreadCount > 0
-                                                    ? FontWeight.bold
-                                                    : FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              conv.lastMessage,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: conv.unreadCount > 0
-                                                    ? context.textPrimary
-                                                    : context.textSecondary,
-                                                fontSize: 14,
-                                                height: 1.3,
-                                                fontWeight: conv.unreadCount > 0
-                                                    ? FontWeight.w500
-                                                    : FontWeight.normal,
-                                              ),
-                                            ),
-                                          ),
-
-                                          if (conv.unreadCount > 0)
-                                            Container(
-                                              margin: const EdgeInsets.only(
-                                                left: 10,
-                                              ),
-                                              width: 20,
-                                              height: 20,
-                                              decoration: BoxDecoration(
-                                                color: context.primaryColor,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  '${conv.unreadCount}',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+              // Show active filter name
+              if (_filterType != 'all')
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 5.0,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
                     ),
-            ),
-          ],
+                    decoration: BoxDecoration(
+                      color: context.primaryColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _filterType == 'unread'
+                              ? 'Đang lọc: Chưa đọc'
+                              : 'Đang lọc: Chatbot',
+                          style: TextStyle(
+                            color: context.primaryColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() => _filterType = 'all');
+                          },
+                          child: Icon(
+                            Icons.cancel,
+                            color: context.primaryColor,
+                            size: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // List of conversations for selected tab
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _buildConversationTabList(viewModel, isCompleted: false),
+                    _buildConversationTabList(viewModel, isCompleted: true),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

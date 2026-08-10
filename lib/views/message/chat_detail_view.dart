@@ -97,15 +97,15 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         widget.conversation ??
         Conversation(
           id: widget.conversationId,
-          name: widget.conversationId == 'chatbot'
+          name: widget.conversationId.startsWith('chatbot')
               ? 'Hỗ trợ Drivio'
               : 'Người dùng',
-          avatarUrl: widget.conversationId == 'chatbot'
+          avatarUrl: widget.conversationId.startsWith('chatbot')
               ? 'lib/assets/images/drivio_logo.png'
               : 'lib/assets/images/avatar_duc.png',
           lastMessage: '',
           time: 'Vừa xong',
-          isChatbot: widget.conversationId == 'chatbot',
+          isChatbot: widget.conversationId.startsWith('chatbot'),
           isOnline: true,
         );
 

@@ -35,7 +35,7 @@ class ConversationViewmodel extends ChangeNotifier {
         final ChatbotSession? chatbotSession = await _chatbotService.getChatbotSession();
         if (chatbotSession != null) {
           chatbotConv = Conversation.raw(
-            id: chatbotSession.id.toString(),
+            id: 'chatbot_${chatbotSession.id}',
             status: 1,
             createdAt: chatbotSession.createdAt,
             updatedAt: chatbotSession.updatedAt,
