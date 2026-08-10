@@ -126,7 +126,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
               : 'Người dùng',
           avatarUrl: widget.conversationId.startsWith('chatbot')
               ? 'lib/assets/images/drivio_logo.png'
-              : 'lib/assets/images/avatar_duc.png',
+              : 'lib/assets/images/default-avatar.jpg',
           lastMessage: '',
           time: 'Vừa xong',
           isChatbot: widget.conversationId.startsWith('chatbot'),

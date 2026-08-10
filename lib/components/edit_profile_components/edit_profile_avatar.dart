@@ -42,8 +42,8 @@ class _EditProfileAvatarState extends State<EditProfileAvatar> {
         return AssetImage(avatar);
       }
     }
-    return const NetworkImage(
-      'https://res.cloudinary.com/dfmoftnpw/image/upload/v1775786630/b5b1ad45e85705c2be3030cb2d566925_tplv-tiktokx-cropcenter_1080_1080_lzsdr8.jpg',
+    return const AssetImage(
+      'lib/assets/images/default-avatar.jpg',
     );
   }
 
