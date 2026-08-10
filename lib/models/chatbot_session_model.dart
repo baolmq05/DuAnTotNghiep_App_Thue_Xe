@@ -1,5 +1,5 @@
 class ChatbotMessage {
-  final int id;
+  final String id;
   final String conversation_id;
   final int user_id;
   final String role;
@@ -19,9 +19,7 @@ class ChatbotMessage {
 
   factory ChatbotMessage.fromJson(Map<String, dynamic> json) {
     return ChatbotMessage(
-      id: json['id'] is int 
-          ? json['id'] 
-          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      id: json['id']?.toString() ?? '',
       conversation_id: json['conversation_id']?.toString() ?? '',
       user_id: json['user_id'] is int 
           ? json['user_id'] 
@@ -47,7 +45,7 @@ class ChatbotMessage {
 }
 
 class ChatbotSession {
-  final int id;
+  final String id;
   final int userId;
   final String title;
   final String createdAt;
@@ -65,9 +63,7 @@ class ChatbotSession {
 
   factory ChatbotSession.fromJson(Map<String, dynamic> json) {
     return ChatbotSession(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      id: json['id']?.toString() ?? '',
       userId: json['user_id'] is int
           ? json['user_id']
           : int.tryParse(json['user_id']?.toString() ?? '') ?? 0,

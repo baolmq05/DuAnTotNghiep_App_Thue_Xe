@@ -12,7 +12,7 @@ class HomeRentOutBanner extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         image: const DecorationImage(
-          image: NetworkImage('lib/assets/images/home/dang_ky_chu_xe.png'),
+          image: AssetImage('lib/assets/images/home/dang_ky_chu_xe.png'),
           fit: BoxFit.cover,
         ),
       ),

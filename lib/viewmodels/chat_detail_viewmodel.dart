@@ -20,12 +20,12 @@ class ChatDetailViewModel extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
   String? _errorMessage;
-  int? _chatbotSessionId;
+  String? _chatbotSessionId;
 
   List<ChatMessage> get messages => _messages;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  int? get chatbotSessionId => _chatbotSessionId;
+  String? get chatbotSessionId => _chatbotSessionId;
 
   final WebSocketService _webSocketService = WebSocketService();
   Conversation? _currentConversation;
@@ -132,7 +132,7 @@ class ChatDetailViewModel extends ChangeNotifier {
       _errorMessage = null;
       final responseText = await _chatbotService.sendChatbotMessage(
         message: message,
-        conversationId: _chatbotSessionId?.toString(),
+        conversationId: _chatbotSessionId,
       );
       return responseText;
     } catch (e) {
