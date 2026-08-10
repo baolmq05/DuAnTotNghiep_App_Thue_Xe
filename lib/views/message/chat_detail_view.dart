@@ -161,6 +161,12 @@ class _ChatDetailViewState extends State<ChatDetailView> {
           );
           chatDetailViewModel.messages.add(botMsg);
         }
+
+        // If the session ID was previously null (first message sent), reload the session
+        // to retrieve and bind the backend-generated session ID.
+        if (chatDetailViewModel.chatbotSessionId == null) {
+          await chatDetailViewModel.loadMessagesForConversation(_conv);
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

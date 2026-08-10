@@ -162,7 +162,10 @@ class Conversation {
   }
 
   // --- Các Getters duy trì tương thích ngược với Giao diện (UI) cũ ---
-  String get name => otherUser.name;
+  String get name {
+    if (isChatbot) return 'Chatbot Drivio';
+    return otherUser.name;
+  }
   String get avatarUrl => otherUser.avatar ?? '';
   String get lastMessage => lastMessageObj?.text ?? '';
   String get time {
@@ -179,9 +182,9 @@ class Conversation {
     return updatedAt;
   }
   bool get isChatbot => id.startsWith('chatbot') ||
-                        name.toLowerCase().contains('chatbot') || 
-                        name.toLowerCase().contains('hỗ trợ drivio') || 
-                        name.toLowerCase().contains('trợ lý ai');
+                        otherUser.name.toLowerCase().contains('chatbot') || 
+                        otherUser.name.toLowerCase().contains('hỗ trợ drivio') || 
+                        otherUser.name.toLowerCase().contains('trợ lý ai');
   String? get attachmentImageUrl => car?.image;
   bool get isOnline => status == 1;
 }
