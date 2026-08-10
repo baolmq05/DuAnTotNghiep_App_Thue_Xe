@@ -42,8 +42,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         imageQuality: 80,
       );
       if (image != null) {
+        final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
         final newMsg = ChatMessage(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: tempId,
           senderId: 'me',
           text: '',
           timestamp: DateTime.now(),
@@ -76,6 +77,29 @@ class _ChatDetailViewState extends State<ChatDetailView> {
               _scrollToBottom();
             }
           });
+        } else {
+          try {
+            await chatDetailViewModel.sendImageMessage(
+              conversationId: _conv.id,
+              imageFile: image,
+            );
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Lỗi gửi hình ảnh: $e'),
+                  backgroundColor: errorColor,
+                ),
+              );
+            }
+          } finally {
+            if (mounted) {
+              setState(() {
+                chatDetailViewModel.messages.removeWhere((m) => m.id == tempId);
+              });
+              _scrollToBottom();
+            }
+          }
         }
       }
     } catch (e) {
@@ -262,10 +286,55 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       );
     }
 
-    final colors = _getGradientColors(_conv.name);
+    final bool hasAvatar =
+        _conv.avatarUrl.isNotEmpty &&
+        (_conv.avatarUrl.startsWith('http') ||
+            _conv.avatarUrl.startsWith('assets') ||
+            _conv.avatarUrl.startsWith('lib'));
+
+    Widget avatarWidget;
+    if (hasAvatar) {
+      final bool isNetwork = _conv.avatarUrl.startsWith('http');
+      avatarWidget = ClipOval(
+        child: isNetwork
+            ? Image.network(
+                _conv.avatarUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildPlaceholderAvatar(),
+              )
+            : Image.asset(
+                _conv.avatarUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _buildPlaceholderAvatar(),
+              ),
+      );
+    } else {
+      avatarWidget = _buildPlaceholderAvatar();
+    }
+
     return Container(
       width: 40,
       height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1.0,
+        ),
+      ),
+      child: avatarWidget,
+    );
+  }
+
+  Widget _buildPlaceholderAvatar() {
+    final colors = _getGradientColors(_conv.name);
+    final String initialLetter = _conv.name.isNotEmpty
+        ? _conv.name.split(' ').last[0].toUpperCase()
+        : '?';
+
+    return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -276,7 +345,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       ),
       child: Center(
         child: Text(
-          _conv.name.split(' ').last[0].toUpperCase(),
+          initialLetter,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -522,46 +591,80 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             children: [
               if (!msg.isMe) ...[_buildAvatar(), const SizedBox(width: 8)],
               Flexible(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: msg.isMe
-                        ? context.primaryColor
-                        : context.chatBubbleIncoming,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: msg.isMe
-                          ? const Radius.circular(16)
-                          : const Radius.circular(4),
-                      bottomRight: msg.isMe
-                          ? const Radius.circular(4)
-                          : const Radius.circular(16),
-                    ),
-                  ),
-                  child: msg.imageUrl != null
-                      ? Container(
+                child: msg.imageUrl != null
+                    ? GestureDetector(
+                        onTap: () => _viewImageFull(context, msg.imageUrl!),
+                        child: Container(
                           constraints: const BoxConstraints(
-                            maxWidth: 200,
-                            maxHeight: 200,
+                            maxWidth: 220,
+                            maxHeight: 220,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              )
+                            ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: msg.imageUrl!.startsWith('http') || kIsWeb
-                                ? Image.network(
-                                    msg.imageUrl!,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    File(msg.imageUrl!),
-                                    fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(16),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                msg.imageUrl!.startsWith('http') || kIsWeb
+                                    ? Image.network(
+                                        msg.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        width: 220,
+                                        height: 220,
+                                      )
+                                    : Image.file(
+                                        File(msg.imageUrl!),
+                                        fit: BoxFit.cover,
+                                        width: 220,
+                                        height: 220,
+                                      ),
+                                if (msg.id.startsWith('temp_'))
+                                  Container(
+                                    color: Colors.black38,
+                                    width: 220,
+                                    height: 220,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 3,
+                                      ),
+                                    ),
                                   ),
+                              ],
+                            ),
                           ),
-                        )
-                      : Text(
+                        ),
+                      )
+                    : Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: msg.isMe
+                              ? context.primaryColor
+                              : context.chatBubbleIncoming,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(16),
+                            topRight: const Radius.circular(16),
+                            bottomLeft: msg.isMe
+                                ? const Radius.circular(16)
+                                : const Radius.circular(4),
+                            bottomRight: msg.isMe
+                                ? const Radius.circular(4)
+                                : const Radius.circular(16),
+                          ),
+                        ),
+                        child: Text(
                           msg.text,
                           style: TextStyle(
                             color: msg.isMe ? Colors.white : context.textPrimary,
@@ -569,7 +672,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                             height: 1.3,
                           ),
                         ),
-                ),
+                      ),
               ),
             ],
           ),
@@ -585,6 +688,33 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _viewImageFull(BuildContext context, String imageUrl) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            elevation: 0,
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              panEnabled: true,
+              boundaryMargin: const EdgeInsets.all(20),
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: imageUrl.startsWith('http') || kIsWeb
+                  ? Image.network(imageUrl, fit: BoxFit.contain)
+                  : Image.file(File(imageUrl), fit: BoxFit.contain),
+            ),
+          ),
+        ),
       ),
     );
   }

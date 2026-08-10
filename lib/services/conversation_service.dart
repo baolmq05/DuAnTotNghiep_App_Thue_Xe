@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
 import 'package:duantotnghiep_app_thue_xe/models/chat_message_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/base_service.dart';
@@ -52,16 +54,20 @@ class ConversationService extends BaseService {
           isMe = senderIdInt != otherUserId;
         }
 
+        final isImage = json['type'] == 'image';
+        final String? imageUrl = isImage ? json['text']?.toString() : null;
+
         return ChatMessage(
           id:
               json['id']?.toString() ??
               DateTime.now().millisecondsSinceEpoch.toString(),
           senderId: senderIdInt.toString(),
-          text: json['text']?.toString() ?? json['content']?.toString() ?? '',
+          text: isImage ? '' : (json['text']?.toString() ?? json['content']?.toString() ?? ''),
           timestamp:
               DateTime.tryParse(json['created_at']?.toString() ?? '') ??
               DateTime.now(),
           isMe: isMe,
+          imageUrl: imageUrl,
         );
       }).toList();
     } catch (e) {
@@ -92,12 +98,55 @@ class ConversationService extends BaseService {
             ? json['sender_id']
             : int.tryParse(json['sender_id']?.toString() ?? '') ?? 0;
 
+        final isImage = json['type'] == 'image';
+        final String? imageUrl = isImage ? json['text']?.toString() : null;
+
         return ChatMessage(
           id: json['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
           senderId: senderIdInt.toString(),
-          text: json['text']?.toString() ?? '',
+          text: isImage ? '' : (json['text']?.toString() ?? ''),
           timestamp: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
           isMe: true,
+          imageUrl: imageUrl,
+        );
+      }
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Send an image message
+  Future<ChatMessage?> sendImageMessage({
+    required String conversationId,
+    required dynamic imageFile, // File or XFile
+  }) async {
+    try {
+      final response = await uploadMultipart(
+        'api/messages',
+        fields: {
+          'conversation_id': conversationId,
+          'type': 'image',
+        },
+        xfile: imageFile is XFile ? imageFile : null,
+        file: imageFile is File ? imageFile : null,
+        fileField: 'image',
+        requiresAuth: true,
+      );
+
+      if (response is Map && response['success'] == true && response['message'] != null) {
+        final json = response['message'];
+        final int senderIdInt = json['sender_id'] is int
+            ? json['sender_id']
+            : int.tryParse(json['sender_id']?.toString() ?? '') ?? 0;
+
+        return ChatMessage(
+          id: json['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString(),
+          senderId: senderIdInt.toString(),
+          text: '',
+          timestamp: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+          isMe: true,
+          imageUrl: json['text']?.toString(), // Text field holds the Cloudinary URL
         );
       }
       return null;

@@ -88,18 +88,22 @@ class ChatDetailViewModel extends ChangeNotifier {
 
               final bool isMe = senderIdInt != conversation.otherUser.id;
 
+              final isImage = messageJson['type'] == 'image';
+              final String? imageUrl = isImage ? messageJson['text']?.toString() : null;
+
               final incomingMessage = ChatMessage(
                 id:
                     messageJson['id']?.toString() ??
                     DateTime.now().millisecondsSinceEpoch.toString(),
                 senderId: senderIdInt.toString(),
-                text: messageJson['text']?.toString() ?? '',
+                text: isImage ? '' : (messageJson['text']?.toString() ?? ''),
                 timestamp:
                     DateTime.tryParse(
                       messageJson['created_at']?.toString() ?? '',
                     ) ??
                     DateTime.now(),
                 isMe: isMe,
+                imageUrl: imageUrl,
               );
 
               // Filter duplicates
@@ -148,10 +152,41 @@ class ChatDetailViewModel extends ChangeNotifier {
   }) async {
     try {
       _errorMessage = null;
-      await _conversationService.sendMessage(
+      final sentMsg = await _conversationService.sendMessage(
         conversationId: conversationId,
         text: text,
       );
+      if (sentMsg != null) {
+        final isDuplicate = _messages.any((m) => m.id == sentMsg.id);
+        if (!isDuplicate) {
+          _messages.add(sentMsg);
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> sendImageMessage({
+    required String conversationId,
+    required dynamic imageFile,
+  }) async {
+    try {
+      _errorMessage = null;
+      final sentMsg = await _conversationService.sendImageMessage(
+        conversationId: conversationId,
+        imageFile: imageFile,
+      );
+      if (sentMsg != null) {
+        final isDuplicate = _messages.any((m) => m.id == sentMsg.id);
+        if (!isDuplicate) {
+          _messages.add(sentMsg);
+          notifyListeners();
+        }
+      }
     } catch (e) {
       _errorMessage = e.toString();
       notifyListeners();
