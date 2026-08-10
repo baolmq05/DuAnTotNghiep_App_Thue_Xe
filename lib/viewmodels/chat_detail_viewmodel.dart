@@ -32,6 +32,7 @@ class ChatDetailViewModel extends ChangeNotifier {
   StreamSubscription<Map<String, dynamic>>? _wsSubscription;
 
   Future<void> loadMessagesForConversation(Conversation conversation) async {
+    _messages.clear();
     _isLoading = true;
     _errorMessage = null;
     _chatbotSessionId = null;

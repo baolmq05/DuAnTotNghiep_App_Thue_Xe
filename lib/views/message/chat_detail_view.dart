@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:duantotnghiep_app_thue_xe/models/chat_message_model.dart';
 import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
@@ -576,6 +578,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   }
 
   Widget _buildMessageBubble(ChatMessage msg) {
+    // Thử phân tích cú pháp dữ liệu gợi ý xe (JSON hoặc Markdown)
+    final carSuggestionsData = !msg.isMe ? _tryParseCarSuggestions(msg.text) : null;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Column(
@@ -591,88 +596,90 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             children: [
               if (!msg.isMe) ...[_buildAvatar(), const SizedBox(width: 8)],
               Flexible(
-                child: msg.imageUrl != null
-                    ? GestureDetector(
-                        onTap: () => _viewImageFull(context, msg.imageUrl!),
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            maxWidth: 220,
-                            maxHeight: 220,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              )
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                msg.imageUrl!.startsWith('http') || kIsWeb
-                                    ? Image.network(
-                                        msg.imageUrl!,
-                                        fit: BoxFit.cover,
+                child: carSuggestionsData != null
+                    ? _buildCarSuggestions(carSuggestionsData)
+                    : msg.imageUrl != null
+                        ? GestureDetector(
+                            onTap: () => _viewImageFull(context, msg.imageUrl!),
+                            child: Container(
+                              constraints: const BoxConstraints(
+                                maxWidth: 220,
+                                maxHeight: 220,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    msg.imageUrl!.startsWith('http') || kIsWeb
+                                        ? Image.network(
+                                            msg.imageUrl!,
+                                            fit: BoxFit.cover,
+                                            width: 220,
+                                            height: 220,
+                                          )
+                                        : Image.file(
+                                            File(msg.imageUrl!),
+                                            fit: BoxFit.cover,
+                                            width: 220,
+                                            height: 220,
+                                          ),
+                                    if (msg.id.startsWith('temp_'))
+                                      Container(
+                                        color: Colors.black38,
                                         width: 220,
                                         height: 220,
-                                      )
-                                    : Image.file(
-                                        File(msg.imageUrl!),
-                                        fit: BoxFit.cover,
-                                        width: 220,
-                                        height: 220,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 3,
+                                          ),
+                                        ),
                                       ),
-                                if (msg.id.startsWith('temp_'))
-                                  Container(
-                                    color: Colors.black38,
-                                    width: 220,
-                                    height: 220,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 3,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: msg.isMe
+                                  ? context.primaryColor
+                                  : context.chatBubbleIncoming,
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(16),
+                                topRight: const Radius.circular(16),
+                                bottomLeft: msg.isMe
+                                    ? const Radius.circular(16)
+                                    : const Radius.circular(4),
+                                bottomRight: msg.isMe
+                                    ? const Radius.circular(4)
+                                    : const Radius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              msg.text,
+                              style: TextStyle(
+                                color: msg.isMe ? Colors.white : context.textPrimary,
+                                fontSize: 15,
+                                height: 1.3,
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                    : Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: msg.isMe
-                              ? context.primaryColor
-                              : context.chatBubbleIncoming,
-                          borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(16),
-                            topRight: const Radius.circular(16),
-                            bottomLeft: msg.isMe
-                                ? const Radius.circular(16)
-                                : const Radius.circular(4),
-                            bottomRight: msg.isMe
-                                ? const Radius.circular(4)
-                                : const Radius.circular(16),
-                          ),
-                        ),
-                        child: Text(
-                          msg.text,
-                          style: TextStyle(
-                            color: msg.isMe ? Colors.white : context.textPrimary,
-                            fontSize: 15,
-                            height: 1.3,
-                          ),
-                        ),
-                      ),
               ),
             ],
           ),
@@ -690,6 +697,373 @@ class _ChatDetailViewState extends State<ChatDetailView> {
         ],
       ),
     );
+  }
+
+  Widget _buildCarSuggestions(Map<String, dynamic> data) {
+    final message = data['message']?.toString() ?? 'Dưới đây là một số gợi ý xe cho bạn:';
+    final carsList = data['cars'] as List<dynamic>? ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Bong bóng hiển thị thông điệp văn bản từ AI
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: context.chatBubbleIncoming,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+              bottomLeft: Radius.circular(4),
+              bottomRight: Radius.circular(16),
+            ),
+          ),
+          child: Text(
+            message,
+            style: TextStyle(
+              color: context.textPrimary,
+              fontSize: 15,
+              height: 1.3,
+            ),
+          ),
+        ),
+        if (carsList.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          // Danh sách xe cuộn ngang cực kỳ mượt mà
+          SizedBox(
+            height: 175,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: carsList.length,
+              itemBuilder: (context, index) {
+                final car = carsList[index] as Map<String, dynamic>;
+                final carId = car['id'] as int? ?? 0;
+                final carName = car['name']?.toString() ?? 'Xe Drivio';
+                final thumbnail = car['thumbnail']?.toString() ?? '';
+                final price = car['price'] is num ? (car['price'] as num).toInt() : 0;
+                final originalPrice = car['original_price'] is num ? (car['original_price'] as num).toInt() : 0;
+                final location = car['location']?.toString() ?? '';
+                final owner = car['owner']?.toString() ?? '';
+                final features = (car['features'] as List<dynamic>?)
+                        ?.map((e) => e.toString())
+                        .toList() ??
+                    [];
+
+                final hasDiscount = originalPrice > price;
+
+                return GestureDetector(
+                  onTap: () => context.push('/car_detail/$carId'),
+                  child: Container(
+                    width: 300,
+                    margin: const EdgeInsets.only(right: 12, bottom: 4),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: context.cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: context.border, width: 0.8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // CỘT 1: HÌNH ẢNH XE (Bên trái, full chiều cao card)
+                        SizedBox(
+                          width: 105,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: _buildCarThumbnailWidget(thumbnail),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+
+                        // CỘT 2: THÔNG TIN CHI TIẾT XE (Bên phải)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    carName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: context.textPrimary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Chủ xe: $owner',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: context.textSecondary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // Dòng Badge: 3 tính năng nổi bật (car_features)
+                                  Wrap(
+                                    spacing: 4,
+                                    runSpacing: 2,
+                                    children: [
+                                      for (var feature in features.take(3))
+                                        _buildMiniBadge(context, feature.trim()),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Địa chỉ xe
+                                  if (location.isNotEmpty)
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on_outlined,
+                                          size: 11,
+                                          color: context.textSecondary,
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Expanded(
+                                          child: Text(
+                                            location,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: context.textSecondary,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  const SizedBox(height: 4),
+                                  // Giá thuê xe & Nút đặt
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Wrap(
+                                          alignment: WrapAlignment.start,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          spacing: 4,
+                                          children: [
+                                            Text(
+                                              '${_formatCurrency(price)}/ngày',
+                                              style: TextStyle(
+                                                color: context.primaryColor,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            if (hasDiscount)
+                                              Text(
+                                                _formatCurrency(originalPrice),
+                                                style: TextStyle(
+                                                  color: context.textSecondary,
+                                                  fontSize: 10,
+                                                  decoration: TextDecoration.lineThrough,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        'Thuê ngay',
+                                        style: TextStyle(
+                                          color: context.primaryColor,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCarThumbnailWidget(String thumbnail) {
+    if (thumbnail.isNotEmpty &&
+        (thumbnail.startsWith('http://') ||
+            thumbnail.startsWith('https://') ||
+            thumbnail.startsWith('assets') ||
+            thumbnail.startsWith('lib/'))) {
+      if (thumbnail.startsWith('http://') || thumbnail.startsWith('https://')) {
+        return Image.network(
+          thumbnail,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildCarPlaceholderImage(),
+        );
+      } else {
+        return Image.asset(
+          thumbnail,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildCarPlaceholderImage(),
+        );
+      }
+    }
+    return _buildCarPlaceholderImage();
+  }
+
+  Widget _buildCarPlaceholderImage() {
+    return Image.network(
+      'https://img1.oto.com.vn/2024/01/18/toyota-wigo-2023-ts4-7d9b-429a_wm.webp',
+      width: 85,
+      height: 85,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        width: 85,
+        height: 85,
+        color: context.primaryColor.withValues(alpha: 0.08),
+        child: Center(
+          child: Icon(
+            Icons.directions_car_filled_rounded,
+            color: context.primaryColor,
+            size: 32,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniBadge(BuildContext context, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      decoration: BoxDecoration(
+        color: context.scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: context.border, width: 0.5),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: context.textPrimary,
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  String _formatCurrency(int value) {
+    final format = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+    return format.format(value).replaceAll('₫', 'đ');
+  }
+
+  Map<String, dynamic>? _tryParseCarSuggestions(String text) {
+    if (text.trim().isEmpty) return null;
+    final cleaned = text.trim();
+
+    // 1. Thử parse dạng JSON (trực tiếp hoặc nằm trong ```json ... ```)
+    try {
+      String jsonStr = cleaned;
+      if (jsonStr.contains('```json')) {
+        jsonStr = jsonStr.split('```json').last.split('```').first.trim();
+      } else if (jsonStr.contains('```')) {
+        jsonStr = jsonStr.split('```')[1].trim();
+      }
+
+      final startIdx = jsonStr.indexOf('{');
+      final endIdx = jsonStr.lastIndexOf('}');
+      if (startIdx != -1 && endIdx > startIdx) {
+        final candidate = jsonStr.substring(startIdx, endIdx + 1);
+        final decoded = jsonDecode(candidate);
+        if (decoded is Map<String, dynamic> && decoded.containsKey('cars')) {
+          return decoded;
+        }
+      }
+    } catch (_) {}
+
+    // 2. Thử parse dạng Markdown (cho các tin nhắn văn bản từ AI chứa danh sách xe)
+    if (cleaned.contains('vehicles/') || cleaned.contains('Chi tiết:') || cleaned.contains('Giá thuê:')) {
+      try {
+        final List<Map<String, dynamic>> cars = [];
+        final lines = cleaned.split('\n');
+        String introMessage = 'Dưới đây là các xe phù hợp với yêu cầu của bạn:';
+
+        for (var line in lines) {
+          final t = line.trim();
+          if (t.isNotEmpty && !t.startsWith('**') && !t.startsWith('-')) {
+            introMessage = t;
+            break;
+          }
+        }
+
+        // Tách theo mẫu **1. hoặc các khối danh sách xe
+        final carBlocks = cleaned.split(RegExp(r'\n(?=\*\*\d+\.)'));
+        for (var block in carBlocks) {
+          final nameMatch = RegExp(r'\*\*\d+\.\s*(.*?)\*\*').firstMatch(block);
+          final idMatch = RegExp(r'vehicles\/(\d+)').firstMatch(block);
+
+          if (nameMatch != null || idMatch != null) {
+            final name = nameMatch?.group(1)?.trim() ?? 'Xe Drivio';
+            final carId = int.tryParse(idMatch?.group(1) ?? '0') ?? 0;
+
+            final ownerMatch = RegExp(r'-\s*\*\*Chủ xe:\*\*\s*(.*)').firstMatch(block);
+            final priceMatch = RegExp(r'-\s*\*\*Giá thuê:\*\*\s*([\d\.]+)').firstMatch(block);
+            final origPriceMatch = RegExp(r'-\s*\*\*Giá gốc:\*\*\s*~~([\d\.]+)').firstMatch(block);
+
+            final owner = ownerMatch?.group(1)?.trim() ?? '';
+            final priceStr = priceMatch?.group(1)?.replaceAll('.', '') ?? '0';
+            final origPriceStr = origPriceMatch?.group(1)?.replaceAll('.', '') ?? '0';
+
+            final price = int.tryParse(priceStr) ?? 0;
+            final origPrice = int.tryParse(origPriceStr) ?? price;
+
+            cars.add({
+              'id': carId,
+              'name': name,
+              'owner': owner,
+              'price': price,
+              'original_price': origPrice,
+              'thumbnail': 'https://img1.oto.com.vn/2024/01/18/toyota-wigo-2023-ts4-7d9b-429a_wm.webp',
+              'location': '',
+            });
+          }
+        }
+
+        if (cars.isNotEmpty) {
+          return {
+            'status': 'success',
+            'message': introMessage,
+            'cars': cars,
+          };
+        }
+      } catch (_) {}
+    }
+
+    return null;
   }
 
   void _viewImageFull(BuildContext context, String imageUrl) {

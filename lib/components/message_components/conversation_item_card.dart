@@ -114,15 +114,42 @@ class ConversationItemCard extends StatelessWidget {
     );
   }
 
+  /// Format last message for preview: replace raw JSON / image URLs with friendly text
+  String _formatLastMessage(String message) {
+    final trimmed = message.trim();
+
+    // JSON car suggestions from AI agent
+    if (trimmed.startsWith('{') && trimmed.contains('"cars"')) {
+      return 'Đã gợi ý xe cho bạn';
+    }
+
+    // Image URL (Cloudinary or any http image link)
+    final imageExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.bmp',
+      '.svg',
+    ];
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      final lowerUrl = trimmed.toLowerCase();
+      if (imageExtensions.any((ext) => lowerUrl.contains(ext))) {
+        return 'Đã gửi một hình ảnh';
+      }
+      return 'Đã gửi một liên kết';
+    }
+
+    return message;
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
-          vertical: 14.0,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -158,7 +185,7 @@ class ConversationItemCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          conversation.lastMessage,
+                          _formatLastMessage(conversation.lastMessage),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -176,9 +203,7 @@ class ConversationItemCard extends StatelessWidget {
 
                       if (conversation.unreadCount > 0)
                         Container(
-                          margin: const EdgeInsets.only(
-                            left: 10,
-                          ),
+                          margin: const EdgeInsets.only(left: 10),
                           width: 20,
                           height: 20,
                           decoration: BoxDecoration(
