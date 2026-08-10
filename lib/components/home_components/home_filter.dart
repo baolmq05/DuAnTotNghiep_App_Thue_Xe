@@ -663,8 +663,9 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
                 margin: const EdgeInsets.only(top: 8),
                 constraints: const BoxConstraints(maxHeight: 200), // Giới hạn chiều cao để danh sách tự cuộn gọn gàng
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardColor,
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: context.border, width: 0.5),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
