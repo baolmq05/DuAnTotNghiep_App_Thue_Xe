@@ -4,7 +4,7 @@ import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
 
 class OwnerOrderViewModel extends ChangeNotifier {
   OwnerOrderViewModel({TripService? tripService})
-      : _tripService = tripService ?? TripService();
+    : _tripService = tripService ?? TripService();
 
   final TripService _tripService;
 
@@ -20,11 +20,51 @@ class OwnerOrderViewModel extends ChangeNotifier {
   String get errorMessage => _errorMessage;
   int get currentTabIndex => _currentTabIndex;
 
-  /// Đếm số lượng đơn hàng theo từng Tab index
+  static const List<String> tabTitles = [
+    'Tất cả',
+    'Chờ duyệt',
+    'Chờ thanh toán',
+    'Đã xác nhận',
+    'Đang di chuyển',
+    'Hoàn tất',
+    'Chủ xe hủy',
+    'Người thuê hủy',
+    'Chờ trả xe',
+  ];
+
+  List<int> getStatusCodesForTab(int tabIndex) {
+    switch (tabIndex) {
+      case 1:
+        return [0];
+      case 2:
+        return [1];
+      case 3:
+        return [2];
+      case 4:
+        return [3];
+      case 5:
+        return [4];
+      case 6:
+        return [6];
+      case 7:
+        return [5];
+      case 8:
+        return [7, 8];
+      case 0:
+      default:
+        return const [];
+    }
+  }
+
+  int getCountForTrips(List<TripModel> trips, int tabIndex) {
+    if (tabIndex == 0) return trips.length;
+    final statuses = getStatusCodesForTab(tabIndex);
+    if (statuses.isEmpty) return 0;
+    return trips.where((trip) => statuses.contains(trip.status)).length;
+  }
+
   int getCountForTab(int tabIndex) {
-    if (tabIndex == 0) return _allTrips.length;
-    final targetStatus = _getStatusForTab(tabIndex);
-    return _allTrips.where((trip) => trip.status == targetStatus).length;
+    return getCountForTrips(_allTrips, tabIndex);
   }
 
   Future<void> fetchOwnerTrips() async {
@@ -35,17 +75,19 @@ class OwnerOrderViewModel extends ChangeNotifier {
     try {
       final trips = await _tripService.getOwnerTrips();
 
-      final enrichedTrips = await Future.wait(trips.map((trip) async {
-        try {
-          final detail = await _tripService.getTripDetail(trip.id);
-          if (detail != null && detail.car != null) {
-            return detail;
+      final enrichedTrips = await Future.wait(
+        trips.map((trip) async {
+          try {
+            final detail = await _tripService.getTripDetail(trip.id);
+            if (detail != null && detail.car != null) {
+              return detail;
+            }
+          } catch (e) {
+            debugPrint('Lỗi fetch detail cho trip ${trip.id}: $e');
           }
-        } catch (e) {
-          debugPrint('Lỗi fetch detail cho trip ${trip.id}: $e');
-        }
-        return trip;
-      }));
+          return trip;
+        }),
+      );
 
       _allTrips.clear();
       _allTrips.addAll(enrichedTrips);
@@ -69,36 +111,18 @@ class OwnerOrderViewModel extends ChangeNotifier {
       return;
     }
 
-    final targetStatus = _getStatusForTab(tabIndex);
+    final statuses = getStatusCodesForTab(tabIndex);
+    if (statuses.isEmpty) {
+      notifyListeners();
+      return;
+    }
+
     for (final trip in _allTrips) {
-      if (trip.status == targetStatus) {
+      if (statuses.contains(trip.status)) {
         _filteredTrips.add(trip);
       }
     }
 
     notifyListeners();
-  }
-
-  int _getStatusForTab(int tabIndex) {
-    switch (tabIndex) {
-      case 1:
-        return 0; // Chờ duyệt
-      case 2:
-        return 1; // Chờ thanh toán
-      case 3:
-        return 2; // Đã xác nhận / Đã cọc
-      case 4:
-        return 3; // Đang di chuyển
-      case 5:
-        return 4; // Hoàn tất
-      case 6:
-        return 6; // Chủ xe hủy
-      case 7:
-        return 5; // Người thuê hủy
-      case 8:
-        return 8; // Chờ trả xe
-      default:
-        return 0;
-    }
   }
 }

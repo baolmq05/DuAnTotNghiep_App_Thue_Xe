@@ -5,15 +5,15 @@ import 'package:go_router/go_router.dart';
 
 class OrderDetailOwnerCard extends StatelessWidget {
   final TripModel trip;
-  final OwnerModel owner;
+  final TripRenterInfo renter;
   final bool isCreatingChat;
-  final Function(TripModel, OwnerModel) onStartChat;
-  final Function(OwnerModel) onCall;
+  final Function(TripModel, TripRenterInfo) onStartChat;
+  final Function(TripRenterInfo) onCall;
 
   const OrderDetailOwnerCard({
     super.key,
     required this.trip,
-    required this.owner,
+    required this.renter,
     required this.isCreatingChat,
     required this.onStartChat,
     required this.onCall,
@@ -21,7 +21,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? avatarUrl = owner.avatar;
+    String? avatarUrl = renter.avatar;
     if (avatarUrl != null &&
         avatarUrl.isNotEmpty &&
         !avatarUrl.startsWith('http')) {
@@ -29,6 +29,12 @@ class OrderDetailOwnerCard extends StatelessWidget {
     }
 
     final bool isPaid = trip.status >= 2 && trip.status <= 4;
+    final ratingText = renter.rating > 0
+        ? renter.rating.toStringAsFixed(1)
+        : '0.0';
+    final reviewText = renter.reviewsCount > 0
+        ? '(${renter.reviewsCount} đánh giá)'
+        : '(Chưa có đánh giá)';
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -40,7 +46,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Chủ xe',
+            'Khách thuê',
             style: TextStyle(
               color: context.textPrimary,
               fontWeight: FontWeight.bold,
@@ -51,7 +57,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () =>
-                    context.push('/owner-profile/${owner.id}?isOwner=true'),
+                    context.push('/owner-profile/${renter.id}?isOwner=false'),
                 child: CircleAvatar(
                   radius: 25,
                   backgroundColor: Colors.grey.shade200,
@@ -75,13 +81,13 @@ class OrderDetailOwnerCard extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () =>
-                      context.push('/owner-profile/${owner.id}?isOwner=true'),
+                      context.push('/owner-profile/${renter.id}?isOwner=false'),
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        owner.name,
+                        renter.name,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
@@ -90,13 +96,17 @@ class OrderDetailOwnerCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(Icons.star, color: context.primaryColor, size: 16),
-                          const Text(
-                            ' 4.9 ',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          Icon(
+                            Icons.star,
+                            color: context.primaryColor,
+                            size: 16,
                           ),
                           Text(
-                            '(86 đánh giá)',
+                            ' $ratingText ',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            reviewText,
                             style: TextStyle(
                               color: context.textSecondary,
                               fontSize: 13,
@@ -137,7 +147,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
                               ),
                         onPressed: isCreatingChat
                             ? null
-                            : () => onStartChat(trip, owner),
+                            : () => onStartChat(trip, renter),
                         hoverColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
@@ -159,7 +169,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
                         color: context.primaryColor,
                         size: 20,
                       ),
-                      onPressed: () => onCall(owner),
+                      onPressed: () => onCall(renter),
                       hoverColor: Colors.transparent,
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,

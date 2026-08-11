@@ -17,18 +17,7 @@ class OwnerOrderView extends StatefulWidget {
 class _OwnerOrderViewState extends State<OwnerOrderView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  final List<String> _tabTitles = const [
-    "Tất cả",
-    "Chờ duyệt",
-    "Chờ thanh toán",
-    "Đã xác nhận",
-    "Đang di chuyển",
-    "Hoàn tất",
-    "Chủ xe hủy",
-    "Người thuê hủy",
-    "Chờ trả xe",
-  ];
+  final List<String> _tabTitles = OwnerOrderViewModel.tabTitles;
 
   @override
   void initState() {
@@ -128,7 +117,9 @@ class _OwnerOrderViewState extends State<OwnerOrderView>
                             decoration: BoxDecoration(
                               color: _tabController.index == index
                                   ? Colors.white.withValues(alpha: 0.25)
-                                  : context.primaryColor.withValues(alpha: 0.12),
+                                  : context.primaryColor.withValues(
+                                      alpha: 0.12,
+                                    ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -160,67 +151,66 @@ class _OwnerOrderViewState extends State<OwnerOrderView>
                     ),
                   )
                 : viewModel.errorMessage.isNotEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              viewModel.errorMessage,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: () =>
-                                  viewModel.fetchOwnerTrips(),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: context.primaryColor,
-                              ),
-                              child: const Text(
-                                'Thử lại',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          viewModel.errorMessage,
+                          style: const TextStyle(color: Colors.red),
                         ),
-                      )
-                    : viewModel.filteredTrips.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.assignment_late_outlined,
-                                  size: 48,
-                                  color: context.textSecondary.withValues(alpha: 0.5),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'Không tìm thấy đơn cho thuê nào.',
-                                  style: TextStyle(
-                                    color: context.textSecondary,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () async => viewModel.fetchOwnerTrips(),
-                            color: context.primaryColor,
-                            child: ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: viewModel.filteredTrips.length,
-                              itemBuilder: (context, index) {
-                                final trip = viewModel.filteredTrips[index];
-                                return OrderItemCard(
-                                  trip: trip,
-                                  onTap: () {
-                                    context.push('/order-detail/${trip.id}');
-                                  },
-                                );
-                              },
-                            ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () => viewModel.fetchOwnerTrips(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: context.primaryColor,
                           ),
+                          child: const Text(
+                            'Thử lại',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : viewModel.filteredTrips.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.assignment_late_outlined,
+                          size: 48,
+                          color: context.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Không tìm thấy đơn cho thuê nào.',
+                          style: TextStyle(
+                            color: context.textSecondary,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async => viewModel.fetchOwnerTrips(),
+                    color: context.primaryColor,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: viewModel.filteredTrips.length,
+                      itemBuilder: (context, index) {
+                        final trip = viewModel.filteredTrips[index];
+                        return OrderItemCard(
+                          trip: trip,
+                          onTap: () {
+                            context.push('/owner-order-detail/${trip.id}');
+                          },
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),

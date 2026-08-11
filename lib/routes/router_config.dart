@@ -37,6 +37,8 @@ import 'package:duantotnghiep_app_thue_xe/views/wallet/wallet_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/owner/owner_order_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/owner/owner_tab_wrapper_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_order_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_order_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/views/owner/owner_order_detail_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/car/create_car_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/create_car_viewmodel.dart';
 
@@ -242,6 +244,18 @@ final drivioRouter = GoRouter(
         return ChangeNotifierProvider(
           create: (_) => OwnerOrderViewModel(),
           child: const OwnerOrderView(),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/owner-order-detail/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final idStr = state.pathParameters['id']!;
+        final id = int.tryParse(idStr) ?? 0;
+        return ChangeNotifierProvider(
+          create: (_) => OwnerOrderDetailViewModel(),
+          child: OwnerOrderDetailView(orderId: id),
         );
       },
     ),

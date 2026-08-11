@@ -28,7 +28,7 @@ class ProfileCard extends StatelessWidget {
     final String displayName =
         (u != null && u.name.trim().isNotEmpty) ? u.name : 'Khách hàng';
     final int tripsCount = u?.tripsCount ?? 0;
-    final double rating = u?.rating ?? 5.0;
+    final double rating = u?.rating ?? 0.0;
 
     return Container(
       padding: const EdgeInsets.all(16.0),

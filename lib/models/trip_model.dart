@@ -23,15 +23,29 @@ class TripReviewModel {
 
   factory TripReviewModel.fromJson(Map<String, dynamic> json) {
     return TripReviewModel(
-      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
-      tripId: json['trip_id'] is int ? json['trip_id'] as int : int.tryParse(json['trip_id']?.toString() ?? '') ?? 0,
-      reviewerId: json['reviewer_id'] is int ? json['reviewer_id'] as int : int.tryParse(json['reviewer_id']?.toString() ?? '') ?? 0,
-      targetId: json['target_id'] is int ? json['target_id'] as int : int.tryParse(json['target_id']?.toString() ?? '') ?? 0,
-      carId: json['car_id'] is int ? json['car_id'] as int : int.tryParse(json['car_id']?.toString() ?? ''),
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      tripId: json['trip_id'] is int
+          ? json['trip_id'] as int
+          : int.tryParse(json['trip_id']?.toString() ?? '') ?? 0,
+      reviewerId: json['reviewer_id'] is int
+          ? json['reviewer_id'] as int
+          : int.tryParse(json['reviewer_id']?.toString() ?? '') ?? 0,
+      targetId: json['target_id'] is int
+          ? json['target_id'] as int
+          : int.tryParse(json['target_id']?.toString() ?? '') ?? 0,
+      carId: json['car_id'] is int
+          ? json['car_id'] as int
+          : int.tryParse(json['car_id']?.toString() ?? ''),
       rating: double.tryParse(json['rating']?.toString() ?? '0') ?? 0.0,
       comment: json['comment']?.toString(),
-      reviewType: json['review_type'] is int ? json['review_type'] as int : int.tryParse(json['review_type']?.toString() ?? '0') ?? 0,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
+      reviewType: json['review_type'] is int
+          ? json['review_type'] as int
+          : int.tryParse(json['review_type']?.toString() ?? '0') ?? 0,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
     );
   }
 }
@@ -40,7 +54,8 @@ class TripExtensionModel {
   final int id;
   final int tripId;
   final double extensionAmount;
-  final int status; // 0: Chưa gia hạn, 1: Chờ duyệt, 2: Chờ thanh toán, 3: Đã gia hạn, 4: Bị từ chối
+  final int
+  status; // 0: Chưa gia hạn, 1: Chờ duyệt, 2: Chờ thanh toán, 3: Đã gia hạn, 4: Bị từ chối
   final String? startDate;
   final String? endDate;
   final int? extendedDays;
@@ -61,17 +76,28 @@ class TripExtensionModel {
 
   factory TripExtensionModel.fromJson(Map<String, dynamic> json) {
     return TripExtensionModel(
-      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
-      tripId: json['trip_id'] is int ? json['trip_id'] as int : int.tryParse(json['trip_id']?.toString() ?? '') ?? 0,
-      extensionAmount: double.tryParse(json['extension_amount']?.toString() ?? '0') ?? 0.0,
-      status: json['status'] is int ? json['status'] as int : int.tryParse(json['status']?.toString() ?? '0') ?? 0,
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      tripId: json['trip_id'] is int
+          ? json['trip_id'] as int
+          : int.tryParse(json['trip_id']?.toString() ?? '') ?? 0,
+      extensionAmount:
+          double.tryParse(json['extension_amount']?.toString() ?? '0') ?? 0.0,
+      status: json['status'] is int
+          ? json['status'] as int
+          : int.tryParse(json['status']?.toString() ?? '0') ?? 0,
       startDate: json['start_date']?.toString(),
       endDate: json['end_date']?.toString(),
       extendedDays: json['extended_days'] is int
           ? json['extended_days'] as int
           : int.tryParse(json['extended_days']?.toString() ?? ''),
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'].toString())
+          : null,
     );
   }
 
@@ -93,6 +119,55 @@ class TripExtensionModel {
   }
 }
 
+class TripRenterInfo {
+  final int id;
+  final String name;
+  final String? avatar;
+  final String? phone;
+  final double rating;
+  final int reviewsCount;
+
+  TripRenterInfo({
+    required this.id,
+    required this.name,
+    this.avatar,
+    this.phone,
+    this.rating = 0.0,
+    this.reviewsCount = 0,
+  });
+
+  factory TripRenterInfo.fromJson(Map<String, dynamic> json) {
+    return TripRenterInfo(
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? 'Khách thuê',
+      avatar: json['avatar']?.toString(),
+      phone: json['phone']?.toString(),
+      rating:
+          double.tryParse(
+            json['rating']?.toString() ??
+                json['reviews_avg_rating']?.toString() ??
+                json['avg_rating']?.toString() ??
+                json['average_rating']?.toString() ??
+                '0',
+          ) ??
+          0.0,
+      reviewsCount: json['reviews_count'] is int
+          ? json['reviews_count'] as int
+          : (json['review_count'] is int
+                ? json['review_count'] as int
+                : int.tryParse(
+                        json['reviews_count']?.toString() ??
+                            json['review_count']?.toString() ??
+                            json['reviewsCount']?.toString() ??
+                            '0',
+                      ) ??
+                      0),
+    );
+  }
+}
+
 class TripModel {
   final int id;
   final double cost;
@@ -106,6 +181,7 @@ class TripModel {
   final DateTime? createdAt;
   final int carId;
   final int userId;
+  final TripRenterInfo? renter;
   final String? deliveryAddress;
   final String? deliveryLocation;
   String? statusText;
@@ -127,6 +203,7 @@ class TripModel {
     this.createdAt,
     required this.carId,
     required this.userId,
+    this.renter,
     this.deliveryAddress,
     this.deliveryLocation,
     this.statusText,
@@ -144,15 +221,17 @@ class TripModel {
       parsedCar = CarModel.fromJson(json);
     }
 
-    if (parsedCar.images.isEmpty || parsedCar.images.every((img) => img.imageUrl.isEmpty)) {
-      final topImage = json['car_image']?.toString() ??
+    if (parsedCar.images.isEmpty ||
+        parsedCar.images.every((img) => img.imageUrl.isEmpty)) {
+      final topImage =
+          json['car_image']?.toString() ??
           json['car_images']?.toString() ??
           json['image_url']?.toString() ??
           json['image']?.toString() ??
           json['thumbnail']?.toString();
       if (topImage != null && topImage.isNotEmpty) {
         final List<CarImageModel> newImages = [
-          CarImageModel(id: 0, isThumbnail: 1, imageUrl: topImage)
+          CarImageModel(id: 0, isThumbnail: 1, imageUrl: topImage),
         ];
         parsedCar = CarModel(
           id: parsedCar.id,
@@ -182,7 +261,8 @@ class TripModel {
               double.tryParse(txn['amount']?.toString() ?? '0') ?? 0.0;
         }
       }
-    } else if (json['pending_balances'] != null && json['pending_balances'] is List) {
+    } else if (json['pending_balances'] != null &&
+        json['pending_balances'] is List) {
       for (var pb in json['pending_balances']) {
         if (pb is Map<String, dynamic>) {
           parsedPaidAmount +=
@@ -195,8 +275,11 @@ class TripModel {
 
     // Parse latest_extension
     TripExtensionModel? parsedExtension;
-    if (json['latest_extension'] != null && json['latest_extension'] is Map<String, dynamic>) {
-      parsedExtension = TripExtensionModel.fromJson(json['latest_extension'] as Map<String, dynamic>);
+    if (json['latest_extension'] != null &&
+        json['latest_extension'] is Map<String, dynamic>) {
+      parsedExtension = TripExtensionModel.fromJson(
+        json['latest_extension'] as Map<String, dynamic>,
+      );
     }
 
     // Parse reviews
@@ -208,24 +291,63 @@ class TripModel {
           .toList();
     }
 
+    final renterJson = json['renter'] is Map<String, dynamic>
+        ? json['renter'] as Map<String, dynamic>
+        : (json['customer'] is Map<String, dynamic>
+              ? json['customer'] as Map<String, dynamic>
+              : (json['user'] is Map<String, dynamic>
+                    ? json['user'] as Map<String, dynamic>
+                    : null));
+
     return TripModel(
-      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
-      cost: double.tryParse(json['cost']?.toString() ?? json['total_cost']?.toString() ?? json['price']?.toString() ?? '0') ?? 0.0,
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      cost:
+          double.tryParse(
+            json['cost']?.toString() ??
+                json['total_cost']?.toString() ??
+                json['price']?.toString() ??
+                '0',
+          ) ??
+          0.0,
       discountAmount:
           double.tryParse(json['discount_amount']?.toString() ?? '0') ?? 0.0,
       deliveryFee:
           double.tryParse(json['delivery_fee']?.toString() ?? '0') ?? 0.0,
       paidAmount: parsedPaidAmount,
-      status: json['status'] is int ? json['status'] as int : int.tryParse(json['status']?.toString() ?? '') ?? 0,
-      tripType: json['trip_type'] is int ? json['trip_type'] as int : int.tryParse(json['trip_type']?.toString() ?? '') ?? 0,
-      startAt: json['start_at'] != null ? DateTime.tryParse(json['start_at'].toString()) ?? DateTime.now() : DateTime.now(),
-      endAt: json['end_at'] != null ? DateTime.tryParse(json['end_at'].toString()) ?? DateTime.now() : DateTime.now(),
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
-      carId: json['car_id'] is int ? json['car_id'] as int : int.tryParse(json['car_id']?.toString() ?? '') ?? 0,
-      userId: json['user_id'] is int ? json['user_id'] as int : int.tryParse(json['user_id']?.toString() ?? '') ?? 0,
-      deliveryAddress: json['delivery_address']?.toString() ?? json['address']?.toString() ?? json['pickup_address']?.toString(),
-      deliveryLocation: json['delivery_location']?.toString() ?? json['location']?.toString() ?? json['pickup_location']?.toString(),
-      statusText: json['status_text']?.toString() ?? json['status_name']?.toString(),
+      status: json['status'] is int
+          ? json['status'] as int
+          : int.tryParse(json['status']?.toString() ?? '') ?? 0,
+      tripType: json['trip_type'] is int
+          ? json['trip_type'] as int
+          : int.tryParse(json['trip_type']?.toString() ?? '') ?? 0,
+      startAt: json['start_at'] != null
+          ? DateTime.tryParse(json['start_at'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      endAt: json['end_at'] != null
+          ? DateTime.tryParse(json['end_at'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
+          : null,
+      carId: json['car_id'] is int
+          ? json['car_id'] as int
+          : int.tryParse(json['car_id']?.toString() ?? '') ?? 0,
+      userId: json['user_id'] is int
+          ? json['user_id'] as int
+          : int.tryParse(json['user_id']?.toString() ?? '') ?? 0,
+      renter: renterJson != null ? TripRenterInfo.fromJson(renterJson) : null,
+      deliveryAddress:
+          json['delivery_address']?.toString() ??
+          json['address']?.toString() ??
+          json['pickup_address']?.toString(),
+      deliveryLocation:
+          json['delivery_location']?.toString() ??
+          json['location']?.toString() ??
+          json['pickup_location']?.toString(),
+      statusText:
+          json['status_text']?.toString() ?? json['status_name']?.toString(),
       tripTypeText: json['trip_type_text']?.toString(),
       car: parsedCar,
       latestExtension: parsedExtension,
@@ -307,19 +429,24 @@ class CarModel {
   });
 
   factory CarModel.fromJson(Map<String, dynamic> json) {
-    var imagesList = (json['images'] ??
-        json['car_images'] ??
-        json['car_image'] ??
-        json['carImages'] ??
-        json['photos']) as List? ?? [];
+    var imagesList =
+        (json['images'] ??
+                json['car_images'] ??
+                json['car_image'] ??
+                json['carImages'] ??
+                json['photos'])
+            as List? ??
+        [];
 
     List<CarImageModel> parsedImages = imagesList
         .where((i) => i != null)
         .map((i) => CarImageModel.fromJson(i))
         .toList();
 
-    if (parsedImages.isEmpty || parsedImages.every((img) => img.imageUrl.isEmpty)) {
-      final directImage = json['image_url']?.toString() ??
+    if (parsedImages.isEmpty ||
+        parsedImages.every((img) => img.imageUrl.isEmpty)) {
+      final directImage =
+          json['image_url']?.toString() ??
           json['image']?.toString() ??
           json['car_image']?.toString() ??
           json['car_image_url']?.toString() ??
@@ -327,15 +454,26 @@ class CarModel {
           json['avatar']?.toString() ??
           json['photo']?.toString();
       if (directImage != null && directImage.isNotEmpty) {
-        parsedImages.add(CarImageModel(id: 0, isThumbnail: 1, imageUrl: directImage));
+        parsedImages.add(
+          CarImageModel(id: 0, isThumbnail: 1, imageUrl: directImage),
+        );
       }
     }
 
     return CarModel(
-      id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       name: json['name']?.toString() ?? json['car_name']?.toString() ?? '',
-      licensePlate: json['license_plate']?.toString() ?? json['licensePlate']?.toString() ?? '',
-      unitPrice: double.tryParse(json['unit_price']?.toString() ?? json['price']?.toString() ?? '0') ?? 0.0,
+      licensePlate:
+          json['license_plate']?.toString() ??
+          json['licensePlate']?.toString() ??
+          '',
+      unitPrice:
+          double.tryParse(
+            json['unit_price']?.toString() ?? json['price']?.toString() ?? '0',
+          ) ??
+          0.0,
       discountValue:
           double.tryParse(json['discount_value']?.toString() ?? '0') ?? 0.0,
       description: json['description']?.toString(),
@@ -343,16 +481,24 @@ class CarModel {
       seatCount: int.tryParse(json['seat_count']?.toString() ?? '5') ?? 5,
       fuelType: json['fuel_type']?.toString(),
       transmission: json['transmission']?.toString(),
-      userId: json['user_id'] is int ? json['user_id'] as int : int.tryParse(json['user_id']?.toString() ?? '') ?? 0,
+      userId: json['user_id'] is int
+          ? json['user_id'] as int
+          : int.tryParse(json['user_id']?.toString() ?? '') ?? 0,
       images: parsedImages,
-      carLocation: json['car_location'] != null && json['car_location'] is Map<String, dynamic>
+      carLocation:
+          json['car_location'] != null &&
+              json['car_location'] is Map<String, dynamic>
           ? CarLocationModel.fromJson(json['car_location'])
           : (json['location'] != null
-              ? CarLocationModel.fromJson(json['location'])
-              : null),
-      owner: json['owner'] != null && json['owner'] is Map<String, dynamic> ? OwnerModel.fromJson(json['owner']) : null,
-      deliveryOption: json['delivery_option'] != null && json['delivery_option'] is Map<String, dynamic>
-          ? CarDeliveryOptionModel.fromJson(json['delivery_option']) 
+                ? CarLocationModel.fromJson(json['location'])
+                : null),
+      owner: json['owner'] != null && json['owner'] is Map<String, dynamic>
+          ? OwnerModel.fromJson(json['owner'])
+          : null,
+      deliveryOption:
+          json['delivery_option'] != null &&
+              json['delivery_option'] is Map<String, dynamic>
+          ? CarDeliveryOptionModel.fromJson(json['delivery_option'])
           : null,
     );
   }
@@ -386,9 +532,18 @@ class CarImageModel {
     }
     if (json is Map<String, dynamic>) {
       return CarImageModel(
-        id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
-        isThumbnail: json['is_thumbnail'] is int ? json['is_thumbnail'] as int : int.tryParse(json['is_thumbnail']?.toString() ?? '') ?? 0,
-        imageUrl: json['image_url']?.toString() ?? json['image']?.toString() ?? json['url']?.toString() ?? json['path']?.toString() ?? '',
+        id: json['id'] is int
+            ? json['id'] as int
+            : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        isThumbnail: json['is_thumbnail'] is int
+            ? json['is_thumbnail'] as int
+            : int.tryParse(json['is_thumbnail']?.toString() ?? '') ?? 0,
+        imageUrl:
+            json['image_url']?.toString() ??
+            json['image']?.toString() ??
+            json['url']?.toString() ??
+            json['path']?.toString() ??
+            '',
       );
     }
     return CarImageModel(id: 0, isThumbnail: 0, imageUrl: '');
@@ -409,9 +564,17 @@ class CarLocationModel {
     }
     if (json is Map<String, dynamic>) {
       return CarLocationModel(
-        id: json['id'] is int ? json['id'] as int : int.tryParse(json['id']?.toString() ?? '') ?? 0,
-        address: json['address']?.toString() ?? json['full_address']?.toString() ?? json['street']?.toString(),
-        city: json['city']?.toString() ?? json['province']?.toString() ?? json['district']?.toString(),
+        id: json['id'] is int
+            ? json['id'] as int
+            : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        address:
+            json['address']?.toString() ??
+            json['full_address']?.toString() ??
+            json['street']?.toString(),
+        city:
+            json['city']?.toString() ??
+            json['province']?.toString() ??
+            json['district']?.toString(),
         location: json['location']?.toString() ?? json['name']?.toString(),
       );
     }

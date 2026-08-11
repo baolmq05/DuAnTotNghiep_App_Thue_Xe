@@ -107,8 +107,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     return '${pad(date.hour)}:${pad(date.minute)}';
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<OrderDetailViewModel>();
@@ -224,10 +222,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           _buildExtensionBanner(trip),
                         ],
                         const SizedBox(height: 20),
-                        if (car != null && car.owner != null)
+                        if (trip.renter != null)
                           OrderDetailOwnerCard(
                             trip: trip,
-                            owner: car.owner!,
+                            renter: trip.renter!,
                             isCreatingChat: _isCreatingChat,
                             onStartChat: _handleStartChat,
                             onCall: _showPhoneDialog,
@@ -300,7 +298,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     child: trip.latestExtension?.status == 2
                         ? ElevatedButton.icon(
                             onPressed: () => _showExtensionPaymentSheet(trip),
-                            icon: const Icon(Icons.credit_card, color: Colors.white, size: 16),
+                            icon: const Icon(
+                              Icons.credit_card,
+                              color: Colors.white,
+                              size: 16,
+                            ),
                             label: const Text(
                               'Thanh toán gia hạn',
                               style: TextStyle(
@@ -321,30 +323,34 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                             ),
                           )
                         : (trip.latestExtension == null ||
-                                trip.latestExtension!.status == 0)
-                            ? ElevatedButton.icon(
-                                onPressed: () => _showExtensionRequestSheet(trip),
-                                icon: const Icon(Icons.more_time, color: Colors.white, size: 16),
-                                label: const Text(
-                                  'Gia hạn chuyến đi',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: context.primaryColor,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 0,
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                              trip.latestExtension!.status == 0)
+                        ? ElevatedButton.icon(
+                            onPressed: () => _showExtensionRequestSheet(trip),
+                            icon: const Icon(
+                              Icons.more_time,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            label: const Text(
+                              'Gia hạn chuyến đi',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: context.primaryColor,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
                   if (trip.latestExtension?.status == 2 ||
                       trip.latestExtension == null ||
@@ -353,7 +359,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _showReturnConfirmDialog(trip),
-                      icon: const Icon(Icons.keyboard_return, color: Colors.white, size: 16),
+                      icon: const Icon(
+                        Icons.keyboard_return,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       label: const Text(
                         'Trả xe',
                         style: TextStyle(
@@ -381,7 +391,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             if (trip.status == 4 && trip.renterReview == null) ...[
               ElevatedButton.icon(
                 onPressed: () => _showReviewDialog(trip),
-                icon: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
+                icon: const Icon(
+                  Icons.star_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 label: const Text(
                   'Đánh giá chủ xe & chuyến đi',
                   style: TextStyle(
@@ -407,18 +421,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       ),
     );
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
   Widget _buildBottomActionButtons(TripModel trip) {
     return Row(
@@ -490,19 +492,19 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Future<void> _handleStartChat(TripModel trip, OwnerModel owner) async {
+  Future<void> _handleStartChat(TripModel trip, TripRenterInfo renter) async {
     if (_isCreatingChat) return;
     setState(() => _isCreatingChat = true);
 
     try {
       final conversationService = ConversationService();
       var conv = await conversationService.createConversation(
-        receiverId: owner.id,
+        receiverId: renter.id,
         tripId: trip.id,
         carId: trip.carId,
       );
 
-      // Nếu API trả về otherUser có tên mặc định/trống hoặc ID = 0, đồng bộ lại từ thông tin của owner (chủ xe)
+      // Nếu API trả về otherUser có tên mặc định/trống hoặc ID = 0, đồng bộ lại từ thông tin của khách thuê
       if (conv.otherUser.id == 0 ||
           conv.otherUser.name == 'Người dùng' ||
           conv.otherUser.name.isEmpty) {
@@ -513,9 +515,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           createdAt: conv.createdAt,
           updatedAt: conv.updatedAt,
           otherUser: OtherUser(
-            id: owner.id,
-            name: owner.name,
-            avatar: owner.avatar,
+            id: renter.id,
+            name: renter.name,
+            avatar: renter.avatar,
           ),
           car: conv.car,
           lastMessageObj: conv.lastMessageObj,
@@ -539,9 +541,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     }
   }
 
-  void _showPhoneDialog(OwnerModel owner) {
-    final phone = (owner.phone != null && owner.phone!.isNotEmpty)
-        ? owner.phone!
+  void _showPhoneDialog(TripRenterInfo renter) {
+    final phone = (renter.phone != null && renter.phone!.isNotEmpty)
+        ? renter.phone!
         : 'Chưa cập nhật số điện thoại';
 
     showDialog(
@@ -553,7 +555,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             Icon(Icons.call, color: context.primaryColor),
             SizedBox(width: 8),
             Text(
-              'Số điện thoại chủ xe',
+              'Số điện thoại khách thuê',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
@@ -563,7 +565,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Chủ xe: ${owner.name}',
+              'Khách thuê: ${renter.name}',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 10),
@@ -576,7 +578,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.phone_android, color: context.primaryColor, size: 20),
+                  Icon(
+                    Icons.phone_android,
+                    color: context.primaryColor,
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: SelectableText(
@@ -865,7 +871,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.article_outlined, color: context.primaryColor),
+              leading: Icon(
+                Icons.article_outlined,
+                color: context.primaryColor,
+              ),
               title: Text('Chính sách & Quy định thuê xe'),
               onTap: () {
                 Navigator.pop(context);
@@ -874,7 +883,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ),
             if (trip.car?.owner != null)
               ListTile(
-                leading: Icon(Icons.person_outline, color: context.primaryColor),
+                leading: Icon(
+                  Icons.person_outline,
+                  color: context.primaryColor,
+                ),
                 title: Text('Xem hồ sơ chủ xe'),
                 onTap: () {
                   Navigator.pop(context);
@@ -1387,7 +1399,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   : () async {
                       final currentContext = this.context;
                       final nav = Navigator.of(dialogCtx);
-                      final viewModel = currentContext.read<OrderDetailViewModel>();
+                      final viewModel = currentContext
+                          .read<OrderDetailViewModel>();
 
                       setDialogState(() => isSubmitting = true);
                       final result = await TripService().requestReturn(trip.id);
@@ -1405,7 +1418,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         } else {
                           AppToast.show(
                             currentContext,
-                            message: result['message'] ?? 'Gửi yêu cầu trả xe thất bại.',
+                            message:
+                                result['message'] ??
+                                'Gửi yêu cầu trả xe thất bại.',
                             type: ToastType.error,
                           );
                         }
@@ -1422,7 +1437,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     )
                   : const Text(
                       'Đồng ý trả xe',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
             ),
           ],
@@ -1565,7 +1583,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () => _showReviewDialog(trip),
-                icon: const Icon(Icons.star_rounded, color: Colors.white, size: 18),
+                icon: const Icon(
+                  Icons.star_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
                 label: const Text(
                   'Đánh giá chủ xe & chuyến đi',
                   style: TextStyle(
@@ -1695,7 +1717,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     enabled: !isSubmitting,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Nhập ý kiến đánh giá của bạn (không bắt buộc)...',
+                      hintText:
+                          'Nhập ý kiến đánh giá của bạn (không bắt buộc)...',
                       hintStyle: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade400,
@@ -1735,8 +1758,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                     : () async {
                         final currentContext = this.context;
                         final nav = Navigator.of(dialogCtx);
-                        final viewModel =
-                            currentContext.read<OrderDetailViewModel>();
+                        final viewModel = currentContext
+                            .read<OrderDetailViewModel>();
 
                         setDialogState(() => isSubmitting = true);
 
@@ -1753,14 +1776,17 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           if (result['success'] == true) {
                             AppToast.show(
                               currentContext,
-                              message: result['message'] ?? 'Gửi đánh giá thành công!',
+                              message:
+                                  result['message'] ??
+                                  'Gửi đánh giá thành công!',
                               type: ToastType.success,
                             );
                             viewModel.fetchTripDetail(trip.id);
                           } else {
                             AppToast.show(
                               currentContext,
-                              message: result['message'] ?? 'Gửi đánh giá thất bại.',
+                              message:
+                                  result['message'] ?? 'Gửi đánh giá thất bại.',
                               type: ToastType.error,
                             );
                           }
@@ -1796,4 +1822,3 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 }
-
