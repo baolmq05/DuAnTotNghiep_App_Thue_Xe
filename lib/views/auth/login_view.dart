@@ -26,6 +26,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _handleLogin() async {
+    FocusScope.of(context).unfocus();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
@@ -66,6 +67,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _handleGoogleLogin() async {
+    FocusScope.of(context).unfocus();
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.loginWithGoogle();
 

@@ -34,6 +34,11 @@ import 'package:duantotnghiep_app_thue_xe/views/profile/driver_license_view.dart
 import 'package:duantotnghiep_app_thue_xe/views/support/privacy_policy_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/profile/edit_profile_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/wallet/wallet_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/owner/owner_order_view.dart';
+import 'package:duantotnghiep_app_thue_xe/views/owner/owner_tab_wrapper_view.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_order_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/views/car/create_car_view.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/create_car_viewmodel.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -46,6 +51,8 @@ final GlobalKey<NavigatorState> _shellNavigatorOrders =
     GlobalKey<NavigatorState>(debugLabel: 'shellOrders');
 final GlobalKey<NavigatorState> _shellNavigatorMessages =
     GlobalKey<NavigatorState>(debugLabel: 'shellMessages');
+final GlobalKey<NavigatorState> _shellNavigatorOwner =
+    GlobalKey<NavigatorState>(debugLabel: 'shellOwner');
 final GlobalKey<NavigatorState> _shellNavigatorProfile =
     GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
@@ -228,8 +235,28 @@ final drivioRouter = GoRouter(
         );
       },
     ),
+    GoRoute(
+      path: '/owner-orders',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        return ChangeNotifierProvider(
+          create: (_) => OwnerOrderViewModel(),
+          child: const OwnerOrderView(),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/register-car',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        return ChangeNotifierProvider(
+          create: (_) => CreateCarViewModel(),
+          child: const CreateCarView(),
+        );
+      },
+    ),
 
-    // StatefulShellRoute chứa 4 tab chính của ứng dụng
+    // StatefulShellRoute chứa 5 tab chính của ứng dụng
     StatefulShellRoute.indexedStack(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state, navigationShell) {
@@ -267,7 +294,20 @@ final drivioRouter = GoRouter(
             ),
           ],
         ),
-        // Tab 3: Cá nhân
+        // Tab 3: Chủ xe
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorOwner,
+          routes: [
+            GoRoute(
+              path: '/owner-dashboard',
+              builder: (context, state) => ChangeNotifierProvider(
+                create: (_) => OwnerOrderViewModel(),
+                child: const OwnerTabWrapperView(),
+              ),
+            ),
+          ],
+        ),
+        // Tab 4: Cá nhân
         StatefulShellBranch(
           navigatorKey: _shellNavigatorProfile,
           routes: [

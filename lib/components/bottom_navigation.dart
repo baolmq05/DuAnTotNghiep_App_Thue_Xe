@@ -88,7 +88,13 @@ class BottomNavigation extends StatelessWidget {
               ),
             ),
             GButton(
-              icon: selectedIndex == 3 ? Icons.person : Icons.person_outline,
+              icon: selectedIndex == 3
+                  ? Icons.time_to_leave
+                  : Icons.time_to_leave_outlined,
+              text: 'Chủ xe',
+            ),
+            GButton(
+              icon: selectedIndex == 4 ? Icons.person : Icons.person_outline,
               text: 'Cá nhân',
             ),
           ],

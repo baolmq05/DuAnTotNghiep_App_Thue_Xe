@@ -17,6 +17,26 @@ class TripService extends BaseService {
     }
   }
 
+  Future<List<TripModel>> getOwnerTrips() async {
+    try {
+      final response = await get('api/trips', requiresAuth: true);
+      if (response != null && response['success'] == true) {
+        final data = response['data'];
+        List dataList = [];
+        if (data is Map<String, dynamic>) {
+          dataList = (data['owner_trips'] ?? data['owner'] ?? []) as List;
+        } else if (data is List) {
+          dataList = data;
+        }
+        return dataList.map((json) => TripModel.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Lỗi khi lấy danh sách đơn thuê xe cho chủ xe: $e');
+      rethrow;
+    }
+  }
+
   Future<TripModel?> getTripDetail(int id) async {
     try {
       final response = await get('api/trips/$id', requiresAuth: true);
