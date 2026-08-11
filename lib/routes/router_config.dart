@@ -156,6 +156,14 @@ final drivioRouter = GoRouter(
       builder: (context, state) => const NotificationView(),
     ),
     GoRoute(
+      path: '/notifications',
+      redirect: (context, state) => '/notification',
+    ),
+    GoRoute(
+      path: '/conversations',
+      redirect: (context, state) => '/messages',
+    ),
+    GoRoute(
       path: '/support',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const SupportView(),

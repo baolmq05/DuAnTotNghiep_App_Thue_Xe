@@ -106,29 +106,32 @@ class FcmService extends BaseService {
         debugPrint('Nội dung: ${message.notification?.body}');
         debugPrint('Data payload: ${message.data}');
 
-        final title = message.notification?.title ?? message.data['title'] ?? 'Thông báo mới';
-        final body = message.notification?.body ?? message.data['body'] ?? message.data['message'] ?? '';
+        final combinedData = _extractMessageData(message);
+        final title = combinedData['title'] ?? 'Thông báo mới';
+        final body = combinedData['body'] ?? combinedData['message'] ?? '';
 
         if (title.isNotEmpty || body.isNotEmpty) {
           showLocalNotification(
             title: title,
             body: body,
-            payload: jsonEncode(message.data),
+            payload: jsonEncode(combinedData),
           );
         }
       });
 
       // 6. Xử lý khi bấm vào thông báo đẩy từ thanh trạng thái (Background)
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        debugPrint('Mở app từ thông báo đẩy (Background): ${message.data}');
-        _handleNotificationPayload(message.data);
+        final data = _extractMessageData(message);
+        debugPrint('Mở app từ thông báo đẩy (Background): $data');
+        _handleNotificationPayload(data);
       });
 
       // 7. Xử lý khi app bị đóng hoàn toàn và được mở từ thông báo (Terminated)
       RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
       if (initialMessage != null) {
-        debugPrint('Mở app từ thông báo đẩy (Terminated): ${initialMessage.data}');
-        _handleNotificationPayload(initialMessage.data);
+        final data = _extractMessageData(initialMessage);
+        debugPrint('Mở app từ thông báo đẩy (Terminated): $data');
+        _handleNotificationPayload(data);
       }
 
       // 8. Lấy và theo dõi FCM Token
@@ -204,6 +207,20 @@ class FcmService extends BaseService {
     if (onNotificationClick != null) {
       onNotificationClick!(data);
     }
+  }
+
+  /// Gộp dữ liệu data payload và notification payload thành Map<String, dynamic>
+  Map<String, dynamic> _extractMessageData(RemoteMessage message) {
+    final Map<String, dynamic> data = Map<String, dynamic>.from(message.data);
+    if (message.notification != null) {
+      if (message.notification!.title != null) {
+        data.putIfAbsent('title', () => message.notification!.title);
+      }
+      if (message.notification!.body != null) {
+        data.putIfAbsent('body', () => message.notification!.body);
+      }
+    }
+    return data;
   }
 
   /// Gửi FCM Token lên backend nếu người dùng đã đăng nhập

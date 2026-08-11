@@ -38,12 +38,42 @@ void main() async {
     // Điều hướng khi người dùng nhấn vào thông báo đẩy
     fcmService.onNotificationClick = (Map<String, dynamic> data) {
       debugPrint('XỬ LÝ ĐIỀU HƯỚNG KHI CLICK THÔNG BÁO: $data');
-      final type = data['type'] ?? data['notification_type'];
-      if (type == 'chat' || data.containsKey('conversation_id')) {
-        drivioRouter.push('/conversations');
-      } else {
-        drivioRouter.push('/notifications');
+      final type = (data['type'] ?? data['notification_type'] ?? data['screen'] ?? '').toString().toLowerCase();
+
+      final conversationId = data['conversation_id'] ?? data['conversationId'];
+      final tripId = data['trip_id'] ?? data['order_id'] ?? data['tripId'] ?? data['orderId'] ?? data['id'];
+      final isOwner = data['is_owner']?.toString() == 'true' || type == 'owner_order';
+
+      // 1. Nhắn tin / Chat
+      if (type == 'chat' || type == 'message' || conversationId != null) {
+        if (conversationId != null && conversationId.toString().isNotEmpty) {
+          drivioRouter.push('/chat/${conversationId.toString()}');
+        } else {
+          drivioRouter.push('/messages');
+        }
+        return;
       }
+
+      // 2. Chuyến xe / Đặt xe / Duyệt xe / Trạng thái đơn thuê
+      if (type == 'trip' ||
+          type == 'order' ||
+          type == 'booking' ||
+          type == 'trip_update' ||
+          type == 'rental' ||
+          type == 'owner_order' ||
+          tripId != null) {
+        if (isOwner) {
+          drivioRouter.push('/owner-orders');
+        } else if (tripId != null && int.tryParse(tripId.toString()) != null) {
+          drivioRouter.push('/order-detail/${tripId.toString()}');
+        } else {
+          drivioRouter.push('/orders');
+        }
+        return;
+      }
+
+      // 3. Mặc định: Thông báo hệ thống
+      drivioRouter.push('/notification');
     };
   } catch (e) {
     debugPrint('Lỗi khởi tạo Firebase trong main: $e');
