@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/components/payment/zalopay_checkout_sheet.dart';
 import 'package:duantotnghiep_app_thue_xe/components/extension/extension_request_sheet.dart';
 import 'package:duantotnghiep_app_thue_xe/components/extension/extension_payment_sheet.dart';
+import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 
 // Components
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_header.dart';
@@ -156,6 +157,10 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     final trip = viewModel.trip!;
     final car = trip.car;
 
+    final auth = context.watch<AuthProvider>();
+    final currentUser = auth.user;
+    final isOwner = currentUser != null && car != null && currentUser.id == car.userId;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
@@ -264,115 +269,130 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           top: 10,
           bottom: MediaQuery.of(context).padding.bottom + 10,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (trip.status == 1) ...[
-              ElevatedButton.icon(
-                onPressed: () => _showZaloPayCheckoutSheet(trip),
-                icon: const Icon(Icons.payment, color: Colors.white),
-                label: const Text(
-                  'Thanh toán đặt cọc qua ZaloPay',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
-            if (trip.status == 3 || trip.status == 7) ...[
-              Row(
+        child: isOwner
+            ? _buildOwnerBottomNavigationBar(trip)
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: trip.latestExtension?.status == 2
-                        ? ElevatedButton.icon(
-                            onPressed: () => _showExtensionPaymentSheet(trip),
-                            icon: const Icon(
-                              Icons.credit_card,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            label: const Text(
-                              'Thanh toán gia hạn',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange.shade700,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                          )
-                        : (trip.latestExtension == null ||
-                              trip.latestExtension!.status == 0)
-                        ? ElevatedButton.icon(
-                            onPressed: () => _showExtensionRequestSheet(trip),
-                            icon: const Icon(
-                              Icons.more_time,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            label: const Text(
-                              'Gia hạn chuyến đi',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: context.primaryColor,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  if (trip.latestExtension?.status == 2 ||
-                      trip.latestExtension == null ||
-                      trip.latestExtension!.status == 0)
-                    const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => _showReturnConfirmDialog(trip),
-                      icon: const Icon(
-                        Icons.keyboard_return,
-                        color: Colors.white,
-                        size: 16,
-                      ),
+                  if (trip.status == 1) ...[
+                    ElevatedButton.icon(
+                      onPressed: () => _showZaloPayCheckoutSheet(trip),
+                      icon: const Icon(Icons.payment, color: Colors.white),
                       label: const Text(
-                        'Trả xe',
+                        'Thanh toán đặt cọc qua ZaloPay',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  if (trip.status == 3 || trip.status == 7) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: trip.latestExtension?.status == 2
+                              ? ElevatedButton.icon(
+                                  onPressed: () => _showExtensionPaymentSheet(trip),
+                                  icon: const Icon(Icons.credit_card, color: Colors.white, size: 16),
+                                  label: const Text(
+                                    'Thanh toán gia hạn',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange.shade700,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                )
+                              : (trip.latestExtension == null ||
+                                      trip.latestExtension!.status == 0)
+                                  ? ElevatedButton.icon(
+                                      onPressed: () => _showExtensionRequestSheet(trip),
+                                      icon: const Icon(Icons.more_time, color: Colors.white, size: 16),
+                                      label: const Text(
+                                        'Gia hạn chuyến đi',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: context.primaryColor,
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                        ),
+                        if (trip.latestExtension?.status == 2 ||
+                            trip.latestExtension == null ||
+                            trip.latestExtension!.status == 0)
+                          const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _showReturnConfirmDialog(trip),
+                            icon: const Icon(Icons.keyboard_return, color: Colors.white, size: 16),
+                            label: const Text(
+                              'Trả xe',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF059669),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  if (trip.status == 4 && trip.renterReview == null) ...[
+                    ElevatedButton.icon(
+                      onPressed: () => _showReviewDialog(trip),
+                      icon: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
+                      label: const Text(
+                        'Đánh giá chủ xe & chuyến đi',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF059669),
@@ -383,41 +403,11 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         elevation: 0,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                  ],
+                  _buildBottomActionButtons(trip),
                 ],
               ),
-              const SizedBox(height: 10),
-            ],
-            if (trip.status == 4 && trip.renterReview == null) ...[
-              ElevatedButton.icon(
-                onPressed: () => _showReviewDialog(trip),
-                icon: const Icon(
-                  Icons.star_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                label: const Text(
-                  'Đánh giá chủ xe & chuyến đi',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF059669),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
-            _buildBottomActionButtons(trip),
-          ],
-        ),
       ),
     );
   }
@@ -442,6 +432,339 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           onTap: () => context.push('/support'),
         ),
       ],
+    );
+  }
+
+  Widget _buildOwnerBottomNavigationBar(TripModel trip) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (trip.status == 0) ...[
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showRejectDialog(trip),
+                  icon: const Icon(Icons.cancel_outlined, color: AppColors.error),
+                  label: const Text(
+                    'Từ chối',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.error,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.error),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _showApproveConfirmDialog(trip),
+                  icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                  label: const Text(
+                    'Duyệt đơn',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.primaryColor,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+        ],
+        if (trip.status == 1) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: context.infoSurface,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: context.info, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Đang chờ khách hàng thanh toán đặt cọc.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.info,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+        _buildBottomActionButtons(trip),
+      ],
+    );
+  }
+
+  void _showRejectDialog(TripModel trip) {
+    final reasonController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.cancel_outlined, color: AppColors.error),
+              SizedBox(width: 8),
+              Text(
+                'Từ chối đơn thuê xe',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Vui lòng nhập lý do từ chối yêu cầu thuê xe này (không bắt buộc):',
+                style: TextStyle(fontSize: 13, color: context.textSecondary),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: reasonController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Lý do từ chối (ví dụ: bận đột xuất, xe đang bảo dưỡng...)...',
+                  hintStyle: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade400,
+                  ),
+                  filled: true,
+                  fillColor: context.cardColor,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: context.primaryColor),
+                  ),
+                  contentPadding: const EdgeInsets.all(12),
+                ),
+                style: const TextStyle(fontSize: 13),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text(
+                'Quay lại',
+                style: TextStyle(color: context.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                // Secondary confirmation dialog before final rejection
+                showDialog(
+                  context: context,
+                  builder: (confirmCtx) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: Row(
+                      children: const [
+                        Icon(Icons.warning_amber_rounded, color: AppColors.error),
+                        SizedBox(width: 8),
+                        Text('Xác nhận từ chối'),
+                      ],
+                    ),
+                    content: const Text(
+                      'Bạn có chắc chắn muốn từ chối yêu cầu thuê xe này không?\nQuyết định này không thể hoàn tác.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(confirmCtx),
+                        child: Text(
+                          'Hủy',
+                          style: TextStyle(color: context.textSecondary),
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.error,
+                        ),
+                        onPressed: () async {
+                          final currentContext = this.context;
+                          final detailViewModel = currentContext.read<OrderDetailViewModel>();
+                          
+                          // Close confirm dialog
+                          Navigator.pop(confirmCtx);
+                          // Close reason dialog
+                          Navigator.pop(dialogCtx);
+                          
+                          final reason = reasonController.text.trim();
+                          final result = await detailViewModel.rejectTrip(
+                            trip.id,
+                            reason: reason.isNotEmpty ? reason : null,
+                          );
+                          
+                          if (!mounted) return;
+                          if (currentContext.mounted) {
+                            if (result['success'] == true) {
+                              AppToast.show(
+                                currentContext,
+                                message: 'Đã từ chối đơn thuê xe thành công!',
+                                type: ToastType.success,
+                              );
+                            } else {
+                              AppToast.show(
+                                currentContext,
+                                message: result['message'] ?? 'Không thể từ chối đơn thuê.',
+                                type: ToastType.error,
+                              );
+                            }
+                          }
+                        },
+                        child: const Text(
+                          'Xác nhận từ chối',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Text(
+                'Từ chối',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showApproveConfirmDialog(TripModel trip) {
+    bool isSubmitting = false;
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.check_circle_outline, color: AppColors.success),
+              SizedBox(width: 8),
+              Text('Duyệt đơn thuê xe'),
+            ],
+          ),
+          content: const Text(
+            'Bạn có đồng ý duyệt yêu cầu thuê xe này không?\nSau khi duyệt, khách hàng sẽ nhận được thông báo để đặt cọc.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: isSubmitting ? null : () => Navigator.pop(dialogCtx),
+              child: Text(
+                'Quay lại',
+                style: TextStyle(color: context.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: isSubmitting
+                  ? null
+                  : () async {
+                      final currentContext = this.context;
+                      final nav = Navigator.of(dialogCtx);
+                      final detailViewModel = currentContext.read<OrderDetailViewModel>();
+
+                      setDialogState(() => isSubmitting = true);
+                      final result = await detailViewModel.confirmTrip(trip.id);
+                      nav.pop();
+
+                      if (!mounted) return;
+                      if (currentContext.mounted) {
+                        if (result['success'] == true) {
+                          AppToast.show(
+                            currentContext,
+                            message: 'Đã xác nhận yêu cầu thuê xe thành công!',
+                            type: ToastType.success,
+                          );
+                        } else {
+                          AppToast.show(
+                            currentContext,
+                            message: result['message'] ?? 'Duyệt đơn thuê xe thất bại.',
+                            type: ToastType.error,
+                          );
+                        }
+                      }
+                    },
+              child: isSubmitting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Xác nhận duyệt',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

@@ -318,6 +318,58 @@ class TripService extends BaseService {
       return {'success': false, 'message': 'Có lỗi xảy ra khi gửi đánh giá: $e'};
     }
   }
+
+  // Xác nhận chuyến đi (Chủ xe duyệt đơn)
+  Future<Map<String, dynamic>> confirmTrip(int tripId) async {
+    try {
+      final response = await update(
+        'api/trips/$tripId/confirm',
+        body: {},
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Xác nhận chuyến đi thành công!',
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể xác nhận chuyến đi.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi xác nhận chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Từ chối chuyến đi (Chủ xe từ chối đơn)
+  Future<Map<String, dynamic>> rejectTrip(int tripId, {String? reason}) async {
+    try {
+      final response = await update(
+        'api/trips/$tripId/reject',
+        body: reason != null ? {'reason': reason} : {},
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Từ chối yêu cầu thuê xe thành công!',
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể từ chối yêu cầu thuê xe.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi từ chối chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }
 
 
