@@ -34,4 +34,43 @@ class OwnerOrderDetailViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Xác nhận chuyến đi (Chủ xe duyệt đơn)
+  Future<Map<String, dynamic>> confirmTrip(int tripId) async {
+    try {
+      final result = await _tripService.confirmTrip(tripId);
+      if (result['success'] == true) {
+        await fetchTripDetail(tripId);
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Từ chối chuyến đi (Chủ xe từ chối đơn)
+  Future<Map<String, dynamic>> rejectTrip(int tripId, {String? reason}) async {
+    try {
+      final result = await _tripService.rejectTrip(tripId, reason: reason);
+      if (result['success'] == true) {
+        await fetchTripDetail(tripId);
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Hủy chuyến đi
+  Future<Map<String, dynamic>> cancelTrip(int tripId, {String? reason}) async {
+    try {
+      final result = await _tripService.cancelTrip(tripId, reason: reason);
+      if (result['success'] == true) {
+        await fetchTripDetail(tripId);
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_order_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_header.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_car_card.dart';
@@ -129,7 +130,11 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
                         const SizedBox(height: 20),
                         OrderDetailPriceCard(trip: trip),
                         const SizedBox(height: 20),
-                        OrderDetailTimeline(trip: trip, onCancel: (_) {}),
+                        OrderDetailTimeline(
+                          trip: trip,
+                          isOwner: true,
+                          onCancel: (t) => _showStatusUpdateDialog(t, 'Hủy chuyến đi', 6),
+                        ),
                         const SizedBox(height: 24),
                         _buildOwnerActions(trip),
                         const SizedBox(height: 18),
@@ -248,33 +253,99 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
     String actionLabel,
     int nextStatus,
   ) {
+    bool isSubmitting = false;
+
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(actionLabel),
-          content: Text(
-            'Bạn chắc chắn muốn $actionLabel cho đơn #RT${trip.id}?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Hủy'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-                trip.status = nextStatus;
-                trip.statusText = trip.getStatusDisplay();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$actionLabel thành công.')),
-                  );
-                }
-              },
-              child: const Text('Xác nhận'),
-            ),
-          ],
+      barrierDismissible: false,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(actionLabel),
+              content: Text(
+                'Bạn chắc chắn muốn $actionLabel cho đơn #RT${trip.id}?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting ? null : () => Navigator.of(dialogCtx).pop(),
+                  child: Text(
+                    'Hủy',
+                    style: TextStyle(color: context.textSecondary),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          setDialogState(() => isSubmitting = true);
+                          final viewModel = this.context.read<OwnerOrderDetailViewModel>();
+                          Map<String, dynamic> result = {'success': false, 'message': 'Không xác định'};
+
+                          if (nextStatus == 2) {
+                            result = await viewModel.confirmTrip(trip.id);
+                          } else if (nextStatus == 6 && actionLabel == 'Từ chối đơn') {
+                            result = await viewModel.rejectTrip(trip.id);
+                          } else if (nextStatus == 6 && actionLabel == 'Hủy chuyến đi') {
+                            result = await viewModel.cancelTrip(trip.id);
+                          } else {
+                            // Local updates for other statuses if there's no API
+                            await Future.delayed(const Duration(milliseconds: 300));
+                            setState(() {
+                              trip.status = nextStatus;
+                              trip.statusText = trip.getStatusDisplay();
+                            });
+                            result = {'success': true};
+                          }
+
+                          if (!mounted) return;
+                          Navigator.of(dialogCtx).pop();
+
+                          if (this.context.mounted) {
+                            if (result['success'] == true) {
+                              AppToast.show(
+                                this.context,
+                                message: '$actionLabel thành công.',
+                                type: ToastType.success,
+                              );
+                            } else {
+                              AppToast.show(
+                                this.context,
+                                message: result['message'] ?? '$actionLabel thất bại.',
+                                type: ToastType.error,
+                              );
+                            }
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: nextStatus == 2 ? Colors.green : AppColors.error,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Xác nhận',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ],
+            );
+          },
         );
       },
     );

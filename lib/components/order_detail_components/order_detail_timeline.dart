@@ -5,11 +5,13 @@ import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 class OrderDetailTimeline extends StatelessWidget {
   final TripModel trip;
   final Function(TripModel) onCancel;
+  final bool isOwner;
 
   const OrderDetailTimeline({
     super.key,
     required this.trip,
     required this.onCancel,
+    this.isOwner = false,
   });
 
   String _formatDateTime(DateTime date) {
@@ -88,7 +90,9 @@ class OrderDetailTimeline extends StatelessWidget {
     final isStep4 = trip.status >= 3;
     final isStep5 = trip.status == 4;
 
-    final bool canCancel = trip.status >= 0 && trip.status < 3;
+    final bool canCancel = isOwner
+        ? (trip.status == 1 || trip.status == 2)
+        : (trip.status >= 0 && trip.status < 3);
 
     return Container(
       padding: const EdgeInsets.all(16),
