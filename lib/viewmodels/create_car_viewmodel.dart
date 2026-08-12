@@ -22,6 +22,9 @@ class CreateCarViewModel extends ChangeNotifier {
   final CloudinaryUploadService _cloudinaryService;
   final GoongMapService _goongMapService;
 
+  int? editingCarId;
+  bool get isEditMode => editingCarId != null;
+
   // Master Data
   List<CarBrand> _brands = [];
   List<CarTypeItem> _types = [];
@@ -132,6 +135,133 @@ class CreateCarViewModel extends ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = 'Không thể tải danh mục xe: $e';
+    } finally {
+      _isLoadingData = false;
+      notifyListeners();
+    }
+  }
+
+  /// Tải thông tin danh mục và nạp dữ liệu xe cần chỉnh sửa
+  Future<void> fetchInitialDataAndLoadCar(int carId) async {
+    editingCarId = carId;
+    _isLoadingData = true;
+    _errorMessage = '';
+    notifyListeners();
+
+    try {
+      // 1. Tải danh mục trước
+      final results = await Future.wait([
+        _carService.getCarBrands(),
+        _carService.getCarFeatures(),
+      ]);
+
+      _brands = results[0] as List<CarBrand>;
+      _features = results[1] as List<CarFeatureItem>;
+
+      // 2. Tải chi tiết xe cần chỉnh sửa
+      final carDetail = await _carService.getCarDetail(id: carId);
+
+      int brandId = carDetail.carType.carBrandId;
+      if (brandId == 0) {
+        brandId = carDetail.carBrandId;
+      }
+      if (brandId == 0) {
+        brandId = carDetail.carBrand.id;
+      }
+      selectedBrandId = brandId != 0 ? brandId : null;
+
+      if (selectedBrandId != null) {
+        _types = await _carService.getCarTypes(selectedBrandId!);
+      } else {
+        _types = [];
+      }
+
+      int typeId = carDetail.carTypeId;
+      if (typeId == 0) {
+        typeId = carDetail.carType.id;
+      }
+      selectedTypeId = typeId != 0 ? typeId : null;
+
+      licensePlate = carDetail.licensePlate;
+      vin = carDetail.VIN;
+      engineNumber = carDetail.engineNumber;
+
+      fuelConsumption = carDetail.fuelConsumption.toDouble();
+      unitPrice = double.tryParse(carDetail.unitPrice) ?? 0.0;
+      discountValue = double.tryParse(carDetail.discountValue) ?? 0.0;
+
+      description = carDetail.description ?? '';
+      rentalTerms = carDetail.rentalTerms;
+
+      seatCount = int.tryParse(carDetail.seatCount) ?? 5;
+      manufactureYear = int.tryParse(carDetail.manufactureYear) ?? DateTime.now().year;
+
+      final fType = carDetail.fuelType.toLowerCase();
+      if (fType.contains('xăng') || fType.contains('gasoline')) {
+        fuelType = 'gasoline';
+      } else if (fType.contains('dầu') || fType.contains('diesel')) {
+        fuelType = 'diesel';
+      } else if (fType.contains('điện') || fType.contains('electric')) {
+        fuelType = 'electric';
+      } else if (fType.contains('hybrid')) {
+        fuelType = 'hybrid';
+      } else {
+        fuelType = 'gasoline';
+      }
+
+      final trans = carDetail.transmission.toLowerCase();
+      if (trans.contains('tự động') || trans.contains('automatic') || trans.contains('auto')) {
+        transmission = 'automatic';
+      } else if (trans.contains('sàn') || trans.contains('manual')) {
+        transmission = 'manual';
+      } else {
+        transmission = 'automatic';
+      }
+
+      address = carDetail.carLocation.address;
+
+      if (address.isNotEmpty) {
+        final parts = address.split(',');
+        if (parts.isNotEmpty) {
+          location = parts.last.trim();
+        }
+      } else {
+        location = '';
+      }
+
+      final coords = carDetail.carLocation.location.split(',');
+      if (coords.length == 2) {
+        selectedLat = double.tryParse(coords[0]) ?? 10.03711;
+        selectedLng = double.tryParse(coords[1]) ?? 105.78275;
+      } else {
+        selectedLat = 10.03711;
+        selectedLng = 105.78275;
+      }
+
+      deliveryEnabled = carDetail.deliveryOption.status == 1;
+      deliveryMaxDistance = carDetail.deliveryOption.maxDistance.toDouble();
+      deliveryFee = carDetail.deliveryOption.feeDistance.toDouble();
+      deliveryFreeDistance = carDetail.deliveryOption.freeDistance.toDouble();
+
+      kmLimitEnabled = carDetail.usageLimit.status == 1;
+      kmLimitValue = carDetail.usageLimit.maxDailyDistance.toDouble();
+      overFeeValue = double.tryParse(carDetail.usageLimit.extraDistanceFee) ?? 0.0;
+
+      selectedFeatures.clear();
+      for (final f in carDetail.features) {
+        selectedFeatures.add(f.id);
+      }
+
+      images.clear();
+      for (int i = 0; i < carDetail.images.length; i++) {
+        final img = carDetail.images[i];
+        images.add(img.imageUrl);
+        if (img.isThumbnail == 1) {
+          thumbnailIndex = i;
+        }
+      }
+    } catch (e) {
+      _errorMessage = 'Không thể tải thông tin xe cần chỉnh sửa: $e';
     } finally {
       _isLoadingData = false;
       notifyListeners();
@@ -391,7 +521,9 @@ class CreateCarViewModel extends ChangeNotifier {
         thumbnailIndex: thumbnailIndex,
       );
 
-      final res = await _carService.createCar(req);
+      final res = isEditMode
+          ? await _carService.updateCar(editingCarId!, req)
+          : await _carService.createCar(req);
       if (res.success) {
         _successMessage = res.message;
       } else {

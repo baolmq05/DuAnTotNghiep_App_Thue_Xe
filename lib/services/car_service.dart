@@ -101,4 +101,67 @@ class CarService extends BaseService {
     final Car_Detail data = Car_Detail.fromJson(response['data']);
     return data;
   }
+
+  /// Cập nhật trạng thái xe (ví dụ: hoạt động, tạm khóa)
+  Future<bool> updateCarStatus(int carId, int status) async {
+    try {
+      final response = await update(
+        'api/cars/$carId',
+        body: {
+          'status': status,
+        },
+        requiresAuth: true,
+      );
+      return response != null && response['success'] == true;
+    } catch (e) {
+      debugPrint('Lỗi updateCarStatus: $e');
+      return false;
+    }
+  }
+
+  /// Xóa xe khỏi hệ thống
+  Future<bool> deleteCar(int carId) async {
+    try {
+      final response = await delete(
+        'api/cars/$carId',
+        requiresAuth: true,
+      );
+      return response != null && response['success'] == true;
+    } catch (e) {
+      debugPrint('Lỗi deleteCar: $e');
+      return false;
+    }
+  }
+
+  /// Cập nhật thông tin xe
+  Future<CreateCarResponse> updateCar(int carId, CreateCarRequest request) async {
+    try {
+      final response = await update(
+        'api/cars/$carId',
+        body: request.toJson(),
+        requiresAuth: true,
+      );
+
+      if (response != null && response is Map<String, dynamic>) {
+        return CreateCarResponse.fromJson(response);
+      }
+
+      return CreateCarResponse(
+        success: false,
+        message: 'Không nhận được phản hồi hợp lệ từ máy chủ.',
+      );
+    } catch (e) {
+      debugPrint('Lỗi khi cập nhật xe: $e');
+      if (e is ApiException) {
+        return CreateCarResponse(
+          success: false,
+          message: e.message,
+        );
+      }
+      return CreateCarResponse(
+        success: false,
+        message: 'Có lỗi xảy ra: $e',
+      );
+    }
+  }
 }

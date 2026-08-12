@@ -166,14 +166,7 @@ class _OwnerDashboardViewState extends State<OwnerDashboardView> {
               iconColor: Colors.teal,
               title: 'Quản lý danh sách xe',
               subtitle: 'Xem, chỉnh sửa trạng thái và thông tin xe của bạn',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tính năng Quản lý danh sách xe đang được phát triển!'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
+              onTap: () => context.push('/owner-vehicles'),
             ),
             const SizedBox(height: 10),
             _buildFeatureTile(

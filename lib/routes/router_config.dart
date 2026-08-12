@@ -41,6 +41,8 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_order_detail_viewmode
 import 'package:duantotnghiep_app_thue_xe/views/owner/owner_order_detail_view.dart';
 import 'package:duantotnghiep_app_thue_xe/views/car/create_car_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/create_car_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/views/owner/owner_vehicle_list_view.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_vehicle_viewmodel.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -274,6 +276,28 @@ final drivioRouter = GoRouter(
         return ChangeNotifierProvider(
           create: (_) => CreateCarViewModel(),
           child: const CreateCarView(),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/edit-car/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final idStr = state.pathParameters['id']!;
+        final carId = int.tryParse(idStr) ?? 0;
+        return ChangeNotifierProvider(
+          create: (_) => CreateCarViewModel(),
+          child: CreateCarView(carId: carId),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/owner-vehicles',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        return ChangeNotifierProvider(
+          create: (_) => OwnerVehicleViewModel(),
+          child: const OwnerVehicleListView(),
         );
       },
     ),

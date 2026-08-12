@@ -86,7 +86,7 @@ class Car_Detail {
           : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       name: json['name']?.toString() ?? '',
       licensePlate: json['license_plate']?.toString() ?? '',
-      VIN: json['vin']?.toString() ?? '',
+      VIN: (json['vin'] ?? json['VIN'] ?? json['Vin'])?.toString() ?? '',
       engineNumber: json['engine_number']?.toString() ?? '',
       fuelConsumption: json['fuel_consumption'] is int
           ? json['fuel_consumption']

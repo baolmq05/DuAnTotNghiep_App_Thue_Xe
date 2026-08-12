@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/create_car_viewmodel.dart';
 
 class CreateCarView extends StatefulWidget {
-  const CreateCarView({super.key});
+  final int? carId;
+  const CreateCarView({super.key, this.carId});
 
   @override
   State<CreateCarView> createState() => _CreateCarViewState();
@@ -23,8 +24,14 @@ class _CreateCarViewState extends State<CreateCarView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CreateCarViewModel>().fetchInitialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final vm = context.read<CreateCarViewModel>();
+      if (widget.carId != null) {
+        await vm.fetchInitialDataAndLoadCar(widget.carId!);
+        _addressController.text = vm.address;
+      } else {
+        await vm.fetchInitialData();
+      }
     });
   }
 
@@ -275,7 +282,7 @@ class _CreateCarViewState extends State<CreateCarView> {
           },
         ),
         title: Text(
-          'Đăng ký xe mới',
+          vm.isEditMode ? 'Chỉnh sửa thông tin xe' : 'Đăng ký xe mới',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -1448,9 +1455,9 @@ class _CreateCarViewState extends State<CreateCarView> {
                       ),
                       child: vm.isSubmitting
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                              'Đăng ký xe ngay',
-                              style: TextStyle(
+                          : Text(
+                              vm.isEditMode ? 'Cập nhật xe' : 'Đăng ký xe ngay',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
