@@ -8,7 +8,6 @@ class OrderDetailOwnerCard extends StatelessWidget {
   final TripRenterInfo renter;
   final bool isCreatingChat;
   final Function(TripModel, TripRenterInfo) onStartChat;
-  final Function(TripRenterInfo) onCall;
 
   const OrderDetailOwnerCard({
     super.key,
@@ -16,7 +15,6 @@ class OrderDetailOwnerCard extends StatelessWidget {
     required this.renter,
     required this.isCreatingChat,
     required this.onStartChat,
-    required this.onCall,
   });
 
   @override
@@ -121,7 +119,7 @@ class OrderDetailOwnerCard extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (isPaid) ...[
+                  if (isPaid)
                     Container(
                       width: 44,
                       height: 44,
@@ -153,28 +151,6 @@ class OrderDetailOwnerCard extends StatelessWidget {
                         highlightColor: Colors.transparent,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                  ],
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.call,
-                        color: context.primaryColor,
-                        size: 20,
-                      ),
-                      onPressed: () => onCall(renter),
-                      hoverColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                    ),
-                  ),
                 ],
               ),
             ],

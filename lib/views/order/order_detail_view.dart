@@ -233,7 +233,6 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                             renter: trip.renter!,
                             isCreatingChat: _isCreatingChat,
                             onStartChat: _handleStartChat,
-                            onCall: _showPhoneDialog,
                           ),
                         const SizedBox(height: 20),
                         OrderDetailTimeCard(trip: trip),
@@ -864,73 +863,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     }
   }
 
-  void _showPhoneDialog(TripRenterInfo renter) {
-    final phone = (renter.phone != null && renter.phone!.isNotEmpty)
-        ? renter.phone!
-        : 'Chưa cập nhật số điện thoại';
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(Icons.call, color: context.primaryColor),
-            SizedBox(width: 8),
-            Text(
-              'Số điện thoại khách thuê',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Khách thuê: ${renter.name}',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.cardColor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.phone_android,
-                    color: context.primaryColor,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: SelectableText(
-                      phone,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: context.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Đóng', style: TextStyle(color: context.primaryColor)),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showCancelConfirmDialog(TripModel trip) {
     bool isCancelling = false;

@@ -6,6 +6,8 @@ import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_order_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
+import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
+import 'package:duantotnghiep_app_thue_xe/services/conversation_service.dart';
 
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_header.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_car_card.dart';
@@ -24,6 +26,8 @@ class OwnerOrderDetailView extends StatefulWidget {
 }
 
 class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
+  bool _isCreatingChat = false;
+
   @override
   void initState() {
     super.initState();
@@ -121,9 +125,8 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
                           OrderDetailOwnerCard(
                             trip: trip,
                             renter: trip.renter!,
-                            isCreatingChat: false,
-                            onStartChat: (_, __) {},
-                            onCall: (_) {},
+                            isCreatingChat: _isCreatingChat,
+                            onStartChat: _handleStartChat,
                           ),
                         const SizedBox(height: 20),
                         OrderDetailTimeCard(trip: trip),
@@ -349,5 +352,54 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
         );
       },
     );
+  }
+
+  Future<void> _handleStartChat(TripModel trip, TripRenterInfo renter) async {
+    if (_isCreatingChat) return;
+    setState(() => _isCreatingChat = true);
+
+    try {
+      final conversationService = ConversationService();
+      var conv = await conversationService.createConversation(
+        receiverId: renter.id,
+        tripId: trip.id,
+        carId: trip.carId,
+      );
+
+      // Nếu API trả về otherUser có tên mặc định/trống hoặc ID = 0, đồng bộ lại từ thông tin của khách thuê
+      if (conv.otherUser.id == 0 ||
+          conv.otherUser.name == 'Người dùng' ||
+          conv.otherUser.name.isEmpty) {
+        conv = Conversation.raw(
+          id: conv.id,
+          status: conv.status,
+          tripId: conv.tripId,
+          createdAt: conv.createdAt,
+          updatedAt: conv.updatedAt,
+          otherUser: OtherUser(
+            id: renter.id,
+            name: renter.name,
+            avatar: renter.avatar,
+          ),
+          car: conv.car,
+          lastMessageObj: conv.lastMessageObj,
+          unreadCount: conv.unreadCount,
+        );
+      }
+
+      if (!mounted) return;
+      context.push('/chat/${conv.id}', extra: conv);
+    } catch (e) {
+      if (!mounted) return;
+      AppToast.show(
+        context,
+        message: 'Không thể tạo đoạn chat: $e',
+        type: ToastType.error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCreatingChat = false);
+      }
+    }
   }
 }
