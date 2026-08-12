@@ -82,17 +82,45 @@ class OrderDetailTimeline extends StatelessWidget {
     );
   }
 
+  String _getStatusLabel(int status) {
+    switch (status) {
+      case 0:
+        return 'Chờ duyệt';
+      case 1:
+        return 'Chờ thanh toán';
+      case 2:
+        return 'Đã xác nhận';
+      case 3:
+        return 'Đang diễn ra';
+      case 4:
+        return 'Đã hoàn thành';
+      case 5:
+        return 'Người dùng hủy';
+      case 6:
+        return 'Chủ xe hủy';
+      case 7:
+        return 'Chờ gia hạn';
+      case 8:
+        return 'Chờ trả xe';
+      default:
+        return 'Không xác định';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isStep1 = trip.status >= 0;
-    final isStep2 = trip.status >= 1;
-    final isStep3 = trip.status >= 2;
-    final isStep4 = trip.status >= 3;
-    final isStep5 = trip.status == 4;
+    final status = trip.status;
+    final isCancelled = status == 5 || status == 6;
+
+    final isStep1 = status >= 0;
+    final isStep2 = status >= 1 && !isCancelled;
+    final isStep3 = status >= 2 && !isCancelled;
+    final isStep4 = status >= 3 && !isCancelled;
+    final isStep5 = status == 4;
 
     final bool canCancel = isOwner
-        ? (trip.status == 1 || trip.status == 2)
-        : (trip.status >= 0 && trip.status < 3);
+        ? (status == 1 || status == 2)
+        : (status >= 0 && status < 3);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -103,12 +131,40 @@ class OrderDetailTimeline extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Trạng thái đơn',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Trạng thái đơn',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: context.textPrimary,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isCancelled
+                      ? Colors.red.shade100
+                      : (status == 4
+                          ? Colors.green.shade100
+                          : Colors.orange.shade100),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  _getStatusLabel(status),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isCancelled
+                        ? Colors.red.shade700
+                        : (status == 4
+                            ? Colors.green.shade700
+                            : Colors.orange.shade800),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           Row(
@@ -117,7 +173,7 @@ class OrderDetailTimeline extends StatelessWidget {
                 child: _buildTimelineStep(
                   context,
                   icon: Icons.assignment_outlined,
-                  title: 'Đăng ký thuê',
+                  title: 'Chờ duyệt',
                   time: isStep1 ? _formatDateTime(trip.startAt) : '--',
                   isDone: isStep1,
                   showLeftLine: false,
@@ -128,8 +184,8 @@ class OrderDetailTimeline extends StatelessWidget {
                 child: _buildTimelineStep(
                   context,
                   icon: Icons.account_balance_wallet,
-                  title: 'Đặt cọc',
-                  time: isStep2 ? 'Đã cọc' : '--',
+                  title: 'Chờ TT',
+                  time: isStep2 ? 'Chờ thanh toán' : '--',
                   isDone: isStep2,
                   showLeftLine: true,
                   showRightLine: true,
@@ -138,9 +194,9 @@ class OrderDetailTimeline extends StatelessWidget {
               Expanded(
                 child: _buildTimelineStep(
                   context,
-                  icon: Icons.check,
+                  icon: Icons.check_circle_outline,
                   title: 'Xác nhận',
-                  time: isStep3 ? 'Thành công' : '--',
+                  time: isStep3 ? 'Đã xác nhận' : '--',
                   isDone: isStep3,
                   showLeftLine: true,
                   showRightLine: true,
@@ -150,8 +206,14 @@ class OrderDetailTimeline extends StatelessWidget {
                 child: _buildTimelineStep(
                   context,
                   icon: Icons.directions_car,
-                  title: 'Nhận xe',
-                  time: isStep4 ? _formatDateTime(trip.startAt) : '--',
+                  title: 'Đang thuê',
+                  time: isStep4
+                      ? (status == 7
+                          ? 'Chờ gia hạn'
+                          : status == 8
+                              ? 'Chờ trả xe'
+                              : _formatDateTime(trip.startAt))
+                      : '--',
                   isDone: isStep4,
                   showLeftLine: true,
                   showRightLine: true,
@@ -162,7 +224,7 @@ class OrderDetailTimeline extends StatelessWidget {
                   context,
                   icon: Icons.assignment_turned_in,
                   title: 'Hoàn tất',
-                  time: isStep5 ? 'Đã xong' : '--',
+                  time: isStep5 ? 'Đã hoàn thành' : '--',
                   isDone: isStep5,
                   showLeftLine: true,
                   showRightLine: false,
@@ -170,8 +232,34 @@ class OrderDetailTimeline extends StatelessWidget {
               ),
             ],
           ),
+          if (isCancelled) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.cancel_outlined, color: Colors.red.shade600, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    _getStatusLabel(status),
+                    style: TextStyle(
+                      color: Colors.red.shade700,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (canCancel) ...[
-            const SizedBox(height: 36),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(

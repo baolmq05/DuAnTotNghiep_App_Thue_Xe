@@ -397,6 +397,60 @@ class TripService extends BaseService {
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
     }
   }
+
+  // Bắt đầu chuyến đi (upload ảnh trước chuyến & đổi status sang 3 - Ongoing)
+  Future<Map<String, dynamic>> startTrip(int tripId, List<String> imageUrls) async {
+    try {
+      final response = await store(
+        'api/trips/$tripId/start',
+        body: {'images': imageUrls},
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Bắt đầu chuyến đi thành công!',
+          'data': response['data'] != null ? TripModel.fromJson(response['data']) : null,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể bắt đầu chuyến đi.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi bắt đầu chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Hoàn thành chuyến đi (upload ảnh sau chuyến & đổi status sang 4 - Complete)
+  Future<Map<String, dynamic>> completeTrip(int tripId, List<String> imageUrls) async {
+    try {
+      final response = await store(
+        'api/trips/$tripId/complete',
+        body: {'images': imageUrls},
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Hoàn thành chuyến đi thành công!',
+          'data': response['data'] != null ? TripModel.fromJson(response['data']) : null,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể hoàn thành chuyến đi.',
+      };
+    } catch (e) {
+      debugPrint('Lỗi khi hoàn thành chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }
 
 

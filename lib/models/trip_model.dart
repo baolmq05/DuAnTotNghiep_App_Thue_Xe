@@ -119,6 +119,43 @@ class TripExtensionModel {
   }
 }
 
+class TripImageModel {
+  final int id;
+  final int tripId;
+  final String imageUrl;
+  final int type; // 0: Trước chuyến đi, 1: Sau chuyến đi
+  final int isThumbnail;
+
+  TripImageModel({
+    required this.id,
+    required this.tripId,
+    required this.imageUrl,
+    required this.type,
+    this.isThumbnail = 0,
+  });
+
+  factory TripImageModel.fromJson(Map<String, dynamic> json) {
+    return TripImageModel(
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      tripId: json['trip_id'] is int
+          ? json['trip_id'] as int
+          : int.tryParse(json['trip_id']?.toString() ?? '') ?? 0,
+      imageUrl: json['image_url']?.toString() ??
+          json['url']?.toString() ??
+          json['image']?.toString() ??
+          '',
+      type: json['type'] is int
+          ? json['type'] as int
+          : int.tryParse(json['type']?.toString() ?? '0') ?? 0,
+      isThumbnail: json['is_thumbnail'] is int
+          ? json['is_thumbnail'] as int
+          : int.tryParse(json['is_thumbnail']?.toString() ?? '0') ?? 0,
+    );
+  }
+}
+
 class TripRenterInfo {
   final int id;
   final String name;
@@ -189,6 +226,7 @@ class TripModel {
   final CarModel? car;
   final TripExtensionModel? latestExtension;
   final List<TripReviewModel> reviews;
+  final List<TripImageModel> tripImages;
 
   TripModel({
     required this.id,
@@ -211,6 +249,7 @@ class TripModel {
     this.car,
     this.latestExtension,
     this.reviews = const [],
+    this.tripImages = const [],
   });
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
@@ -291,6 +330,20 @@ class TripModel {
           .toList();
     }
 
+    // Parse trip images (bàn giao trước/sau chuyến)
+    List<TripImageModel> parsedTripImages = [];
+    if (json['images'] != null && json['images'] is List) {
+      parsedTripImages = (json['images'] as List)
+          .where((img) => img != null && img is Map<String, dynamic>)
+          .map((img) => TripImageModel.fromJson(img as Map<String, dynamic>))
+          .toList();
+    } else if (json['trip_images'] != null && json['trip_images'] is List) {
+      parsedTripImages = (json['trip_images'] as List)
+          .where((img) => img != null && img is Map<String, dynamic>)
+          .map((img) => TripImageModel.fromJson(img as Map<String, dynamic>))
+          .toList();
+    }
+
     final renterJson = json['renter'] is Map<String, dynamic>
         ? json['renter'] as Map<String, dynamic>
         : (json['customer'] is Map<String, dynamic>
@@ -352,7 +405,24 @@ class TripModel {
       car: parsedCar,
       latestExtension: parsedExtension,
       reviews: parsedReviews,
+      tripImages: parsedTripImages,
     );
+  }
+
+  // Danh sách ảnh bàn giao trước chuyến đi (type = 0)
+  List<String> get beforeTripImages {
+    return tripImages
+        .where((img) => img.type == 0 && img.imageUrl.isNotEmpty)
+        .map((img) => img.imageUrl)
+        .toList();
+  }
+
+  // Danh sách ảnh bàn giao sau chuyến đi (type = 1)
+  List<String> get afterTripImages {
+    return tripImages
+        .where((img) => img.type == 1 && img.imageUrl.isNotEmpty)
+        .map((img) => img.imageUrl)
+        .toList();
   }
 
   TripReviewModel? get renterReview {
