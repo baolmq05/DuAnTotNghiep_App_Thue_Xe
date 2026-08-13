@@ -36,6 +36,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   int _messageCount = 0;
 
   void _pickAndSendImage(ImageSource source) async {
+    if (!_conv.isChatbot && _conv.status == 0) return;
     final errorColor = context.error;
     final chatDetailViewModel = context.read<ChatDetailViewModel>();
     try {
@@ -68,7 +69,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
               final botMsg = ChatMessage(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 senderId: 'chatbot',
-                text: 'Tôi đã nhận được ảnh của bạn. Tôi có thể giúp gì thêm không?',
+                text:
+                    'Tôi đã nhận được ảnh của bạn. Tôi có thể giúp gì thêm không?',
                 timestamp: DateTime.now(),
                 isMe: false,
               );
@@ -150,6 +152,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   }
 
   void _sendMessage() async {
+    if (!_conv.isChatbot && _conv.status == 0) return;
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
@@ -321,10 +324,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.grey.shade200,
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.grey.shade200, width: 1.0),
       ),
       child: avatarWidget,
     );
@@ -417,10 +417,10 @@ class _ChatDetailViewState extends State<ChatDetailView> {
           //   icon: const Icon(Icons.phone_outlined, color: Colors.black54),
           //   onPressed: () {},
           // ),
-          IconButton(
-            icon: Icon(Icons.info_outline, color: context.textSecondary),
-            onPressed: () {},
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.info_outline, color: context.textSecondary),
+          //   onPressed: () {},
+          // ),
           const SizedBox(width: 8),
         ],
       ),
@@ -481,97 +481,169 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                   ),
           ),
 
-          Container(
-            padding: const EdgeInsets.only(
-              left: 12,
-              right: 12,
-              top: 10,
-              bottom: 25,
-            ),
-            decoration: BoxDecoration(
-              color: context.cardColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, -3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                if (!_conv.isChatbot) ...[
-                  IconButton(
-                    icon: const Icon(
-                      Icons.image_outlined,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                    onPressed: () => _pickAndSendImage(ImageSource.gallery),
+          !_conv.isChatbot && _conv.status == 0
+              ? Container(
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 12,
+                    bottom: 30,
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.camera_alt_outlined,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                    onPressed: () => _pickAndSendImage(ImageSource.camera),
-                  ),
-                  const SizedBox(width: 4),
-                ],
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    onSubmitted: (_) => _sendMessage(),
-                    style: TextStyle(
-                      color: context.textPrimary,
-                      fontSize: 15,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Nhập tin nhắn...',
-                      hintStyle: const TextStyle(
-                        color: Color(0xFF9CA3AF),
-                        fontSize: 15,
-                      ),
-                      fillColor: context.inputBackground,
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 16,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: context.border, width: 1.2),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: context.border, width: 1.2),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: context.primaryColor, width: 1.2),
-                      ),
-                      isDense: true,
+                  decoration: BoxDecoration(
+                    color: context.cardColor,
+                    border: Border(
+                      top: BorderSide(color: context.border, width: 0.8),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-
-                GestureDetector(
-                  onTap: _sendMessage,
                   child: Container(
-                    width: 44,
-                    height: 44,
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: context.primaryColor,
-                      shape: BoxShape.circle,
+                      color: context.inputBackground,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: context.border),
                     ),
-                    child: const Center(
-                      child: Icon(Icons.send, color: Colors.white, size: 18),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          color: context.textSecondary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Cuộc trò chuyện đã đóng',
+                                style: TextStyle(
+                                  color: context.textPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Chuyến đi đã kết thúc hoặc đã hủy. Bạn chỉ có thể xem lại lịch sử tin nhắn.',
+                                style: TextStyle(
+                                  color: context.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                )
+              : Container(
+                  padding: const EdgeInsets.only(
+                    left: 12,
+                    right: 12,
+                    top: 10,
+                    bottom: 25,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.cardColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, -3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      if (!_conv.isChatbot) ...[
+                        IconButton(
+                          icon: const Icon(
+                            Icons.image_outlined,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                          onPressed: () =>
+                              _pickAndSendImage(ImageSource.gallery),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.camera_alt_outlined,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                          onPressed: () =>
+                              _pickAndSendImage(ImageSource.camera),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Expanded(
+                        child: TextField(
+                          controller: _messageController,
+                          onSubmitted: (_) => _sendMessage(),
+                          style: TextStyle(
+                            color: context.textPrimary,
+                            fontSize: 15,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Nhập tin nhắn...',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 15,
+                            ),
+                            fillColor: context.inputBackground,
+                            filled: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 16,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(
+                                color: context.border,
+                                width: 1.2,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(
+                                color: context.border,
+                                width: 1.2,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(
+                                color: context.primaryColor,
+                                width: 1.2,
+                              ),
+                            ),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      GestureDetector(
+                        onTap: _sendMessage,
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: context.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -579,7 +651,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
 
   Widget _buildMessageBubble(ChatMessage msg) {
     // Thử phân tích cú pháp dữ liệu gợi ý xe (JSON hoặc Markdown)
-    final carSuggestionsData = !msg.isMe ? _tryParseCarSuggestions(msg.text) : null;
+    final carSuggestionsData = !msg.isMe
+        ? _tryParseCarSuggestions(msg.text)
+        : null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
@@ -599,87 +673,89 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                 child: carSuggestionsData != null
                     ? _buildCarSuggestions(carSuggestionsData)
                     : msg.imageUrl != null
-                        ? GestureDetector(
-                            onTap: () => _viewImageFull(context, msg.imageUrl!),
-                            child: Container(
-                              constraints: const BoxConstraints(
-                                maxWidth: 220,
-                                maxHeight: 220,
+                    ? GestureDetector(
+                        onTap: () => _viewImageFull(context, msg.imageUrl!),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: 220,
+                            maxHeight: 220,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  )
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    msg.imageUrl!.startsWith('http') || kIsWeb
-                                        ? Image.network(
-                                            msg.imageUrl!,
-                                            fit: BoxFit.cover,
-                                            width: 220,
-                                            height: 220,
-                                          )
-                                        : Image.file(
-                                            File(msg.imageUrl!),
-                                            fit: BoxFit.cover,
-                                            width: 220,
-                                            height: 220,
-                                          ),
-                                    if (msg.id.startsWith('temp_'))
-                                      Container(
-                                        color: Colors.black38,
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                msg.imageUrl!.startsWith('http') || kIsWeb
+                                    ? Image.network(
+                                        msg.imageUrl!,
+                                        fit: BoxFit.cover,
                                         width: 220,
                                         height: 220,
-                                        child: const Center(
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 3,
-                                          ),
-                                        ),
+                                      )
+                                    : Image.file(
+                                        File(msg.imageUrl!),
+                                        fit: BoxFit.cover,
+                                        width: 220,
+                                        height: 220,
                                       ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                        : Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: msg.isMe
-                                  ? context.primaryColor
-                                  : context.chatBubbleIncoming,
-                              borderRadius: BorderRadius.only(
-                                topLeft: const Radius.circular(16),
-                                topRight: const Radius.circular(16),
-                                bottomLeft: msg.isMe
-                                    ? const Radius.circular(16)
-                                    : const Radius.circular(4),
-                                bottomRight: msg.isMe
-                                    ? const Radius.circular(4)
-                                    : const Radius.circular(16),
-                              ),
-                            ),
-                            child: Text(
-                              msg.text,
-                              style: TextStyle(
-                                color: msg.isMe ? Colors.white : context.textPrimary,
-                                fontSize: 15,
-                                height: 1.3,
-                              ),
+                                if (msg.id.startsWith('temp_'))
+                                  Container(
+                                    color: Colors.black38,
+                                    width: 220,
+                                    height: 220,
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 3,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
+                        ),
+                      )
+                    : Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: msg.isMe
+                              ? context.primaryColor
+                              : context.chatBubbleIncoming,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(16),
+                            topRight: const Radius.circular(16),
+                            bottomLeft: msg.isMe
+                                ? const Radius.circular(16)
+                                : const Radius.circular(4),
+                            bottomRight: msg.isMe
+                                ? const Radius.circular(4)
+                                : const Radius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          msg.text,
+                          style: TextStyle(
+                            color: msg.isMe
+                                ? Colors.white
+                                : context.textPrimary,
+                            fontSize: 15,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
               ),
             ],
           ),
@@ -700,7 +776,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   }
 
   Widget _buildCarSuggestions(Map<String, dynamic> data) {
-    final message = data['message']?.toString() ?? 'Dưới đây là một số gợi ý xe cho bạn:';
+    final message =
+        data['message']?.toString() ?? 'Dưới đây là một số gợi ý xe cho bạn:';
     final carsList = data['cars'] as List<dynamic>? ?? [];
 
     return Column(
@@ -740,11 +817,16 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                 final carId = car['id'] as int? ?? 0;
                 final carName = car['name']?.toString() ?? 'Xe Drivio';
                 final thumbnail = car['thumbnail']?.toString() ?? '';
-                final price = car['price'] is num ? (car['price'] as num).toInt() : 0;
-                final originalPrice = car['original_price'] is num ? (car['original_price'] as num).toInt() : 0;
+                final price = car['price'] is num
+                    ? (car['price'] as num).toInt()
+                    : 0;
+                final originalPrice = car['original_price'] is num
+                    ? (car['original_price'] as num).toInt()
+                    : 0;
                 final location = car['location']?.toString() ?? '';
                 final owner = car['owner']?.toString() ?? '';
-                final features = (car['features'] as List<dynamic>?)
+                final features =
+                    (car['features'] as List<dynamic>?)
                         ?.map((e) => e.toString())
                         .toList() ??
                     [];
@@ -766,7 +848,7 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                           color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
-                        )
+                        ),
                       ],
                     ),
                     child: Row(
@@ -818,7 +900,10 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                                     runSpacing: 2,
                                     children: [
                                       for (var feature in features.take(3))
-                                        _buildMiniBadge(context, feature.trim()),
+                                        _buildMiniBadge(
+                                          context,
+                                          feature.trim(),
+                                        ),
                                     ],
                                   ),
                                 ],
@@ -856,7 +941,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                                       Expanded(
                                         child: Wrap(
                                           alignment: WrapAlignment.start,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
                                           spacing: 4,
                                           children: [
                                             Text(
@@ -873,7 +959,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
                                                 style: TextStyle(
                                                   color: context.textSecondary,
                                                   fontSize: 10,
-                                                  decoration: TextDecoration.lineThrough,
+                                                  decoration: TextDecoration
+                                                      .lineThrough,
                                                 ),
                                               ),
                                           ],
@@ -977,7 +1064,11 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   }
 
   String _formatCurrency(int value) {
-    final format = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+    final format = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: 'đ',
+      decimalDigits: 0,
+    );
     return format.format(value).replaceAll('₫', 'đ');
   }
 
@@ -1006,7 +1097,9 @@ class _ChatDetailViewState extends State<ChatDetailView> {
     } catch (_) {}
 
     // 2. Thử parse dạng Markdown (cho các tin nhắn văn bản từ AI chứa danh sách xe)
-    if (cleaned.contains('vehicles/') || cleaned.contains('Chi tiết:') || cleaned.contains('Giá thuê:')) {
+    if (cleaned.contains('vehicles/') ||
+        cleaned.contains('Chi tiết:') ||
+        cleaned.contains('Giá thuê:')) {
       try {
         final List<Map<String, dynamic>> cars = [];
         final lines = cleaned.split('\n');
@@ -1030,13 +1123,20 @@ class _ChatDetailViewState extends State<ChatDetailView> {
             final name = nameMatch?.group(1)?.trim() ?? 'Xe Drivio';
             final carId = int.tryParse(idMatch?.group(1) ?? '0') ?? 0;
 
-            final ownerMatch = RegExp(r'-\s*\*\*Chủ xe:\*\*\s*(.*)').firstMatch(block);
-            final priceMatch = RegExp(r'-\s*\*\*Giá thuê:\*\*\s*([\d\.]+)').firstMatch(block);
-            final origPriceMatch = RegExp(r'-\s*\*\*Giá gốc:\*\*\s*~~([\d\.]+)').firstMatch(block);
+            final ownerMatch = RegExp(
+              r'-\s*\*\*Chủ xe:\*\*\s*(.*)',
+            ).firstMatch(block);
+            final priceMatch = RegExp(
+              r'-\s*\*\*Giá thuê:\*\*\s*([\d\.]+)',
+            ).firstMatch(block);
+            final origPriceMatch = RegExp(
+              r'-\s*\*\*Giá gốc:\*\*\s*~~([\d\.]+)',
+            ).firstMatch(block);
 
             final owner = ownerMatch?.group(1)?.trim() ?? '';
             final priceStr = priceMatch?.group(1)?.replaceAll('.', '') ?? '0';
-            final origPriceStr = origPriceMatch?.group(1)?.replaceAll('.', '') ?? '0';
+            final origPriceStr =
+                origPriceMatch?.group(1)?.replaceAll('.', '') ?? '0';
 
             final price = int.tryParse(priceStr) ?? 0;
             final origPrice = int.tryParse(origPriceStr) ?? price;
@@ -1047,18 +1147,15 @@ class _ChatDetailViewState extends State<ChatDetailView> {
               'owner': owner,
               'price': price,
               'original_price': origPrice,
-              'thumbnail': 'https://img1.oto.com.vn/2024/01/18/toyota-wigo-2023-ts4-7d9b-429a_wm.webp',
+              'thumbnail':
+                  'https://img1.oto.com.vn/2024/01/18/toyota-wigo-2023-ts4-7d9b-429a_wm.webp',
               'location': '',
             });
           }
         }
 
         if (cars.isNotEmpty) {
-          return {
-            'status': 'success',
-            'message': introMessage,
-            'cars': cars,
-          };
+          return {'status': 'success', 'message': introMessage, 'cars': cars};
         }
       } catch (_) {}
     }

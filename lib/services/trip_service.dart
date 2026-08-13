@@ -75,6 +75,9 @@ class TripService extends BaseService {
         'success': false,
         'message': 'Không nhận được phản hồi từ hệ thống.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi tạo yêu cầu thuê xe: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi tạo yêu cầu thuê xe: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
@@ -101,6 +104,9 @@ class TripService extends BaseService {
         'success': false,
         'message': response?['message'] ?? 'Không thể hủy chuyến đi.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi hủy chuyến đi $tripId: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi hủy chuyến đi $tripId: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra khi hủy chuyến: $e'};
@@ -150,6 +156,9 @@ class TripService extends BaseService {
         'success': false,
         'message': 'Không nhận được phản hồi từ backend.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi gọi API thanh toán ZaloPay: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi gọi API thanh toán ZaloPay: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
@@ -212,6 +221,9 @@ class TripService extends BaseService {
         'success': false,
         'message': 'Không nhận được phản hồi từ hệ thống.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi gửi yêu cầu gia hạn: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi gửi yêu cầu gia hạn: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
@@ -252,6 +264,9 @@ class TripService extends BaseService {
         'success': false,
         'message': 'Không nhận được phản hồi từ backend.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi gọi API thanh toán gia hạn ZaloPay: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi gọi API thanh toán gia hạn ZaloPay: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
@@ -279,6 +294,9 @@ class TripService extends BaseService {
         'success': false,
         'message': 'Không nhận được phản hồi từ hệ thống.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi gửi yêu cầu trả xe: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi gửi yêu cầu trả xe: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
@@ -313,6 +331,9 @@ class TripService extends BaseService {
         'success': false,
         'message': response?['message'] ?? 'Không thể gửi đánh giá.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi gửi đánh giá cho chuyến đi $tripId: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi gửi đánh giá cho chuyến đi $tripId: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra khi gửi đánh giá: $e'};
@@ -339,6 +360,9 @@ class TripService extends BaseService {
         'success': false,
         'message': response?['message'] ?? 'Không thể xác nhận chuyến đi.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi xác nhận chuyến đi $tripId: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi xác nhận chuyến đi $tripId: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
@@ -365,6 +389,9 @@ class TripService extends BaseService {
         'success': false,
         'message': response?['message'] ?? 'Không thể từ chối yêu cầu thuê xe.',
       };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi từ chối chuyến đi $tripId: ${e.message}');
+      return {'success': false, 'message': e.message};
     } catch (e) {
       debugPrint('Lỗi khi từ chối chuyến đi $tripId: $e');
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};

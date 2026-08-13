@@ -73,9 +73,9 @@ class _ConversationsViewState extends State<ConversationsView> {
     ConversationViewmodel viewModel, {
     required bool isCompleted,
   }) {
-    // 1. Separate list by status (2 = Completed, other = Active)
+    // 1. Separate list by status (0 = Completed, other = Active)
     final tabConversations = viewModel.conversations.where((conv) {
-      return isCompleted ? (conv.status == 2) : (conv.status != 2);
+      return isCompleted ? (conv.status == 0) : (conv.status != 0);
     }).toList();
 
     // 2. Filter and sort by search text and filter menu
@@ -152,36 +152,46 @@ class _ConversationsViewState extends State<ConversationsView> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: context.inputBackground,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: context.border, width: 1),
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (val) {
-                            setState(() {
-                              _searchQuery = val;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Tìm kiếm tin nhắn',
-                            hintStyle: const TextStyle(
-                              color: Color(0xFF9CA3AF),
-                              fontSize: 15,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              color: Color(0xFF9CA3AF),
-                              size: 20,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                            ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (val) {
+                          setState(() {
+                            _searchQuery = val;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Tìm kiếm tin nhắn',
+                          hintStyle: const TextStyle(
+                            color: Color(0xFF9CA3AF),
+                            fontSize: 15,
                           ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: Color(0xFF9CA3AF),
+                            size: 20,
+                          ),
+                          fillColor: context.inputBackground,
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: context.border, width: 1),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: context.border, width: 1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: context.primaryColor, width: 1.5),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: context.textPrimary,
+                          fontSize: 15,
                         ),
                       ),
                     ),

@@ -130,10 +130,9 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
               primary: context.primaryColor,
               onPrimary: Colors.white,
-              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -203,10 +202,9 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
               primary: context.primaryColor,
               onPrimary: Colors.white,
-              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -268,10 +266,9 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
               primary: context.primaryColor,
               onPrimary: Colors.white,
-              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(
@@ -329,10 +326,9 @@ class _BookingCarViewState extends State<BookingCarView> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
               primary: context.primaryColor,
               onPrimary: Colors.white,
-              onSurface: context.textPrimary,
             ),
           ),
           child: Localizations.override(

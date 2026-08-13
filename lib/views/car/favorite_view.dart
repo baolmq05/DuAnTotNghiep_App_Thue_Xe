@@ -69,55 +69,46 @@ class _FavoriteViewState extends State<FavoriteView> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: context.cardColor,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: context.border),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const SizedBox(width: 12),
-                        Icon(
-                          Icons.search,
-                          color: context.textSecondary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                searchQuery = value;
-                              });
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'Tìm xe trong danh sách yêu thích...',
-                              hintStyle: TextStyle(
-                                color: context.textSecondary,
-                                fontSize: 13,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              isDense: true,
-                            ),
-                            style: TextStyle(
-                              color: context.textPrimary,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-                    ),
-                  ),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Tìm xe trong danh sách yêu thích...',
+                hintStyle: TextStyle(
+                  color: context.textSecondary,
+                  fontSize: 14,
                 ),
-              ],
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: context.textSecondary,
+                  size: 20,
+                ),
+                fillColor: context.inputBackground,
+                filled: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.border, width: 1),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.border, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: context.primaryColor, width: 1.5),
+                ),
+              ),
+              style: TextStyle(
+                color: context.textPrimary,
+                fontSize: 15,
+              ),
             ),
           ),
           Expanded(
