@@ -283,7 +283,7 @@ class AuthProvider extends ChangeNotifier {
         try {
           final reviewData = await OwnerProfileService().fetchProfileReviews(
             targetId: profileUser.id,
-            isOwner: false,
+            isOwner: profileUser.isOwner,
           );
           if (reviewData != null) {
             final List reviewsList = reviewData['reviews'] as List? ?? [];

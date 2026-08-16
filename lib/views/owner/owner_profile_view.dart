@@ -164,41 +164,51 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
             );
           }
 
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                OwnerProfileHeader(profile: profile, isOwner: currentIsOwner),
-                Divider(
-                  height: 24,
-                  thickness: 1,
-                  color: context.border,
-                ),
-                OwnerProfileReviews(
-                  viewModel: viewModel,
-                  isOwner: currentIsOwner,
-                  onReviewerTap: (reviewerId, isOwnerReview) {
-                    context.push(
-                      '/owner-profile/$reviewerId?isOwner=$isOwnerReview',
-                    );
-                  },
-                ),
-                if (currentIsOwner) ...[
+          return RefreshIndicator(
+            onRefresh: () async {
+              await viewModel.fetchOwnerProfile(
+                ownerId: widget.ownerId,
+                isOwner: widget.isOwner,
+              );
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  OwnerProfileHeader(profile: profile, isOwner: currentIsOwner),
                   Divider(
                     height: 24,
                     thickness: 1,
                     color: context.border,
                   ),
-                  OwnerProfileCars(
-                    profile: profile,
-                    onCarTap: (car) {
-                      context.push('/car_detail/${car.id}');
+                  OwnerProfileReviews(
+                    viewModel: viewModel,
+                    isOwner: currentIsOwner,
+                    onReviewerTap: (reviewerId, isOwnerReview) {
+                      context.push(
+                        '/owner-profile/$reviewerId?isOwner=$isOwnerReview',
+                      );
                     },
                   ),
+                  if (currentIsOwner) ...[
+                    Divider(
+                      height: 24,
+                      thickness: 1,
+                      color: context.border,
+                    ),
+                    OwnerProfileCars(
+                      profile: profile,
+                      onCarTap: (car) {
+                        context.push('/car_detail/${car.id}');
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 32),
                 ],
-                const SizedBox(height: 32),
-              ],
+              ),
             ),
           );
         },

@@ -86,37 +86,45 @@ class _ProfileViewState extends State<ProfileView> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        children: [
-          ProfileCard(user: user),
-          const SizedBox(height: 16),
-          const WalletCard(),
-          const SizedBox(height: 24),
-          Text(
-            'Dịch vụ của tôi',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await context.read<AuthProvider>().fetchProfile();
+          await context.read<WalletViewModel>().fetchWalletDetails();
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          children: [
+            ProfileCard(user: user),
+            const SizedBox(height: 16),
+            const WalletCard(),
+            const SizedBox(height: 24),
+            Text(
+              'Dịch vụ của tôi',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: context.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          ServicesCard(user: user),
-          const SizedBox(height: 24),
-          Text(
-            'Khác',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: context.textPrimary,
+            const SizedBox(height: 12),
+            ServicesCard(user: user),
+            const SizedBox(height: 24),
+            Text(
+              'Khác',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: context.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          const OtherCard(),
-          const SizedBox(height: 32),
-        ],
+            const SizedBox(height: 12),
+            const OtherCard(),
+            const SizedBox(height: 32),
+          ],
+        ),
       ),
     );
   }
+  
 }

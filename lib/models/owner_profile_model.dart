@@ -30,12 +30,27 @@ class OwnerProfile {
     var carList = json['cars'] as List? ?? [];
     List<Car> parsedCars = carList.where((c) => c != null).map((c) => Car.fromJson(c as Map<String, dynamic>)).toList();
 
+    double rating = double.tryParse(json['rating']?.toString() ?? '0.0') ?? 0.0;
+    if (parsedReviews.isNotEmpty) {
+      double totalStars = 0.0;
+      int validCount = 0;
+      for (var review in parsedReviews) {
+        if (review.rating > 0) {
+          totalStars += review.rating;
+          validCount++;
+        }
+      }
+      if (validCount > 0) {
+        rating = totalStars / validCount;
+      }
+    }
+
     return OwnerProfile(
       id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       name: json['name']?.toString() ?? '',
       avatar: json['avatar']?.toString(),
       phone: json['phone']?.toString(),
-      rating: double.tryParse(json['rating']?.toString() ?? '0.0') ?? 0.0,
+      rating: rating,
       tripsCount: json['trips_count'] is int
           ? json['trips_count']
           : int.tryParse(json['trips_count']?.toString() ?? '') ?? 0,
