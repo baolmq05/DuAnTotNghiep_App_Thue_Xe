@@ -145,11 +145,11 @@ class _CreateCarViewState extends State<CreateCarView> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.border),
+                        borderSide: BorderSide(color: context.inputBorderColor),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.border),
+                        borderSide: BorderSide(color: context.inputBorderColor),
                       ),
                     ),
                   ),
@@ -786,7 +786,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                           decoration: BoxDecoration(
                             color: context.cardColor,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: context.border),
+                            border: Border.all(color: context.inputBorderColor),
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
@@ -794,7 +794,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                               shrinkWrap: true,
                               itemCount: vm.addressSuggestionsWithId.length,
                               separatorBuilder: (_, __) => Divider(
-                                color: context.border.withValues(alpha: 0.5),
+                                color: context.inputBorderColor.withValues(alpha: 0.5),
                                 height: 1,
                               ),
                               itemBuilder: (context, index) {
@@ -1483,7 +1483,7 @@ class _CreateCarViewState extends State<CreateCarView> {
         color: context.inputBackground,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isSelected ? context.primaryColor : context.border,
+          color: isSelected ? context.primaryColor : context.inputBorderColor,
         ),
       ),
       child: Row(
@@ -1576,11 +1576,11 @@ class _CreateCarViewState extends State<CreateCarView> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: context.border),
+        borderSide: BorderSide(color: context.inputBorderColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: context.border),
+        borderSide: BorderSide(color: context.inputBorderColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),

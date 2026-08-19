@@ -49,6 +49,7 @@ extension AppThemeColors on BuildContext {
   // Border
   Color get border => colorScheme.outline;
   Color get borderVariant => colorScheme.outlineVariant;
+  Color get inputBorderColor => isDarkMode ? Colors.grey.shade700 : colorScheme.outline;
 
   // Status
   Color get success => AppColors.success;

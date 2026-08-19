@@ -103,4 +103,24 @@ ThemeData darkTheme = ThemeData(
   dialogTheme: DialogThemeData(
     backgroundColor: Colors.grey.shade800,
   ),
+  switchTheme: SwitchThemeData(
+    thumbColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return null;
+      }
+      return Colors.grey.shade400;
+    }),
+    trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return null;
+      }
+      return Colors.grey.shade700;
+    }),
+    trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return null;
+      }
+      return Colors.transparent;
+    }),
+  ),
 );
