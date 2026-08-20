@@ -115,7 +115,7 @@ class OrderDetailHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '#RT${trip.id}',
+                      trip.displayCode,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

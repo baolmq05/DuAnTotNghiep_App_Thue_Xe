@@ -226,13 +226,43 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                           const SizedBox(height: 20),
                           _buildExtensionBanner(trip),
                         ],
-                        const SizedBox(height: 20),
-                        if (trip.renter != null)
-                          OrderDetailOwnerCard(
+                        if (isOwner && trip.renter != null)
+                          OrderDetailOwnerCard.renter(
                             trip: trip,
                             renter: trip.renter!,
                             isCreatingChat: _isCreatingChat,
-                            onStartChat: _handleStartChat,
+                            onStartChat: () => _handleStartChat(
+                              trip,
+                              receiverId: trip.renter!.id,
+                              receiverName: trip.renter!.name,
+                              receiverAvatar: trip.renter!.avatar,
+                            ),
+                          )
+                        else if (car?.owner != null)
+                          OrderDetailOwnerCard.owner(
+                            trip: trip,
+                            owner: car!.owner!,
+                            isCreatingChat: _isCreatingChat,
+                            onStartChat: () => _handleStartChat(
+                              trip,
+                              receiverId: car.owner!.id,
+                              receiverName: car.owner!.name,
+                              receiverAvatar: car.owner!.avatar,
+                            ),
+                          )
+                        else if (car != null && car.userId > 0)
+                          OrderDetailOwnerCard.owner(
+                            trip: trip,
+                            owner: OwnerModel(
+                              id: car.userId,
+                              name: 'Chủ xe',
+                            ),
+                            isCreatingChat: _isCreatingChat,
+                            onStartChat: () => _handleStartChat(
+                              trip,
+                              receiverId: car.userId,
+                              receiverName: 'Chủ xe',
+                            ),
                           ),
                         const SizedBox(height: 20),
                         OrderDetailTimeCard(trip: trip),
@@ -814,19 +844,24 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     );
   }
 
-  Future<void> _handleStartChat(TripModel trip, TripRenterInfo renter) async {
+  Future<void> _handleStartChat(
+    TripModel trip, {
+    required int receiverId,
+    required String receiverName,
+    String? receiverAvatar,
+  }) async {
     if (_isCreatingChat) return;
     setState(() => _isCreatingChat = true);
 
     try {
       final conversationService = ConversationService();
       var conv = await conversationService.createConversation(
-        receiverId: renter.id,
+        receiverId: receiverId,
         tripId: trip.id,
         carId: trip.carId,
       );
 
-      // Nếu API trả về otherUser có tên mặc định/trống hoặc ID = 0, đồng bộ lại từ thông tin của khách thuê
+      // Nếu API trả về otherUser có tên mặc định/trống hoặc ID = 0, đồng bộ lại từ thông tin người nhận
       if (conv.otherUser.id == 0 ||
           conv.otherUser.name == 'Người dùng' ||
           conv.otherUser.name.isEmpty) {
@@ -837,9 +872,9 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           createdAt: conv.createdAt,
           updatedAt: conv.updatedAt,
           otherUser: OtherUser(
-            id: renter.id,
-            name: renter.name,
-            avatar: renter.avatar,
+            id: receiverId,
+            name: receiverName,
+            avatar: receiverAvatar,
           ),
           car: conv.car,
           lastMessageObj: conv.lastMessageObj,
@@ -934,7 +969,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bạn có chắc chắn muốn hủy chuyến đi #RT${trip.id} này không? Quyết định này không thể hoàn tác.',
+                  'Bạn có chắc chắn muốn hủy chuyến đi ${trip.displayCode} này không? Quyết định này không thể hoàn tác.',
                   style: TextStyle(fontSize: 13, color: context.textSecondary),
                 ),
                 const SizedBox(height: 12),
@@ -1199,7 +1234,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ],
             ),
             Divider(height: 20),
-            _buildReportDetailRow('Mã đơn hàng:', '#RT${trip.id}'),
+            _buildReportDetailRow('Mã đơn hàng:', trip.displayCode),
             _buildReportDetailRow('Tên xe:', car?.name ?? 'Xe tự lái'),
             _buildReportDetailRow('Biển số xe:', car?.licensePlate ?? 'N/A'),
             _buildReportDetailRow(
@@ -1300,7 +1335,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ],
             ),
             Divider(height: 20),
-            _buildReportDetailRow('Mã đơn hàng:', '#RT${trip.id}'),
+            _buildReportDetailRow('Mã đơn hàng:', trip.displayCode),
             _buildReportDetailRow('Tên xe:', car?.name ?? 'Xe tự lái'),
             _buildReportDetailRow('Biển số xe:', car?.licensePlate ?? 'N/A'),
             _buildReportDetailRow(

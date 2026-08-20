@@ -123,11 +123,11 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
                         if (car != null) OrderDetailCarCard(car: car),
                         const SizedBox(height: 20),
                         if (trip.renter != null)
-                          OrderDetailOwnerCard(
+                          OrderDetailOwnerCard.renter(
                             trip: trip,
                             renter: trip.renter!,
                             isCreatingChat: _isCreatingChat,
-                            onStartChat: _handleStartChat,
+                            onStartChat: () => _handleStartChat(trip, trip.renter!),
                           ),
                         const SizedBox(height: 20),
                         OrderDetailTimeCard(trip: trip),
@@ -440,7 +440,7 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
               ),
               title: Text(actionLabel),
               content: Text(
-                'Bạn chắc chắn muốn $actionLabel cho đơn #RT${trip.id}?',
+                'Bạn chắc chắn muốn $actionLabel cho đơn ${trip.displayCode}?',
               ),
               actions: [
                 TextButton(

@@ -207,6 +207,7 @@ class TripRenterInfo {
 
 class TripModel {
   final int id;
+  final String? tripCode;
   final double cost;
   final double discountAmount;
   final double deliveryFee;
@@ -230,6 +231,7 @@ class TripModel {
 
   TripModel({
     required this.id,
+    this.tripCode,
     required this.cost,
     required this.discountAmount,
     this.deliveryFee = 0.0,
@@ -251,6 +253,10 @@ class TripModel {
     this.reviews = const [],
     this.tripImages = const [],
   });
+
+  /// Mã chuyến đi hiển thị (ưu tiên trip_code từ backend, nếu không có fallback về #RT{id})
+  String get displayCode =>
+      (tripCode != null && tripCode!.isNotEmpty) ? tripCode! : '#RT$id';
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
     CarModel? parsedCar;
@@ -287,6 +293,31 @@ class TripModel {
           images: newImages,
           carLocation: parsedCar.carLocation,
           owner: parsedCar.owner,
+          deliveryOption: parsedCar.deliveryOption,
+        );
+      }
+    }
+
+    // Fallback nếu car.owner chưa có nhưng top-level json có owner
+    if (parsedCar.owner == null &&
+        (json['owner'] != null || json['car_owner'] != null || json['host'] != null)) {
+      final ownerMap = json['owner'] ?? json['car_owner'] ?? json['host'];
+      if (ownerMap is Map<String, dynamic>) {
+        parsedCar = CarModel(
+          id: parsedCar.id,
+          name: parsedCar.name,
+          licensePlate: parsedCar.licensePlate,
+          unitPrice: parsedCar.unitPrice,
+          discountValue: parsedCar.discountValue,
+          description: parsedCar.description,
+          rentalTerms: parsedCar.rentalTerms,
+          seatCount: parsedCar.seatCount,
+          fuelType: parsedCar.fuelType,
+          transmission: parsedCar.transmission,
+          userId: parsedCar.userId,
+          images: parsedCar.images,
+          carLocation: parsedCar.carLocation,
+          owner: OwnerModel.fromJson(ownerMap),
           deliveryOption: parsedCar.deliveryOption,
         );
       }
@@ -356,6 +387,9 @@ class TripModel {
       id: json['id'] is int
           ? json['id'] as int
           : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      tripCode: json['trip_code']?.toString() ??
+          json['tripCode']?.toString() ??
+          json['code']?.toString(),
       cost:
           double.tryParse(
             json['cost']?.toString() ??
@@ -658,6 +692,8 @@ class OwnerModel {
   final String? email;
   final String? phone;
   final String? avatar;
+  final double rating;
+  final int reviewsCount;
 
   OwnerModel({
     required this.id,
@@ -665,15 +701,38 @@ class OwnerModel {
     this.email,
     this.phone,
     this.avatar,
+    this.rating = 0.0,
+    this.reviewsCount = 0,
   });
 
   factory OwnerModel.fromJson(Map<String, dynamic> json) {
     return OwnerModel(
-      id: json['id'],
-      name: json['name'] ?? '',
-      email: json['email'],
-      phone: json['phone'],
-      avatar: json['avatar'],
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      name: json['name']?.toString() ?? 'Chủ xe',
+      email: json['email']?.toString(),
+      phone: json['phone']?.toString(),
+      avatar: json['avatar']?.toString(),
+      rating: double.tryParse(
+            json['rating']?.toString() ??
+                json['reviews_avg_rating']?.toString() ??
+                json['avg_rating']?.toString() ??
+                json['average_rating']?.toString() ??
+                '0',
+          ) ??
+          0.0,
+      reviewsCount: json['reviews_count'] is int
+          ? json['reviews_count'] as int
+          : (json['review_count'] is int
+              ? json['review_count'] as int
+              : int.tryParse(
+                      json['reviews_count']?.toString() ??
+                          json['review_count']?.toString() ??
+                          json['reviewsCount']?.toString() ??
+                          '0',
+                    ) ??
+                  0),
     );
   }
 }
