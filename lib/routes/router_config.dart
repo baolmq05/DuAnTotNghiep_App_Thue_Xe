@@ -43,6 +43,8 @@ import 'package:duantotnghiep_app_thue_xe/views/car/create_car_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/create_car_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/views/owner/owner_vehicle_list_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_vehicle_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart';
 
 // Khởi tạo các Global Navigator Keys
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -120,7 +122,12 @@ final drivioRouter = GoRouter(
       builder: (context, state) {
         final idStr = state.pathParameters['id']!;
         final id = int.tryParse(idStr) ?? 0;
-        return CarDetailPage(carId: id);
+        // CarDetailViewmodel được cấp cục bộ:
+        // tạo mới khi vào màn hình, dispose khi thoát
+        return ChangeNotifierProvider(
+          create: (_) => CarDetailViewmodel(),
+          child: CarDetailPage(carId: id),
+        );
       },
     ),
     GoRoute(
@@ -149,7 +156,12 @@ final drivioRouter = GoRouter(
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         final conv = state.extra as Conversation?;
-        return ChatDetailView(conversationId: id, conversation: conv);
+        // ChatDetailViewModel được cấp cục bộ:
+        // tạo mới mỗi khi mở cuộc trò chuyện, dispose khi rời màn hình
+        return ChangeNotifierProvider(
+          create: (_) => ChatDetailViewModel(),
+          child: ChatDetailView(conversationId: id, conversation: conv),
+        );
       },
     ),
     GoRoute(

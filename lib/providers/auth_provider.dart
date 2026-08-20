@@ -25,6 +25,11 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  // Cache để tránh gọi API trips/reviews liên tục
+  // Chỉ refresh sau 5 phút hoặc khi có forceRefresh
+  DateTime? _lastProfileRefresh;
+  static const _cacheDuration = Duration(minutes: 5);
+
   UserModel? get user => _user;
   String? get token => _token;
   bool get isAuthenticated => _token != null;
@@ -36,6 +41,11 @@ class AuthProvider extends ChangeNotifier {
   bool get isCustomer => _user?.isCustomer ?? false;
   bool get isAdmin => _user?.isAdmin ?? false;
 
+  /// Kiểm tra cache còn hạn hay chưa
+  bool get _isCacheValid =>
+      _lastProfileRefresh != null &&
+      DateTime.now().difference(_lastProfileRefresh!) < _cacheDuration;
+
   /// Đăng nhập
   Future<bool> login(String email, String password) async {
     _isLoading = true;
@@ -46,7 +56,8 @@ class AuthProvider extends ChangeNotifier {
       final res = await _authService.login(email, password);
       _token = res['access_token'] as String;
       await _authService.saveToken(_token!);
-      await fetchProfile();
+      // Force refresh đầy đủ sau khi login (bỏ qua cache)
+      await fetchProfile(forceRefresh: true);
       _errorMessage = null;
       return true;
     } catch (e) {
@@ -93,7 +104,8 @@ class AuthProvider extends ChangeNotifier {
       );
       _token = res['access_token'] as String;
       await _authService.saveToken(_token!);
-      await fetchProfile();
+      // Force refresh đầy đủ sau khi login Google (bỏ qua cache)
+      await fetchProfile(forceRefresh: true);
       _errorMessage = null;
       return true;
     } catch (e) {
@@ -129,7 +141,7 @@ class AuthProvider extends ChangeNotifier {
       _token = tokenInfo['access_token'] as String;
       await _authService.saveToken(_token!);
 
-      await fetchProfile();
+      await fetchProfile(forceRefresh: true);
 
       // Nếu có số điện thoại, tiến hành cập nhật qua profile
       if (phone != null && phone.isNotEmpty) {
@@ -138,6 +150,7 @@ class AuthProvider extends ChangeNotifier {
             name: name,
             phone: phone,
           );
+          // Chỉ cần lấy lại profile cơ bản (không cần refresh trips/reviews)
           await fetchProfile();
         } catch (_) {
           // Bỏ qua lỗi cập nhật sđt nếu đăng ký chính thành công
@@ -182,6 +195,8 @@ class AuthProvider extends ChangeNotifier {
         bankAccountNumber: bankAccountNumber,
       );
       _user = updatedUser;
+      // Không cần gọi lại trips/reviews sau khi update profile
+      // nên không dùng forceRefresh ở đây
       await fetchProfile();
       _errorMessage = null;
       return true;
@@ -207,7 +222,8 @@ class AuthProvider extends ChangeNotifier {
 
       _token = savedToken;
       // Lấy thông tin cá nhân từ server để xác thực token hợp lệ
-      await fetchProfile();
+      // forceRefresh: true để luôn load đầy đủ khi mở app lần đầu
+      await fetchProfile(forceRefresh: true);
       _errorMessage = null;
       return true;
     } catch (_) {
@@ -222,68 +238,88 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Tải lại thông tin cá nhân (bao gồm cả số chuyến đi và số sao từ đánh giá)
-  Future<void> fetchProfile() async {
+  /// Tải lại thông tin cá nhân.
+  ///
+  /// - [forceRefresh]: nếu true, bỏ qua cache và luôn gọi lại cả trips + reviews.
+  ///   Dùng sau login, auto-login. Mặc định false (dùng cache 5 phút).
+  Future<void> fetchProfile({bool forceRefresh = false}) async {
     if (!isAuthenticated) return;
+
+    // Kiểm tra cache: nếu còn hạn và không force, bỏ qua phần tốn băng thông
+    final skipHeavyRefresh = !forceRefresh && _isCacheValid;
+
     try {
       final profileUser = await _authService.getProfile();
       int tripsCount = profileUser.tripsCount;
       double rating = profileUser.rating;
 
-      // 1. Tải danh sách chuyến đi thực tế từ API my-trips
-      try {
-        final trips = await TripService().getMyTrips();
-        if (trips.isNotEmpty) {
-          final completed = trips.where((t) {
-            final st = (t.statusText ?? '').toLowerCase();
-            return t.status == 4 || st.contains('hoàn') || st.contains('thành') || st.contains('xong');
-          }).length;
+      // 1. Tải danh sách chuyến đi — chỉ gọi khi cache hết hạn hoặc forceRefresh
+      if (!skipHeavyRefresh) {
+        try {
+          final trips = await TripService().getMyTrips();
+          if (trips.isNotEmpty) {
+            final completed = trips.where((t) {
+              final st = (t.statusText ?? '').toLowerCase();
+              return t.status == 4 || st.contains('hoàn') || st.contains('thành') || st.contains('xong');
+            }).length;
 
-          if (completed > 0) {
-            tripsCount = completed;
-          } else {
-            final activeOrDone = trips.where((t) => t.status != 5 && t.status != 6).length;
-            tripsCount = activeOrDone > 0 ? activeOrDone : trips.length;
+            if (completed > 0) {
+              tripsCount = completed;
+            } else {
+              final activeOrDone = trips.where((t) => t.status != 5 && t.status != 6).length;
+              tripsCount = activeOrDone > 0 ? activeOrDone : trips.length;
+            }
           }
+        } catch (e) {
+          debugPrint('Lỗi fetch trips trong profile: $e');
         }
-      } catch (e) {
-        debugPrint('Lỗi fetch trips trong profile: $e');
+      } else {
+        // Dùng lại giá trị cũ từ _user khi cache còn hạn
+        tripsCount = _user?.tripsCount ?? tripsCount;
       }
 
-      // 2. Tải đánh giá thực tế (reviews) của tài khoản và tính trung bình cộng số sao
-      try {
-        final reviewData = await OwnerProfileService().fetchProfileReviews(
-          targetId: profileUser.id,
-          isOwner: false,
-        );
-        if (reviewData != null) {
-          final List reviewsList = reviewData['reviews'] as List? ?? [];
-          if (reviewsList.isNotEmpty) {
-            double totalStars = 0.0;
-            int validCount = 0;
-            for (var r in reviewsList) {
-              final rVal = double.tryParse(r['rating']?.toString() ?? r['stars']?.toString() ?? '') ?? 0.0;
-              if (rVal > 0) {
-                totalStars += rVal;
-                validCount++;
+      // 2. Tải đánh giá — chỉ gọi khi cache hết hạn hoặc forceRefresh
+      if (!skipHeavyRefresh) {
+        try {
+          final reviewData = await OwnerProfileService().fetchProfileReviews(
+            targetId: profileUser.id,
+            isOwner: false,
+          );
+          if (reviewData != null) {
+            final List reviewsList = reviewData['reviews'] as List? ?? [];
+            if (reviewsList.isNotEmpty) {
+              double totalStars = 0.0;
+              int validCount = 0;
+              for (var r in reviewsList) {
+                final rVal = double.tryParse(r['rating']?.toString() ?? r['stars']?.toString() ?? '') ?? 0.0;
+                if (rVal > 0) {
+                  totalStars += rVal;
+                  validCount++;
+                }
               }
-            }
-            if (validCount > 0) {
-              rating = totalStars / validCount;
+              if (validCount > 0) {
+                rating = totalStars / validCount;
+              } else if (reviewData['rating'] != null) {
+                rating = double.tryParse(reviewData['rating'].toString()) ?? 0.0;
+              }
             } else if (reviewData['rating'] != null) {
               rating = double.tryParse(reviewData['rating'].toString()) ?? 0.0;
             }
-          } else if (reviewData['rating'] != null) {
-            rating = double.tryParse(reviewData['rating'].toString()) ?? 0.0;
-          }
 
-          if (reviewData['trips_count'] != null) {
-            final tc = int.tryParse(reviewData['trips_count'].toString()) ?? 0;
-            if (tc > 0) tripsCount = tc;
+            if (reviewData['trips_count'] != null) {
+              final tc = int.tryParse(reviewData['trips_count'].toString()) ?? 0;
+              if (tc > 0) tripsCount = tc;
+            }
           }
+        } catch (e) {
+          debugPrint('Lỗi fetch reviews trong profile: $e');
         }
-      } catch (e) {
-        debugPrint('Lỗi fetch reviews trong profile: $e');
+
+        // Cập nhật thời gian cache sau khi đã load đầy đủ
+        _lastProfileRefresh = DateTime.now();
+      } else {
+        // Dùng lại rating cũ từ _user
+        rating = _user?.rating ?? rating;
       }
 
       _user = UserModel(
@@ -364,6 +400,8 @@ class AuthProvider extends ChangeNotifier {
     } finally {
       _token = null;
       _user = null;
+      // Xóa cache khi đăng xuất
+      _lastProfileRefresh = null;
       _isLoading = false;
       notifyListeners();
     }

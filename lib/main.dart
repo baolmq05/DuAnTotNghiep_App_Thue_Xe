@@ -14,9 +14,7 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/home_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/order_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/order_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/notification_viewmodel.dart';
-import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/address_viewmodel.dart';
-import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/policy_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/wallet_viewmodel.dart';
@@ -104,9 +102,10 @@ class DrivioApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => OrderViewModel()),
         ChangeNotifierProvider(create: (context) => OrderDetailViewModel()),
         ChangeNotifierProvider(create: (context) => NotificationViewModel()),
-        ChangeNotifierProvider(create: (context) => ChatDetailViewModel()),
+        // ℹ️ ChatDetailViewModel & CarDetailViewmodel KHÔNG đặt ở đây nữa
+        // vì chúng chỉ cần dùng trong 1 màn hình cụ thể.
+        // Chúng được cấp cục bộ trong router_config.dart cho từng route.
         ChangeNotifierProvider(create: (context) => AddressViewModel()),
-        ChangeNotifierProvider(create: (context) => CarDetailViewmodel()),
         ChangeNotifierProvider(create: (context) => PolicyViewModel()),
         ChangeNotifierProvider(create: (context) => FavoriteViewModel()),
         ChangeNotifierProvider(create: (context) => WalletViewModel()),
