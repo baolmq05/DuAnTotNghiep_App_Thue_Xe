@@ -29,8 +29,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
   @override
   void initState() {
     super.initState();
-    context.read<CarDetailViewmodel>().fetchCarDetail(id: widget.carId);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CarDetailViewmodel>().fetchCarDetail(id: widget.carId);
       context.read<FavoriteViewModel>().fetchFavorites();
     });
   }

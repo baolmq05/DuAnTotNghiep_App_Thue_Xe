@@ -33,7 +33,9 @@ class _DriverLicenseViewState extends State<DriverLicenseView> {
   void initState() {
     super.initState();
     _viewModel.addListener(_onViewModelChanged);
-    _loadProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProfile();
+    });
   }
 
   void _onViewModelChanged() {
@@ -376,7 +378,7 @@ class _DriverLicenseViewState extends State<DriverLicenseView> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final bool hasImage =
-        _viewModel.user?.drivingLicense?.image?.isNotEmpty == true;
+        _viewModel.user?.drivingLicense?.image.isNotEmpty == true;
     if (_selectedImage == null && !hasImage) {
       AppToast.show(
         context,

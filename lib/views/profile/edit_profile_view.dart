@@ -44,7 +44,9 @@ class _EditProfileViewState extends State<EditProfileView> {
     _bankAccountNumberController =
         TextEditingController(text: user?.bankAccountNumber ?? '');
     _selectedGender = user?.gender;
-    _loadBanks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadBanks();
+    });
   }
 
   @override

@@ -107,8 +107,8 @@ class _VehicleListViewState extends State<VehicleListView> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<FavoriteViewModel>().fetchFavorites();
+      _fetchCars();
     });
-    _fetchCars();
   }
 
   @override
