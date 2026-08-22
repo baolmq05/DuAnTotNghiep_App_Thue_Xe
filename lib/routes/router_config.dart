@@ -43,6 +43,7 @@ import 'package:duantotnghiep_app_thue_xe/views/car/create_car_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/create_car_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/views/owner/owner_vehicle_list_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_vehicle_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/views/owner/owner_strikes_view.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/car_detail_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart';
 
@@ -310,6 +311,16 @@ final drivioRouter = GoRouter(
         return ChangeNotifierProvider(
           create: (_) => OwnerVehicleViewModel(),
           child: const OwnerVehicleListView(),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/owner-strikes',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        return ChangeNotifierProvider(
+          create: (_) => OwnerOrderViewModel(),
+          child: const OwnerStrikesView(),
         );
       },
     ),

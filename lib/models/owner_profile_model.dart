@@ -11,6 +11,8 @@ class OwnerProfile {
   final List<OwnerReview> reviews;
   final List<Car> cars;
 
+  int get reviewsCount => reviews.length;
+
   OwnerProfile({
     required this.id,
     required this.name,

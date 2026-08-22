@@ -60,7 +60,8 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    final bool currentIsOwner = widget.isOwner;
+    final isDark = context.isDarkMode;
+
     return Scaffold(
       backgroundColor: context.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -72,7 +73,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
           onPressed: () => _goBack(context),
         ),
         title: Text(
-          currentIsOwner ? 'Thông tin chủ xe' : 'Hồ sơ khách thuê',
+          'Hồ sơ người dùng',
           style: TextStyle(
             color: context.textPrimary,
             fontWeight: FontWeight.bold,
@@ -83,7 +84,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
       ),
       body: Consumer<OwnerProfileViewModel>(
         builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
+          if (viewModel.isLoading && viewModel.ownerProfile == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -91,9 +92,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                   CircularProgressIndicator(color: context.primaryColor),
                   const SizedBox(height: 16),
                   Text(
-                    currentIsOwner
-                        ? 'Đang tải thông tin chủ xe...'
-                        : 'Đang tải hồ sơ khách thuê...',
+                    'Đang tải thông tin hồ sơ...',
                     style: TextStyle(
                       color: context.textSecondary,
                       fontSize: 14,
@@ -104,7 +103,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
             );
           }
 
-          if (viewModel.errorMessage != null) {
+          if (viewModel.errorMessage != null && viewModel.ownerProfile == null) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -153,9 +152,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
           if (profile == null) {
             return Center(
               child: Text(
-                currentIsOwner
-                    ? 'Không tìm thấy thông tin chủ xe'
-                    : 'Không tìm thấy hồ sơ khách thuê',
+                'Không tìm thấy thông tin hồ sơ',
                 style: TextStyle(
                   color: context.textSecondary,
                   fontSize: 14,
@@ -164,11 +161,13 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
             );
           }
 
+          final isOwnerTab = viewModel.currentTab == 0;
+
           return RefreshIndicator(
             onRefresh: () async {
               await viewModel.fetchOwnerProfile(
                 ownerId: widget.ownerId,
-                isOwner: widget.isOwner,
+                isOwner: isOwnerTab,
               );
             },
             child: SingleChildScrollView(
@@ -178,22 +177,144 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  OwnerProfileHeader(profile: profile, isOwner: currentIsOwner),
+                  // 1. Selector 2 Tab vai trò: Chủ xe / Người thuê
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E293B) : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          // Tab 1: Chủ xe
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => viewModel.switchTab(0, targetId: widget.ownerId),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: isOwnerTab
+                                      ? (isDark ? context.cardColor : Colors.white)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: isOwnerTab
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.06),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.directions_car_rounded,
+                                      size: 18,
+                                      color: isOwnerTab
+                                          ? context.primaryColor
+                                          : context.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Vai trò Chủ xe',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: isOwnerTab
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: isOwnerTab
+                                            ? (isDark ? Colors.white : context.primaryColor)
+                                            : context.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Tab 2: Người thuê
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => viewModel.switchTab(1, targetId: widget.ownerId),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: !isOwnerTab
+                                      ? (isDark ? context.cardColor : Colors.white)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: !isOwnerTab
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.06),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.person_rounded,
+                                      size: 18,
+                                      color: !isOwnerTab
+                                          ? context.primaryColor
+                                          : context.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Vai trò Người thuê',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: !isOwnerTab
+                                            ? FontWeight.bold
+                                            : FontWeight.w500,
+                                        color: !isOwnerTab
+                                            ? (isDark ? Colors.white : context.primaryColor)
+                                            : context.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 2. Header Hồ sơ người dùng
+                  OwnerProfileHeader(profile: profile, isOwner: isOwnerTab),
+
                   Divider(
                     height: 24,
                     thickness: 1,
                     color: context.border,
                   ),
+
+                  // 3. Đánh giá từ đối tác
                   OwnerProfileReviews(
                     viewModel: viewModel,
-                    isOwner: currentIsOwner,
+                    isOwner: isOwnerTab,
                     onReviewerTap: (reviewerId, isOwnerReview) {
                       context.push(
                         '/owner-profile/$reviewerId?isOwner=$isOwnerReview',
                       );
                     },
                   ),
-                  if (currentIsOwner) ...[
+
+                  // 4. Danh sách xe (Chỉ hiển thị khi đang xem Tab Chủ xe)
+                  if (isOwnerTab) ...[
                     Divider(
                       height: 24,
                       thickness: 1,
@@ -206,6 +327,7 @@ class _OwnerProfileViewState extends State<OwnerProfileView> {
                       },
                     ),
                   ],
+
                   const SizedBox(height: 32),
                 ],
               ),

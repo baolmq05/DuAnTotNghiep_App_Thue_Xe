@@ -1,22 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/owner_report_summary_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/owner_service.dart';
 
 class OwnerOrderViewModel extends ChangeNotifier {
-  OwnerOrderViewModel({TripService? tripService})
-    : _tripService = tripService ?? TripService();
+  OwnerOrderViewModel({
+    TripService? tripService,
+    OwnerProfileService? ownerService,
+  })  : _tripService = tripService ?? TripService(),
+        _ownerService = ownerService ?? OwnerProfileService() {
+    // Khởi tạo giá trị mặc định để giao diện Strike hiển thị ngay lập tức
+    _reportSummary = OwnerReportSummaryModel.initial();
+  }
 
   final TripService _tripService;
+  final OwnerProfileService _ownerService;
 
   final List<TripModel> _allTrips = [];
   final List<TripModel> _filteredTrips = [];
+  OwnerReportSummaryModel? _reportSummary;
   bool _isLoading = true;
+  bool _isLoadingSummary = false;
   String _errorMessage = '';
   int _currentTabIndex = 0;
 
   List<TripModel> get allTrips => _allTrips;
   List<TripModel> get filteredTrips => _filteredTrips;
+  OwnerReportSummaryModel? get reportSummary => _reportSummary;
   bool get isLoading => _isLoading;
+  bool get isLoadingSummary => _isLoadingSummary;
   String get errorMessage => _errorMessage;
   int get currentTabIndex => _currentTabIndex;
 
@@ -67,6 +80,39 @@ class OwnerOrderViewModel extends ChangeNotifier {
     return getCountForTrips(_allTrips, tabIndex);
   }
 
+  /// Tải dữ liệu toàn diện cho Bảng điều khiển chủ xe (Trips + Strike Summary)
+  Future<void> fetchDashboardData() async {
+    await Future.wait([
+      fetchOwnerTrips(),
+      fetchOwnerReportSummary(),
+    ]);
+  }
+
+  /// Tải thông tin Strike / Báo cáo kỷ luật của chủ xe
+  Future<void> fetchOwnerReportSummary() async {
+    _isLoadingSummary = true;
+    notifyListeners();
+
+    try {
+      debugPrint('[OwnerOrderViewModel] Bắt đầu gọi fetchOwnerReportSummary()...');
+      final summary = await _ownerService.fetchOwnerReportSummary();
+      if (summary != null) {
+        _reportSummary = summary;
+        debugPrint('[OwnerOrderViewModel] Đã gán reportSummary thành công: activeStrikes=${summary.activeStrikes}, total=${summary.totalStrikes}, reports=${summary.reports.total}');
+      } else {
+        debugPrint('[OwnerOrderViewModel] summary trả về null, giữ fallback initial.');
+        _reportSummary ??= OwnerReportSummaryModel.initial();
+      }
+    } catch (e) {
+      debugPrint('[OwnerOrderViewModel] Lỗi fetchOwnerReportSummary: $e');
+      _reportSummary ??= OwnerReportSummaryModel.initial();
+    } finally {
+      _isLoadingSummary = false;
+      notifyListeners();
+    }
+  }
+
+  /// Tải danh sách các đơn cho thuê xe của chủ xe
   Future<void> fetchOwnerTrips() async {
     _isLoading = true;
     _errorMessage = '';

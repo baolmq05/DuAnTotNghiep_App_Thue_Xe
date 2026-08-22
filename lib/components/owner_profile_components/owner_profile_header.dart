@@ -110,7 +110,7 @@ class OwnerProfileHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Đánh giá',
+                      'Điểm đánh giá',
                       style: TextStyle(
                         fontSize: 12,
                         color: context.textSecondary,
@@ -124,13 +124,17 @@ class OwnerProfileHeader extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.directions_car_rounded,
+                          isOwner
+                              ? Icons.directions_car_rounded
+                              : Icons.rate_review_rounded,
                           color: context.primaryColor,
                           size: 22,
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          '${profile.tripsCount}',
+                          isOwner
+                              ? '${profile.tripsCount}'
+                              : '${profile.reviewsCount}',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -141,7 +145,7 @@ class OwnerProfileHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isOwner ? 'Chuyến đi' : 'Chuyến thuê',
+                      isOwner ? 'Chuyến đi' : 'Đánh giá từ chủ xe',
                       style: TextStyle(
                         fontSize: 12,
                         color: context.textSecondary,

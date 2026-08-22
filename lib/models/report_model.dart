@@ -156,9 +156,9 @@ class ReportModel {
       case 0:
         return 'Chờ xử lý';
       case 1:
-        return 'Đã xử lý';
+        return 'Đã giải quyết';
       case 2:
-        return 'Đã từ chối';
+        return 'Từ chối';
       default:
         return 'Không xác định';
     }
