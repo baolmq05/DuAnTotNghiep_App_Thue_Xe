@@ -84,4 +84,34 @@ class ReportService extends BaseService {
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
     }
   }
+
+  /// Thu hồi báo cáo/khiếu nại
+  Future<Map<String, dynamic>> cancelReport(int reportId) async {
+    try {
+      final response = await store(
+        'api/reports/$reportId/revoke',
+        body: {},
+        requiresAuth: true,
+      );
+
+      if (response != null) {
+        final success = response['success'] ?? false;
+        return {
+          'success': success,
+          'message': response['message'] ?? (success ? 'Thu hồi khiếu nại thành công!' : 'Thu hồi khiếu nại thất bại!'),
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Không nhận được phản hồi từ hệ thống.',
+      };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi thu hồi báo cáo $reportId: ${e.message}');
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      debugPrint('Lỗi khi thu hồi báo cáo $reportId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }

@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/report_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
+import 'package:duantotnghiep_app_thue_xe/services/report_service.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 
 class OrderDetailReportCard extends StatelessWidget {
   final ReportModel report;
   final bool isOwnerView;
+  final VoidCallback? onReportCancelled;
 
   const OrderDetailReportCard({
     super.key,
     required this.report,
     this.isOwnerView = false,
+    this.onReportCancelled,
   });
 
   @override
@@ -151,27 +155,53 @@ class OrderDetailReportCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              icon: const Icon(Icons.visibility_outlined, size: 16),
-              label: const Text(
-                'Xem chi tiết khiếu nại',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.visibility_outlined, size: 16),
+                  label: const Text(
+                    'Xem chi tiết khiếu nại',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  onPressed: () => _showReportDetailBottomSheet(context, report),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: context.primaryColor,
+                    side: BorderSide(color: context.primaryColor.withAlpha(150)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
                 ),
               ),
-              onPressed: () => _showReportDetailBottomSheet(context, report),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: context.primaryColor,
-                side: BorderSide(color: context.primaryColor.withAlpha(150)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              if (!isOwnerView && report.status == 0) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _confirmAndCancelReport(context, report.id),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    child: const Text(
+                      'Thu hồi khiếu nại',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-              ),
-            ),
+              ],
+            ],
           ),
         ],
       ),
@@ -458,8 +488,123 @@ class OrderDetailReportCard extends StatelessWidget {
                   ),
                 ),
               ],
+              if (!isOwnerView && report.status == 0) ...[
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.pop(sheetCtx);
+                      _confirmAndCancelReport(context, report.id);
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text(
+                      'Thu hồi khiếu nại',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmAndCancelReport(BuildContext context, int reportId) {
+    bool isRevoking = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppColors.error),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Xác nhận thu hồi',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Bạn có chắc chắn muốn thu hồi khiếu nại này không? Quyết định này không thể hoàn tác.',
+            style: TextStyle(fontSize: 13, color: context.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isRevoking ? null : () => Navigator.pop(dialogCtx),
+              child: Text(
+                'Quay lại',
+                style: TextStyle(color: context.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: isRevoking
+                  ? null
+                  : () async {
+                      setDialogState(() => isRevoking = true);
+                      
+                      final result = await ReportService().cancelReport(reportId);
+                      
+                      if (!dialogCtx.mounted) return;
+                      Navigator.pop(dialogCtx);
+
+                      if (context.mounted) {
+                        if (result['success'] == true) {
+                          AppToast.show(
+                            context,
+                            message: result['message'] ?? 'Đã thu hồi khiếu nại thành công!',
+                            type: ToastType.success,
+                          );
+                          onReportCancelled?.call();
+                        } else {
+                          AppToast.show(
+                            context,
+                            message: result['message'] ?? 'Thu hồi khiếu nại thất bại.',
+                            type: ToastType.error,
+                          );
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: isRevoking
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Thu hồi',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+            ),
+          ],
         ),
       ),
     );

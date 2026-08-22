@@ -2,13 +2,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/report_service.dart';
 import 'package:duantotnghiep_app_thue_xe/models/report_model.dart';
 
 class OrderDetailViewModel extends ChangeNotifier {
-  OrderDetailViewModel({TripService? tripService})
-    : _tripService = tripService ?? TripService();
+  OrderDetailViewModel({TripService? tripService, ReportService? reportService})
+    : _tripService = tripService ?? TripService(),
+      _reportService = reportService ?? ReportService();
 
   final TripService _tripService;
+  final ReportService _reportService;
 
   TripModel? _trip;
   ReportModel? _report;
@@ -88,6 +91,21 @@ class OrderDetailViewModel extends ChangeNotifier {
       final result = await _tripService.rejectTrip(tripId, reason: reason);
       if (result['success'] == true) {
         await fetchTripDetail(tripId);
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Thu hồi báo cáo/khiếu nại
+  Future<Map<String, dynamic>> cancelReport(int reportId) async {
+    try {
+      final result = await _reportService.cancelReport(reportId);
+      if (result['success'] == true) {
+        if (_trip != null) {
+          await fetchTripDetail(_trip!.id);
+        }
       }
       return result;
     } catch (e) {

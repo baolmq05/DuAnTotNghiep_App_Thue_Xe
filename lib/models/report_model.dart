@@ -159,6 +159,8 @@ class ReportModel {
         return 'Đã giải quyết';
       case 2:
         return 'Từ chối';
+      case 3:
+        return 'Đã thu hồi';
       default:
         return 'Không xác định';
     }

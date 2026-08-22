@@ -2243,33 +2243,59 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () => _showReportDetailBottomSheet(context, report),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: context.primaryColor),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => _showReportDetailBottomSheet(context, viewModel, report),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: context.primaryColor),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                  child: Text(
+                    'Xem chi tiết khiếu nại',
+                    style: TextStyle(
+                      color: context.primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 10),
               ),
-              child: Text(
-                'Xem chi tiết khiếu nại',
-                style: TextStyle(
-                  color: context.primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+              if (report.status == 0) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _confirmAndCancelReport(context, viewModel, report.id),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    child: const Text(
+                      'Thu hồi khiếu nại',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              ],
+            ],
           ),
         ],
       ),
     );
   }
 
-  void _showReportDetailBottomSheet(BuildContext context, ReportModel report) {
+  void _showReportDetailBottomSheet(BuildContext context, OrderDetailViewModel viewModel, ReportModel report) {
     Color statusColor;
     Color statusBgColor;
     switch (report.status) {
@@ -2495,6 +2521,32 @@ class _OrderDetailViewState extends State<OrderDetailView> {
               ),
             ],
             const SizedBox(height: 24),
+            if (report.status == 0) ...[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(sheetCtx);
+                    _confirmAndCancelReport(context, viewModel, report.id);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Thu hồi khiếu nại',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -2514,6 +2566,94 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   ),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmAndCancelReport(BuildContext context, OrderDetailViewModel viewModel, int reportId) {
+    bool isRevoking = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppColors.error),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Xác nhận thu hồi',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Bạn có chắc chắn muốn thu hồi khiếu nại này không? Quyết định này không thể hoàn tác.',
+            style: TextStyle(fontSize: 13, color: context.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isRevoking ? null : () => Navigator.pop(dialogCtx),
+              child: Text(
+                'Quay lại',
+                style: TextStyle(color: context.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: isRevoking
+                  ? null
+                  : () async {
+                      setDialogState(() => isRevoking = true);
+                      
+                      final result = await viewModel.cancelReport(reportId);
+                      
+                      if (!dialogCtx.mounted) return;
+                      Navigator.pop(dialogCtx);
+
+                      if (context.mounted) {
+                        if (result['success'] == true) {
+                          AppToast.show(
+                            context,
+                            message: result['message'] ?? 'Đã thu hồi khiếu nại thành công!',
+                            type: ToastType.success,
+                          );
+                        } else {
+                          AppToast.show(
+                            context,
+                            message: result['message'] ?? 'Thu hồi khiếu nại thất bại.',
+                            type: ToastType.error,
+                          );
+                        }
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: isRevoking
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Thu hồi',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
             ),
           ],
         ),
