@@ -6,6 +6,7 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/order_detail_viewmodel.dart
 import 'package:duantotnghiep_app_thue_xe/services/conversation_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
 import 'package:duantotnghiep_app_thue_xe/models/conversation_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/report_model.dart';
 import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/components/payment/zalopay_checkout_sheet.dart';
@@ -161,6 +162,8 @@ class _OrderDetailViewState extends State<OrderDetailView> {
     final currentUser = auth.user;
     final isOwner = currentUser != null && car != null && currentUser.id == car.userId;
 
+    debugPrint('[DEBUG] OrderDetailView BUILD: orderId=${widget.orderId}, isOwner=$isOwner, currentUser=${currentUser?.id}, carUserId=${car?.userId}, tripStatus=${trip.status}');
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
@@ -268,6 +271,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         OrderDetailTimeCard(trip: trip),
                         const SizedBox(height: 20),
                         OrderDetailPriceCard(trip: trip),
+                        _buildReportSection(trip, viewModel),
                         const SizedBox(height: 20),
                         OrderDetailTimeline(
                           trip: trip,
@@ -2109,6 +2113,316 @@ class _OrderDetailViewState extends State<OrderDetailView> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildReportSection(TripModel trip, OrderDetailViewModel viewModel) {
+    final report = viewModel.report;
+    debugPrint('[DEBUG] _buildReportSection: report is null = ${report == null}');
+    if (report == null) return const SizedBox.shrink();
+    debugPrint('[DEBUG] _buildReportSection rendering: id=${report.id}, title="${report.title}", status=${report.status}');
+
+    Color statusColor;
+    Color statusBgColor;
+    switch (report.status) {
+      case 1:
+        statusColor = Colors.green.shade700;
+        statusBgColor = Colors.green.shade50;
+        break;
+      case 2:
+        statusColor = Colors.red.shade700;
+        statusBgColor = Colors.red.shade50;
+        break;
+      case 0:
+      default:
+        statusColor = Colors.orange.shade700;
+        statusBgColor = Colors.orange.shade50;
+        break;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.border, width: 0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Khiếu nại / Báo cáo',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: context.textPrimary,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusBgColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  report.getStatusDisplay(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            report.title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: context.textPrimary,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            report.description,
+            style: TextStyle(
+              fontSize: 13,
+              color: context.textSecondary,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => _showReportDetailBottomSheet(context, report),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: context.primaryColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+              child: Text(
+                'Xem chi tiết khiếu nại',
+                style: TextStyle(
+                  color: context.primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReportDetailBottomSheet(BuildContext context, ReportModel report) {
+    Color statusColor;
+    Color statusBgColor;
+    switch (report.status) {
+      case 1:
+        statusColor = Colors.green.shade700;
+        statusBgColor = Colors.green.shade50;
+        break;
+      case 2:
+        statusColor = Colors.red.shade700;
+        statusBgColor = Colors.red.shade50;
+        break;
+      case 0:
+      default:
+        statusColor = Colors.orange.shade700;
+        statusBgColor = Colors.orange.shade50;
+        break;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Container(
+        decoration: BoxDecoration(
+          color: context.cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(sheetCtx).padding.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Chi tiết báo cáo / khiếu nại',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: context.textPrimary,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(sheetCtx),
+                ),
+              ],
+            ),
+            const Divider(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Trạng thái:',
+                  style: TextStyle(color: context.textSecondary, fontSize: 14),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    report.getStatusDisplay(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (report.createdAt != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Thời gian gửi:',
+                    style: TextStyle(color: context.textSecondary, fontSize: 14),
+                  ),
+                  Text(
+                    '${report.createdAt!.day}/${report.createdAt!.month}/${report.createdAt!.year} ${report.createdAt!.hour.toString().padLeft(2, '0')}:${report.createdAt!.minute.toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      color: context.textPrimary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (report.resolvedAt != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Thời gian xử lý:',
+                    style: TextStyle(color: context.textSecondary, fontSize: 14),
+                  ),
+                  Text(
+                    '${report.resolvedAt!.day}/${report.resolvedAt!.month}/${report.resolvedAt!.year} ${report.resolvedAt!.hour.toString().padLeft(2, '0')}:${report.resolvedAt!.minute.toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      color: context.textPrimary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const Divider(height: 30),
+            Text(
+              'Tiêu đề báo cáo:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: context.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              report.title,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: context.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Nội dung chi tiết:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: context.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: context.border, width: 0.5),
+              ),
+              child: Text(
+                report.description,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(sheetCtx),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Đóng',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
+import 'package:duantotnghiep_app_thue_xe/models/report_model.dart';
 
 class OrderDetailViewModel extends ChangeNotifier {
   OrderDetailViewModel({TripService? tripService})
@@ -9,21 +10,27 @@ class OrderDetailViewModel extends ChangeNotifier {
   final TripService _tripService;
 
   TripModel? _trip;
+  ReportModel? _report;
   bool _isLoading = true;
   String _errorMessage = '';
 
   TripModel? get trip => _trip;
+  ReportModel? get report => _report;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
   Future<void> fetchTripDetail(int orderId) async {
     _isLoading = true;
     _errorMessage = '';
+    _report = null;
     notifyListeners();
 
     try {
       final trip = await _tripService.getTripDetail(orderId);
       _trip = trip;
+      _report = trip?.report;
+
+      debugPrint('[DEBUG] Đã gán báo cáo từ chi tiết chuyến đi: ${_report?.id}');
     } catch (_) {
       _errorMessage = 'Không thể tải chi tiết đơn hàng. Vui lòng thử lại!';
     } finally {

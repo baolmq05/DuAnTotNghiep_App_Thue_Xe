@@ -1,3 +1,5 @@
+import 'report_model.dart';
+
 class TripReviewModel {
   final int id;
   final int tripId;
@@ -228,6 +230,7 @@ class TripModel {
   final TripExtensionModel? latestExtension;
   final List<TripReviewModel> reviews;
   final List<TripImageModel> tripImages;
+  final ReportModel? report;
 
   TripModel({
     required this.id,
@@ -252,6 +255,7 @@ class TripModel {
     this.latestExtension,
     this.reviews = const [],
     this.tripImages = const [],
+    this.report,
   });
 
   /// Mã chuyến đi hiển thị (ưu tiên trip_code từ backend, nếu không có fallback về #RT{id})
@@ -375,6 +379,15 @@ class TripModel {
           .toList();
     }
 
+    // Parse report from backend show response reports list
+    ReportModel? parsedReport;
+    if (json['reports'] != null && json['reports'] is List) {
+      final List reportsList = json['reports'] as List;
+      if (reportsList.isNotEmpty) {
+        parsedReport = ReportModel.fromJson(reportsList.first as Map<String, dynamic>);
+      }
+    }
+
     final renterJson = json['renter'] is Map<String, dynamic>
         ? json['renter'] as Map<String, dynamic>
         : (json['customer'] is Map<String, dynamic>
@@ -440,6 +453,7 @@ class TripModel {
       latestExtension: parsedExtension,
       reviews: parsedReviews,
       tripImages: parsedTripImages,
+      report: parsedReport,
     );
   }
 
