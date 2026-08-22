@@ -7,6 +7,7 @@ class ReportModel {
   final int? reportedUserId;
   final int? carId;
   final int? tripId;
+  final int? reportType;
   final String title;
   final String description;
   final int status; // 0: Pending/Chờ xử lý, 1: Resolved/Đã xử lý, 2: Rejected/Đã từ chối
@@ -14,6 +15,7 @@ class ReportModel {
   final DateTime? resolvedAt;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final List<String> images;
 
   // Optional nested models
   final UserModel? user;
@@ -27,6 +29,7 @@ class ReportModel {
     this.reportedUserId,
     this.carId,
     this.tripId,
+    this.reportType,
     required this.title,
     required this.description,
     required this.status,
@@ -34,6 +37,7 @@ class ReportModel {
     this.resolvedAt,
     this.createdAt,
     this.updatedAt,
+    this.images = const [],
     this.user,
     this.reportedUser,
     this.car,
@@ -47,6 +51,7 @@ class ReportModel {
       reportedUserId: json['reported_user_id'] is int ? json['reported_user_id'] as int : int.tryParse(json['reported_user_id']?.toString() ?? ''),
       carId: json['car_id'] is int ? json['car_id'] as int : int.tryParse(json['car_id']?.toString() ?? ''),
       tripId: json['trip_id'] is int ? json['trip_id'] as int : int.tryParse(json['trip_id']?.toString() ?? ''),
+      reportType: json['report_type'] is int ? json['report_type'] as int : int.tryParse(json['report_type']?.toString() ?? ''),
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       status: json['status'] is int ? json['status'] as int : int.tryParse(json['status']?.toString() ?? '0') ?? 0,
@@ -54,6 +59,17 @@ class ReportModel {
       resolvedAt: json['resolved_at'] != null ? DateTime.tryParse(json['resolved_at'].toString()) : null,
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) : null,
       updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
+      images: json['images'] is List
+          ? (json['images'] as List)
+              .map((img) {
+                if (img is Map<String, dynamic>) {
+                  return img['image_url']?.toString() ?? '';
+                }
+                return img?.toString() ?? '';
+              })
+              .where((url) => url.isNotEmpty)
+              .toList()
+          : const [],
       user: json['user'] != null && json['user'] is Map<String, dynamic>
           ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
           : null,
@@ -76,6 +92,7 @@ class ReportModel {
       'reported_user_id': reportedUserId,
       'car_id': carId,
       'trip_id': tripId,
+      'report_type': reportType,
       'title': title,
       'description': description,
       'status': status,
@@ -83,6 +100,7 @@ class ReportModel {
       'resolved_at': resolvedAt?.toIso8601String(),
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
+      'images': images,
       if (user != null) 'user': user!.toJson(),
       if (reportedUser != null) 'reported_user': reportedUser!.toJson(),
     };
@@ -94,6 +112,7 @@ class ReportModel {
     int? reportedUserId,
     int? carId,
     int? tripId,
+    int? reportType,
     String? title,
     String? description,
     int? status,
@@ -101,6 +120,7 @@ class ReportModel {
     DateTime? resolvedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<String>? images,
     UserModel? user,
     UserModel? reportedUser,
     CarModel? car,
@@ -112,6 +132,7 @@ class ReportModel {
       reportedUserId: reportedUserId ?? this.reportedUserId,
       carId: carId ?? this.carId,
       tripId: tripId ?? this.tripId,
+      reportType: reportType ?? this.reportType,
       title: title ?? this.title,
       description: description ?? this.description,
       status: status ?? this.status,
@@ -119,6 +140,7 @@ class ReportModel {
       resolvedAt: resolvedAt ?? this.resolvedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      images: images ?? this.images,
       user: user ?? this.user,
       reportedUser: reportedUser ?? this.reportedUser,
       car: car ?? this.car,

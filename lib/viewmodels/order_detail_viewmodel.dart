@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
@@ -31,7 +32,12 @@ class OrderDetailViewModel extends ChangeNotifier {
       _report = trip?.report;
 
       debugPrint('[DEBUG] Đã gán báo cáo từ chi tiết chuyến đi: ${_report?.id}');
-    } catch (_) {
+    } catch (e, stack) {
+      debugPrint('[ERROR] Lỗi khi tải chi tiết chuyến đi: $e');
+      debugPrint(stack.toString());
+      try {
+        File('error_log.txt').writeAsStringSync('Error: $e\n\n$stack');
+      } catch (_) {}
       _errorMessage = 'Không thể tải chi tiết đơn hàng. Vui lòng thử lại!';
     } finally {
       _isLoading = false;

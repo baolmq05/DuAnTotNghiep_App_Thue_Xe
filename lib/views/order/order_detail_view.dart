@@ -93,7 +93,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
       context,
       trip: trip,
       onReportSubmitted: () {
-        // Tải lại chi tiết chuyến đi nếu cần
+        context.read<OrderDetailViewModel>().fetchTripDetail(widget.orderId);
       },
     );
   }
@@ -2434,6 +2434,66 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                 ),
               ),
             ),
+            if (report.images.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Text(
+                'Hình ảnh bằng chứng:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: context.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 90,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: report.images.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) {
+                    final imgUrl = report.images[index];
+                    return GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => Dialog(
+                            backgroundColor: Colors.transparent,
+                            child: Stack(
+                              alignment: Alignment.topRight,
+                              children: [
+                                InteractiveViewer(
+                                  child: Image.network(imgUrl),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          imgUrl,
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 90,
+                            height: 90,
+                            color: Colors.grey.shade300,
+                            child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,

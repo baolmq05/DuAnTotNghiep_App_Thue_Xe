@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
+import 'package:duantotnghiep_app_thue_xe/services/cloudinary_upload_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/report_service.dart';
 
 /// BottomSheet Giao diện Báo cáo vi phạm chuyến đi
 /// Khớp 100% với cấu trúc bảng `reports` trong Database:
@@ -281,22 +283,64 @@ class _OrderDetailReportViolationSheetState
 
     setState(() => _isSubmitting = true);
 
-    // Giả lập gửi dữ liệu giao diện
-    await Future.delayed(const Duration(milliseconds: 900));
+    try {
+      final cloudinaryService = CloudinaryUploadService();
+      final reportService = ReportService();
+      final List<String> imageUrls = [];
 
-    if (!mounted) return;
-    setState(() => _isSubmitting = false);
+      // Upload các ảnh đã chọn lên Cloudinary (nếu có)
+      for (var img in _selectedImages) {
+        final url = await cloudinaryService.uploadImage(img, folder: 'reports');
+        if (url != null && url.isNotEmpty) {
+          imageUrls.add(url);
+        } else {
+          if (mounted) {
+            AppToast.show(
+              context,
+              message: 'Tải ảnh bằng chứng lên hệ thống thất bại. Vui lòng thử lại!',
+              type: ToastType.error,
+            );
+            setState(() => _isSubmitting = false);
+          }
+          return;
+        }
+      }
 
-    Navigator.pop(context);
+      // Gọi API gửi báo cáo/khiếu nại
+      final result = await reportService.createReport(
+        tripId: widget.trip.id,
+        reportType: _selectedReportType!,
+        description: description,
+        images: imageUrls.isNotEmpty ? imageUrls : null,
+      );
 
-    AppToast.show(
-      context,
-      message:
-          'Đã gửi báo cáo vi phạm thành công! Drivio sẽ tiếp nhận và xử lý trong 24h.',
-      type: ToastType.success,
-    );
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
 
-    widget.onReportSubmitted?.call();
+      if (result['success'] == true) {
+        Navigator.pop(context);
+        AppToast.show(
+          context,
+          message: result['message'] ?? 'Đã gửi báo cáo vi phạm thành công! Drivio sẽ tiếp nhận và xử lý trong 24h.',
+          type: ToastType.success,
+        );
+        widget.onReportSubmitted?.call();
+      } else {
+        AppToast.show(
+          context,
+          message: result['message'] ?? 'Gửi báo cáo vi phạm thất bại.',
+          type: ToastType.error,
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      AppToast.show(
+        context,
+        message: 'Có lỗi xảy ra: $e',
+        type: ToastType.error,
+      );
+    }
   }
 
   @override

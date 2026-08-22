@@ -383,9 +383,11 @@ class TripModel {
     ReportModel? parsedReport;
     if (json['reports'] != null && json['reports'] is List) {
       final List reportsList = json['reports'] as List;
-      if (reportsList.isNotEmpty) {
-        parsedReport = ReportModel.fromJson(reportsList.first as Map<String, dynamic>);
+      if (reportsList.isNotEmpty && reportsList.first is Map) {
+        parsedReport = ReportModel.fromJson(Map<String, dynamic>.from(reportsList.first as Map));
       }
+    } else if (json['report'] != null && json['report'] is Map) {
+      parsedReport = ReportModel.fromJson(Map<String, dynamic>.from(json['report'] as Map));
     }
 
     final renterJson = json['renter'] is Map<String, dynamic>

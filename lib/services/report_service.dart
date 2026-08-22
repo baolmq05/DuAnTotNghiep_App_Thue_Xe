@@ -46,21 +46,19 @@ class ReportService extends BaseService {
 
   /// Gửi một báo cáo/khiếu nại mới lên hệ thống
   Future<Map<String, dynamic>> createReport({
-    required String title,
+    required int tripId,
+    required int reportType,
     required String description,
-    int? reportedUserId,
-    int? carId,
-    int? tripId,
+    List<String>? images,
   }) async {
     try {
       final response = await store(
         'api/reports',
         body: {
-          'title': title,
+          'trip_id': tripId,
+          'report_type': reportType,
           'description': description,
-          if (reportedUserId != null) 'reported_user_id': reportedUserId,
-          if (carId != null) 'car_id': carId,
-          if (tripId != null) 'trip_id': tripId,
+          if (images != null) 'images': images,
         },
         requiresAuth: true,
       );
