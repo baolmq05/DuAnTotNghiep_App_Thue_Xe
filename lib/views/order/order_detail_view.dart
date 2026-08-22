@@ -21,6 +21,7 @@ import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/ord
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_time_card.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_price_card.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_timeline.dart';
+import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_report_violation_sheet.dart';
 
 class OrderDetailView extends StatefulWidget {
   final int orderId;
@@ -84,6 +85,16 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           context.read<OrderDetailViewModel>().fetchTripDetail(widget.orderId);
         },
       ),
+    );
+  }
+
+  void _showReportViolationSheet(TripModel trip) {
+    OrderDetailReportViolationSheet.show(
+      context,
+      trip: trip,
+      onReportSubmitted: () {
+        // Tải lại chi tiết chuyến đi nếu cần
+      },
     );
   }
 
@@ -458,6 +469,12 @@ class _OrderDetailViewState extends State<OrderDetailView> {
           Icons.assignment_turned_in_outlined,
           'Biên bản\ntrả xe',
           onTap: () => _showReturnReportDialog(trip),
+        ),
+        _buildActionItem(
+          Icons.report_problem_outlined,
+          'Báo cáo\nvi phạm',
+          isDanger: true,
+          onTap: () => _showReportViolationSheet(trip),
         ),
         _buildActionItem(
           Icons.headset_mic_outlined,
@@ -1190,6 +1207,23 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   );
                 },
               ),
+            ListTile(
+              leading: const Icon(
+                Icons.report_problem_outlined,
+                color: AppColors.error,
+              ),
+              title: const Text(
+                'Báo cáo vi phạm chuyến đi',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showReportViolationSheet(trip);
+              },
+            ),
           ],
         ),
       ),
