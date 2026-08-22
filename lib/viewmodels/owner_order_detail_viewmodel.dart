@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
+import 'package:duantotnghiep_app_thue_xe/models/report_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/cloudinary_upload_service.dart';
 
@@ -29,6 +30,7 @@ class OwnerOrderDetailViewModel extends ChangeNotifier {
 
   String? _actionError;
 
+  ReportModel? get report => _trip?.report;
   TripModel? get trip => _trip;
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;

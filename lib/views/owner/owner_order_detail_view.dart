@@ -16,6 +16,7 @@ import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/ord
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_price_card.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_timeline.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_pre_trip_photos_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_report_card.dart';
 
 class OwnerOrderDetailView extends StatefulWidget {
   final int orderId;
@@ -139,6 +140,13 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
                           isOwner: true,
                           onCancel: (t) => _showStatusUpdateDialog(t, 'Hủy chuyến đi', 6),
                         ),
+                        if (trip.report != null) ...[
+                          const SizedBox(height: 20),
+                          OrderDetailReportCard(
+                            report: trip.report!,
+                            isOwnerView: true,
+                          ),
+                        ],
                         const SizedBox(height: 24),
                         _buildOwnerActions(trip),
                         
