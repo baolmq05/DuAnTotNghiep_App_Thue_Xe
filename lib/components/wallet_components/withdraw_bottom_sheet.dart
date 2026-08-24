@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
@@ -6,6 +7,29 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/wallet_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/utils/format_price.dart';
 import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
+
+class ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    if (digitsOnly.isEmpty) {
+      return const TextEditingValue();
+    }
+
+    final formatted = formatPrice(digitsOnly);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
 
 class WithdrawBottomSheet extends StatefulWidget {
   const WithdrawBottomSheet({super.key});
@@ -28,7 +52,7 @@ class _WithdrawBottomSheetState extends State<WithdrawBottomSheet> {
 
   void _setAmount(double value) {
     setState(() {
-      _amountController.text = value.toStringAsFixed(0);
+      _amountController.text = formatPrice(value.toStringAsFixed(0));
     });
   }
 
@@ -301,6 +325,10 @@ class _WithdrawBottomSheetState extends State<WithdrawBottomSheet> {
                     TextFormField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        ThousandsSeparatorInputFormatter(),
+                      ],
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -345,7 +373,8 @@ class _WithdrawBottomSheetState extends State<WithdrawBottomSheet> {
                         if (value == null || value.trim().isEmpty) {
                           return 'Vui lòng nhập số tiền';
                         }
-                        final amountVal = int.tryParse(value);
+                        final cleanValue = value.replaceAll('.', '').replaceAll(',', '').trim();
+                        final amountVal = int.tryParse(cleanValue);
                         if (amountVal == null || amountVal <= 0) {
                           return 'Vui lòng nhập số tiền hợp lệ';
                         }
@@ -467,7 +496,10 @@ class _WithdrawBottomSheetState extends State<WithdrawBottomSheet> {
                                       if (!_formKey.currentState!.validate()) {
                                         return;
                                       }
-                                      final rawText = _amountController.text;
+                                      final rawText = _amountController.text
+                                          .replaceAll('.', '')
+                                          .replaceAll(',', '')
+                                          .trim();
                                       final amount = int.parse(rawText);
                                       final desc = _descriptionController.text.trim();
                                       

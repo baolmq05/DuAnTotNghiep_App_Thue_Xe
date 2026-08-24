@@ -285,4 +285,53 @@ class OwnerOrderDetailViewModel extends ChangeNotifier {
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
     }
   }
+
+  bool _isSubmittingExtension = false;
+  bool get isSubmittingExtension => _isSubmittingExtension;
+
+  // Approve extension request
+  Future<Map<String, dynamic>> approveExtension(int tripId) async {
+    _isSubmittingExtension = true;
+    _actionError = null;
+    notifyListeners();
+
+    try {
+      final result = await _tripService.approveExtension(tripId);
+      if (result['success'] == true) {
+        await fetchTripDetail(tripId);
+      } else {
+        _actionError = result['message'] ?? 'Lỗi khi duyệt gia hạn.';
+      }
+      return result;
+    } catch (e) {
+      _actionError = 'Có lỗi xảy ra khi duyệt gia hạn: $e';
+      return {'success': false, 'message': _actionError!};
+    } finally {
+      _isSubmittingExtension = false;
+      notifyListeners();
+    }
+  }
+
+  // Reject extension request
+  Future<Map<String, dynamic>> rejectExtension(int tripId, {String? reason}) async {
+    _isSubmittingExtension = true;
+    _actionError = null;
+    notifyListeners();
+
+    try {
+      final result = await _tripService.rejectExtension(tripId, reason: reason);
+      if (result['success'] == true) {
+        await fetchTripDetail(tripId);
+      } else {
+        _actionError = result['message'] ?? 'Lỗi khi từ chối gia hạn.';
+      }
+      return result;
+    } catch (e) {
+      _actionError = 'Có lỗi xảy ra khi từ chối gia hạn: $e';
+      return {'success': false, 'message': _actionError!};
+    } finally {
+      _isSubmittingExtension = false;
+      notifyListeners();
+    }
+  }
 }

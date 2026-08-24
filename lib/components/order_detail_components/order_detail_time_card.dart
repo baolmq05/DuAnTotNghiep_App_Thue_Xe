@@ -30,6 +30,19 @@ class OrderDetailTimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    DateTime effectiveEndAt = trip.endAt;
+    if (trip.latestExtension != null &&
+        trip.latestExtension!.status == 3 &&
+        trip.latestExtension!.endDate != null) {
+      final parsed = DateTime.tryParse(trip.latestExtension!.endDate!);
+      if (parsed != null) {
+        effectiveEndAt = parsed;
+      }
+    }
+    final isExtended = trip.latestExtension != null &&
+        trip.latestExtension!.status == 3 &&
+        trip.latestExtension!.endDate != null;
+
     final startCity =
         (trip.deliveryAddress != null &&
             trip.deliveryAddress!.trim().isNotEmpty)
@@ -41,7 +54,7 @@ class OrderDetailTimeCard extends StatelessWidget {
         (trip.car?.carLocation?.address ??
         trip.car?.carLocation?.city ??
         'TP. Hồ Chí Minh');
-    final rentalDays = _calculateDays(trip.startAt, trip.endAt);
+    final rentalDays = _calculateDays(trip.startAt, effectiveEndAt);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -113,19 +126,42 @@ class OrderDetailTimeCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 18),
-                    Text(
-                      'Trả xe',
-                      style: TextStyle(
-                        color: context.textSecondary,
-                        fontSize: 12,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'Trả xe',
+                          style: TextStyle(
+                            color: context.textSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
+                        if (isExtended) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: Colors.green.shade300, width: 0.8),
+                            ),
+                            child: Text(
+                              'Đã gia hạn',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${_formatDateTime(trip.endAt)} • ${_formatDate(trip.endAt)}',
+                      '${_formatDateTime(effectiveEndAt)} • ${_formatDate(effectiveEndAt)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: context.textPrimary,
+                        color: isExtended ? context.primaryColor : context.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),

@@ -451,6 +451,68 @@ class TripService extends BaseService {
       return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
     }
   }
+
+  // Chủ xe duyệt yêu cầu gia hạn chuyến đi
+  Future<Map<String, dynamic>> approveExtension(int tripId) async {
+    try {
+      final response = await update(
+        'api/trips/$tripId/extension-approve',
+        body: {},
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Đã duyệt yêu cầu gia hạn!',
+          'data': response['data'] != null ? TripModel.fromJson(response['data']) : null,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể duyệt yêu cầu gia hạn.',
+      };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi duyệt gia hạn chuyến đi $tripId: ${e.message}');
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      debugPrint('Lỗi khi duyệt gia hạn chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
+  // Chủ xe từ chối yêu cầu gia hạn chuyến đi
+  Future<Map<String, dynamic>> rejectExtension(int tripId, {String? reason}) async {
+    try {
+      final response = await update(
+        'api/trips/$tripId/extension-reject',
+        body: {
+          if (reason != null && reason.isNotEmpty) 'reason': reason,
+        },
+        requiresAuth: true,
+      );
+
+      if (response != null && response['success'] == true) {
+        return {
+          'success': true,
+          'message': response['message'] ?? 'Đã từ chối yêu cầu gia hạn.',
+          'data': response['data'] != null ? TripModel.fromJson(response['data']) : null,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response?['message'] ?? 'Không thể từ chối yêu cầu gia hạn.',
+      };
+    } on ApiException catch (e) {
+      debugPrint('Lỗi khi từ chối gia hạn chuyến đi $tripId: ${e.message}');
+      return {'success': false, 'message': e.message};
+    } catch (e) {
+      debugPrint('Lỗi khi từ chối gia hạn chuyến đi $tripId: $e');
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
 }
 
 

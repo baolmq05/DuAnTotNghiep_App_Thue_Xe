@@ -230,7 +230,9 @@ class TripModel {
   final TripExtensionModel? latestExtension;
   final List<TripReviewModel> reviews;
   final List<TripImageModel> tripImages;
-  final ReportModel? report;
+  final List<ReportModel> reports;
+
+  ReportModel? get report => reports.isNotEmpty ? reports.first : null;
 
   TripModel({
     required this.id,
@@ -255,8 +257,11 @@ class TripModel {
     this.latestExtension,
     this.reviews = const [],
     this.tripImages = const [],
-    this.report,
-  });
+    List<ReportModel>? reports,
+    ReportModel? report,
+  }) : reports = reports != null && reports.isNotEmpty
+            ? reports
+            : (report != null ? [report] : const []);
 
   /// Mã chuyến đi hiển thị (ưu tiên trip_code từ backend, nếu không có fallback về #RT{id})
   String get displayCode =>
@@ -379,15 +384,17 @@ class TripModel {
           .toList();
     }
 
-    // Parse report from backend show response reports list
-    ReportModel? parsedReport;
+    // Parse reports from backend show response reports list
+    List<ReportModel> parsedReports = [];
     if (json['reports'] != null && json['reports'] is List) {
       final List reportsList = json['reports'] as List;
-      if (reportsList.isNotEmpty && reportsList.first is Map) {
-        parsedReport = ReportModel.fromJson(Map<String, dynamic>.from(reportsList.first as Map));
+      for (var r in reportsList) {
+        if (r != null && r is Map) {
+          parsedReports.add(ReportModel.fromJson(Map<String, dynamic>.from(r)));
+        }
       }
     } else if (json['report'] != null && json['report'] is Map) {
-      parsedReport = ReportModel.fromJson(Map<String, dynamic>.from(json['report'] as Map));
+      parsedReports.add(ReportModel.fromJson(Map<String, dynamic>.from(json['report'] as Map)));
     }
 
     final renterJson = json['renter'] is Map<String, dynamic>
@@ -455,7 +462,7 @@ class TripModel {
       latestExtension: parsedExtension,
       reviews: parsedReviews,
       tripImages: parsedTripImages,
-      report: parsedReport,
+      reports: parsedReports,
     );
   }
 
