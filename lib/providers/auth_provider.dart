@@ -100,6 +100,7 @@ class AuthProvider extends ChangeNotifier {
       final res = await _authService.loginWithGoogle(
         email: googleUser.email,
         name: googleUser.displayName ?? 'Google User',
+        avatar: googleUser.photoUrl,
         idToken: token,
       );
       _token = res['access_token'] as String;

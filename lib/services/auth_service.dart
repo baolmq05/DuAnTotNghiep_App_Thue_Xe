@@ -22,6 +22,7 @@ class AuthService extends BaseService {
     String? accessToken,
     String? email,
     String? name,
+    String? avatar,
   }) async {
     final Map<String, dynamic> body = {};
     if (idToken != null) {
@@ -31,6 +32,10 @@ class AuthService extends BaseService {
     if (accessToken != null) body['access_token'] = accessToken;
     if (email != null) body['email'] = email;
     if (name != null) body['name'] = name;
+    if (avatar != null) {
+      body['avatar'] = avatar;
+      body['picture'] = avatar;
+    }
 
     final response = await store('api/auth/google', body: body);
     return response as Map<String, dynamic>;

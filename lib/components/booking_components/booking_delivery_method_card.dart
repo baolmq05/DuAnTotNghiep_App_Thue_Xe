@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/goong_map_service.dart';
+import 'package:duantotnghiep_app_thue_xe/constants/goong_config.dart';
 import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -159,7 +160,7 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
     );
 
     final String url =
-        "https://rsapi.goong.io/Geocode?address=${Uri.encodeComponent(addressInput)}&api_key=$goongApiKey";
+        "https://rsapi.goong.io/Geocode?address=${Uri.encodeComponent(addressInput)}&api_key=${GoongConfig.apiKey}";
 
     try {
       final response = await http.get(Uri.parse(url));

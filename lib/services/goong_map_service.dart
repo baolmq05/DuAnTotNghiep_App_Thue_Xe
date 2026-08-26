@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../constants/goong_config.dart';
 
 class GoongMapService {
-  static const String _apiKey = 'xEcFmnV3loWHnfqa9ZsEENH7Wu6lehK4QmabQk7V';
+  static const String _apiKey = GoongConfig.apiKey;
 
   // lấy danh sách gợi ý địa điểm từ Goong API
   Future<List<String>> getSuggestions(String input) async {

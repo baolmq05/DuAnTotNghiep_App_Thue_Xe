@@ -18,6 +18,7 @@ import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/ord
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_timeline.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_pre_trip_photos_card.dart';
 import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/order_detail_report_card.dart';
+import 'package:duantotnghiep_app_thue_xe/components/order_detail_components/complete_trip_confirmation_sheet.dart';
 
 class OwnerOrderDetailView extends StatefulWidget {
   final int orderId;
@@ -287,17 +288,24 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
                               onPressed: viewModel.isSubmittingComplete ||
                                       viewModel.selectedPostTripPhotos.isEmpty
                                   ? null
-                                  : () async {
-                                      final result = await viewModel.submitCompleteTrip(trip.id);
-                                      if (mounted) {
-                                        AppToast.show(
-                                          context,
-                                          message: result['message'] ?? '',
-                                          type: result['success'] == true
-                                              ? ToastType.success
-                                              : ToastType.error,
-                                        );
-                                      }
+                                  : () {
+                                      CompleteTripConfirmationSheet.show(
+                                        context,
+                                        trip: trip,
+                                        onConfirm: () async {
+                                          final result = await viewModel
+                                              .submitCompleteTrip(trip.id);
+                                          if (mounted) {
+                                            AppToast.show(
+                                              context,
+                                              message: result['message'] ?? '',
+                                              type: result['success'] == true
+                                                  ? ToastType.success
+                                                  : ToastType.error,
+                                            );
+                                          }
+                                        },
+                                      );
                                     },
                             ),
                           ),
