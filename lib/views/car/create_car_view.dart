@@ -419,8 +419,11 @@ class _CreateCarViewState extends State<CreateCarView> {
                                 _buildLabel(context, 'Biển số xe *'),
                                 TextFormField(
                                   initialValue: vm.licensePlate,
+                                  enabled: !vm.isEditMode,
                                   style: TextStyle(
-                                    color: context.textPrimary,
+                                    color: vm.isEditMode
+                                        ? context.textSecondary
+                                        : context.textPrimary,
                                     fontSize: 13,
                                   ),
                                   decoration: _buildInputDecoration(
@@ -440,8 +443,11 @@ class _CreateCarViewState extends State<CreateCarView> {
                                 _buildLabel(context, 'Số khung (VIN) *'),
                                 TextFormField(
                                   initialValue: vm.vin,
+                                  enabled: !vm.isEditMode,
                                   style: TextStyle(
-                                    color: context.textPrimary,
+                                    color: vm.isEditMode
+                                        ? context.textSecondary
+                                        : context.textPrimary,
                                     fontSize: 13,
                                   ),
                                   decoration: _buildInputDecoration(
@@ -467,8 +473,11 @@ class _CreateCarViewState extends State<CreateCarView> {
                                 _buildLabel(context, 'Số máy *'),
                                 TextFormField(
                                   initialValue: vm.engineNumber,
+                                  enabled: !vm.isEditMode,
                                   style: TextStyle(
-                                    color: context.textPrimary,
+                                    color: vm.isEditMode
+                                        ? context.textSecondary
+                                        : context.textPrimary,
                                     fontSize: 13,
                                   ),
                                   decoration: _buildInputDecoration(
@@ -515,19 +524,36 @@ class _CreateCarViewState extends State<CreateCarView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _buildLabel(context, 'Số chỗ ngồi *'),
-                                TextFormField(
-                                  initialValue: vm.seatCount.toString(),
-                                  keyboardType: TextInputType.number,
+                                DropdownButtonFormField<int>(
+                                  value: [4, 5, 7].contains(vm.seatCount)
+                                      ? vm.seatCount
+                                      : null,
+                                  dropdownColor: context.cardColor,
                                   style: TextStyle(
                                     color: context.textPrimary,
                                     fontSize: 13,
                                   ),
                                   decoration: _buildInputDecoration(
                                     context,
-                                    '5',
+                                    'Chọn số chỗ',
                                   ),
-                                  onChanged: (v) =>
-                                      vm.seatCount = int.tryParse(v) ?? 5,
+                                  items: const [
+                                    DropdownMenuItem(
+                                      value: 4,
+                                      child: Text('4 chỗ'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 5,
+                                      child: Text('5 chỗ'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 7,
+                                      child: Text('7 chỗ'),
+                                    ),
+                                  ],
+                                  onChanged: (v) {
+                                    if (v != null) vm.seatCount = v;
+                                  },
                                 ),
                               ],
                             ),
@@ -1581,6 +1607,10 @@ class _CreateCarViewState extends State<CreateCarView> {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: BorderSide(color: context.inputBorderColor),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: context.inputBorderColor.withValues(alpha: 0.5)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
