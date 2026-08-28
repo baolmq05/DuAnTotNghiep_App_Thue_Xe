@@ -119,32 +119,8 @@ class OrderItemCard extends StatelessWidget {
     final imageUrl = trip.car?.getFirstImageUrl();
     final locationText = _getLocationText(trip);
 
-    Color statusBgColor;
-    Color statusTextColor;
-    switch (trip.status) {
-      case 0:
-        statusBgColor = context.warningSurface;
-        statusTextColor = context.warning;
-        break;
-      case 1:
-        statusBgColor = context.infoSurface;
-        statusTextColor = context.info;
-        break;
-      case 2:
-      case 3:
-      case 4:
-        statusBgColor = context.successSurface;
-        statusTextColor = context.success;
-        break;
-      case 5:
-      case 6:
-        statusBgColor = context.errorSurface;
-        statusTextColor = context.error;
-        break;
-      default:
-        statusBgColor = context.cardColor;
-        statusTextColor = context.textSecondary;
-    }
+    final statusBgColor = trip.getStatusBackgroundColor(context);
+    final statusTextColor = trip.getStatusTextColor(context);
 
     final double netTotal = (trip.cost - trip.discountAmount) < 0
         ? 0.0

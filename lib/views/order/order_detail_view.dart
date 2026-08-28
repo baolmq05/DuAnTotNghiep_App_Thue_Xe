@@ -89,6 +89,15 @@ class _OrderDetailViewState extends State<OrderDetailView> {
   }
 
   void _showReportViolationSheet(TripModel trip) {
+    if (trip.status != 2) {
+      AppToast.show(
+        context,
+        message: 'Bạn chỉ có thể gửi báo cáo vi phạm khi chuyến đi ở trạng thái Đã xác nhận.',
+        type: ToastType.warning,
+      );
+      return;
+    }
+
     OrderDetailReportViolationSheet.show(
       context,
       trip: trip,
@@ -126,6 +135,29 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
     if (viewModel.isLoading) {
       return Scaffold(
+        appBar: AppBar(
+          backgroundColor: context.primaryColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/orders');
+              }
+            },
+          ),
+          title: Text(
+            'Chi tiết đơn hàng',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+        ),
         body: Center(
           child: CircularProgressIndicator(color: context.primaryColor),
         ),
@@ -177,130 +209,134 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: context.primaryColor,
-            pinned: true,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/orders');
-                }
-              },
-            ),
-            title: Text(
-              'Chi tiết đơn hàng',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            centerTitle: true,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.headset_mic_outlined,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => context.push('/support'),
-                    ),
-                    IconButton(
-                      constraints: const BoxConstraints(),
-                      padding: EdgeInsets.zero,
-                      icon: Icon(Icons.more_horiz, color: Colors.white),
-                      onPressed: () => _showOptionBottomSheet(context, trip),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+      appBar: AppBar(
+        backgroundColor: context.primaryColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/orders');
+            }
+          },
+        ),
+        title: Text(
+          'Chi tiết đơn hàng',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-          SliverToBoxAdapter(
-            child: Column(
+        ),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                OrderDetailHeader(trip: trip),
-                Transform.translate(
-                  offset: const Offset(0, -30),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        if (car != null) OrderDetailCarCard(car: car),
-                        if (trip.latestExtension != null) ...[
-                          const SizedBox(height: 20),
-                          _buildExtensionBanner(trip),
-                        ],
-                        if (isOwner && trip.renter != null)
-                          OrderDetailOwnerCard.renter(
-                            trip: trip,
-                            renter: trip.renter!,
-                            isCreatingChat: _isCreatingChat,
-                            onStartChat: () => _handleStartChat(
-                              trip,
-                              receiverId: trip.renter!.id,
-                              receiverName: trip.renter!.name,
-                              receiverAvatar: trip.renter!.avatar,
-                            ),
-                          )
-                        else if (car?.owner != null)
-                          OrderDetailOwnerCard.owner(
-                            trip: trip,
-                            owner: car!.owner!,
-                            isCreatingChat: _isCreatingChat,
-                            onStartChat: () => _handleStartChat(
-                              trip,
-                              receiverId: car.owner!.id,
-                              receiverName: car.owner!.name,
-                              receiverAvatar: car.owner!.avatar,
-                            ),
-                          )
-                        else if (car != null && car.userId > 0)
-                          OrderDetailOwnerCard.owner(
-                            trip: trip,
-                            owner: OwnerModel(
-                              id: car.userId,
-                              name: 'Chủ xe',
-                            ),
-                            isCreatingChat: _isCreatingChat,
-                            onStartChat: () => _handleStartChat(
-                              trip,
-                              receiverId: car.userId,
-                              receiverName: 'Chủ xe',
-                            ),
-                          ),
-                        const SizedBox(height: 20),
-                        OrderDetailTimeCard(trip: trip),
-                        const SizedBox(height: 20),
-                        OrderDetailPriceCard(trip: trip),
-                        _buildReportSection(trip, viewModel),
-                        const SizedBox(height: 20),
-                        OrderDetailTimeline(
-                          trip: trip,
-                          onCancel: _showCancelConfirmDialog,
-                        ),
-                        if (trip.status == 4) ...[
-                          const SizedBox(height: 20),
-                          _buildCompletedReviewCard(trip),
-                        ],
-                        const SizedBox(height: 16),
-                      ],
-                    ),
+                IconButton(
+                  icon: Icon(
+                    Icons.headset_mic_outlined,
+                    color: Colors.white,
                   ),
+                  onPressed: () => context.push('/support'),
+                ),
+                IconButton(
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                  icon: Icon(Icons.more_horiz, color: Colors.white),
+                  onPressed: () => _showOptionBottomSheet(context, trip),
                 ),
               ],
             ),
           ),
         ],
+      ),
+      body: RefreshIndicator(
+        color: context.primaryColor,
+        backgroundColor: Colors.white,
+        onRefresh: () async {
+          await context.read<OrderDetailViewModel>().fetchTripDetail(widget.orderId);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              OrderDetailHeader(trip: trip),
+              Transform.translate(
+                offset: const Offset(0, -30),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      if (car != null) OrderDetailCarCard(car: car),
+                      if (trip.latestExtension != null) ...[
+                        const SizedBox(height: 20),
+                        _buildExtensionBanner(trip),
+                      ],
+                      if (isOwner && trip.renter != null)
+                        OrderDetailOwnerCard.renter(
+                          trip: trip,
+                          renter: trip.renter!,
+                          isCreatingChat: _isCreatingChat,
+                          onStartChat: () => _handleStartChat(
+                            trip,
+                            receiverId: trip.renter!.id,
+                            receiverName: trip.renter!.name,
+                            receiverAvatar: trip.renter!.avatar,
+                          ),
+                        )
+                      else if (car?.owner != null)
+                        OrderDetailOwnerCard.owner(
+                          trip: trip,
+                          owner: car!.owner!,
+                          isCreatingChat: _isCreatingChat,
+                          onStartChat: () => _handleStartChat(
+                            trip,
+                            receiverId: car.owner!.id,
+                            receiverName: car.owner!.name,
+                            receiverAvatar: car.owner!.avatar,
+                          ),
+                        )
+                      else if (car != null && car.userId > 0)
+                        OrderDetailOwnerCard.owner(
+                          trip: trip,
+                          owner: OwnerModel(
+                            id: car.userId,
+                            name: 'Chủ xe',
+                          ),
+                          isCreatingChat: _isCreatingChat,
+                          onStartChat: () => _handleStartChat(
+                            trip,
+                            receiverId: car.userId,
+                            receiverName: 'Chủ xe',
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+                      OrderDetailTimeCard(trip: trip),
+                      const SizedBox(height: 20),
+                      OrderDetailPriceCard(trip: trip),
+                      _buildReportSection(trip, viewModel),
+                      const SizedBox(height: 20),
+                      OrderDetailTimeline(
+                        trip: trip,
+                        onCancel: _showCancelConfirmDialog,
+                      ),
+                      if (trip.status == 4) ...[
+                        const SizedBox(height: 20),
+                        _buildCompletedReviewCard(trip),
+                      ],
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

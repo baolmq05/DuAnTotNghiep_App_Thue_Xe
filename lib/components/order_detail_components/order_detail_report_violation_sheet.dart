@@ -32,6 +32,15 @@ class OrderDetailReportViolationSheet extends StatefulWidget {
     required TripModel trip,
     VoidCallback? onReportSubmitted,
   }) {
+    if (trip.status != 2) {
+      AppToast.show(
+        context,
+        message: 'Bạn chỉ có thể gửi báo cáo vi phạm khi chuyến đi ở trạng thái Đã xác nhận.',
+        type: ToastType.warning,
+      );
+      return Future.value();
+    }
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -251,6 +260,15 @@ class _OrderDetailReportViolationSheetState
   }
 
   Future<void> _handleSubmitReport() async {
+    if (widget.trip.status != 2) {
+      AppToast.show(
+        context,
+        message: 'Bạn chỉ có thể gửi báo cáo vi phạm khi chuyến đi ở trạng thái Đã xác nhận.',
+        type: ToastType.warning,
+      );
+      return;
+    }
+
     // Validation các trường theo Database
     if (_selectedReportType == null) {
       AppToast.show(
