@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/car_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/car_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/base_service.dart';
 
 class OwnerVehicleViewModel extends ChangeNotifier {
   final CarService _carService = CarService();
@@ -41,19 +43,18 @@ class OwnerVehicleViewModel extends ChangeNotifier {
 
   /// Chuyển đổi trạng thái xe (Bật/Tắt chế độ cho thuê)
   /// status 1: Hoạt động / Sẵn sàng
-  /// status 3: Tạm khóa / Ngưng hoạt động
-  Future<bool> toggleCarStatus(Car car) async {
+  /// status 0: Dừng hoạt động
+  Future<String?> toggleCarStatus(Car car, {String? reason}) async {
     final int currentStatus = car.status;
-    if (currentStatus != 1 && currentStatus != 3) {
-      // Chỉ cho phép chuyển đổi trạng thái giữa Hoạt động (1) và Tạm khóa (3)
-      // Ví dụ: trạng thái Đang bận (2) hoặc Chờ duyệt (0) thì không cho phép toggle
-      return false;
+    if (currentStatus != 1 && currentStatus != 0) {
+      // Chỉ cho phép chuyển đổi trạng thái giữa Hoạt động (1) và Dừng hoạt động (0)
+      return 'Trạng thái xe không hợp lệ để thay đổi';
     }
 
-    final int newStatus = currentStatus == 1 ? 3 : 1;
+    final int newStatus = currentStatus == 1 ? 0 : 1;
 
     try {
-      final success = await _carService.updateCarStatus(car.id, newStatus);
+      final success = await _carService.updateCarStatus(car.id, newStatus, reason: reason);
       if (success) {
         // Cập nhật trạng thái xe trong danh sách cục bộ
         final index = _cars.indexWhere((c) => c.id == car.id);
@@ -82,12 +83,34 @@ class OwnerVehicleViewModel extends ChangeNotifier {
           );
           _cars[index] = updatedCar;
           notifyListeners();
-          return true;
+          return null; // Thành công
         }
       }
-      return false;
+      return 'Không thể cập nhật trạng thái xe';
     } catch (e) {
       debugPrint('Lỗi khi toggle trạng thái xe: $e');
+      if (e is ApiException) {
+        return e.message;
+      }
+      return 'Lỗi: $e';
+    }
+  }
+
+  /// Kiểm tra xem xe có đang trong quá trình đặt hay không (có chuyến đi chưa hoàn thành)
+  Future<bool> hasActiveBookings(int carId) async {
+    try {
+      final TripService tripService = TripService();
+      final trips = await tripService.getOwnerTrips();
+      // Lọc các chuyến đi của xe này có trạng thái hoạt động (chưa hoàn tất và chưa hủy)
+      final activeTrips = trips.where((trip) =>
+          trip.carId == carId &&
+          trip.status != 4 && // Hoàn tất
+          trip.status != 5 && // Người thuê hủy
+          trip.status != 6 // Chủ xe hủy
+          );
+      return activeTrips.isNotEmpty;
+    } catch (e) {
+      debugPrint('Lỗi khi kiểm tra chuyến đi đang hoạt động của xe $carId: $e');
       return false;
     }
   }

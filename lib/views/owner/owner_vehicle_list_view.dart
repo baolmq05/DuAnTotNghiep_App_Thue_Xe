@@ -5,6 +5,7 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/models/car_model.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/owner_vehicle_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/app_toast.dart';
 
 class OwnerVehicleListView extends StatefulWidget {
   const OwnerVehicleListView({super.key});
@@ -172,18 +173,6 @@ class _OwnerVehicleListViewState extends State<OwnerVehicleListView>
                   ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/register-car'),
-        backgroundColor: context.primaryColor,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Đăng ký xe mới',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
     );
   }
@@ -490,6 +479,56 @@ class _OwnerVehicleListViewState extends State<OwnerVehicleListView>
                   ],
                 ),
 
+                const SizedBox(height: 12),
+                Divider(color: context.border, height: 1),
+                const SizedBox(height: 12),
+
+                // Trạng thái hoạt động toggle switch
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          car.status == 1 ? Icons.play_circle_outline_rounded : Icons.pause_circle_outline_rounded,
+                          size: 20,
+                          color: car.status == 1 ? context.success : context.textSecondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Trạng thái hoạt động',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: context.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          car.status == 1 ? 'Bật' : 'Tắt',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: car.status == 1 ? context.success : context.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Switch(
+                          value: car.status == 1,
+                          onChanged: (car.status == 1 || car.status == 0)
+                              ? (value) => _handleToggleStatus(car, value)
+                              : null,
+                          activeThumbColor: context.success,
+                          activeTrackColor: context.successSurface,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
                 const SizedBox(height: 14),
 
                 // Button Actions
@@ -543,6 +582,174 @@ class _OwnerVehicleListViewState extends State<OwnerVehicleListView>
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _handleToggleStatus(Car car, bool newValue) async {
+    final viewModel = context.read<OwnerVehicleViewModel>();
+
+    if (newValue) {
+      // Bật trạng thái hoạt động (không cần nhập lý do)
+      final error = await viewModel.toggleCarStatus(car);
+      if (mounted) {
+        if (error == null) {
+          AppToast.show(
+            context,
+            message: 'Đã bật trạng thái hoạt động của xe thành công!',
+            type: ToastType.success,
+          );
+        } else {
+          AppToast.show(
+            context,
+            message: error,
+            type: ToastType.error,
+          );
+        }
+      }
+    } else {
+      // Tắt trạng thái hoạt động (cần kiểm tra chuyến đi đang hoạt động và yêu cầu lý do)
+      // 1. Hiển thị loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final hasActive = await viewModel.hasActiveBookings(car.id);
+
+      if (mounted) {
+        Navigator.pop(context); // Tắt loading dialog
+      }
+
+      if (hasActive) {
+        // Có đơn đặt xe đang diễn ra -> Không cho phép tắt
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 26),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Không thể tắt hoạt động',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: const Text(
+                'Xe này đang trong quá trình đặt xe hoặc có chuyến đi chưa hoàn thành. Bạn không thể dừng hoạt động vào lúc này.',
+                style: TextStyle(fontSize: 14, height: 1.4),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: context.primaryColor,
+                  ),
+                  child: const Text('Đã hiểu', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        // Không có chuyến đi -> Xác nhận dừng hoạt động
+        if (mounted) {
+          _showConfirmationDialog(car);
+        }
+      }
+    }
+  }
+
+  void _showConfirmationDialog(Car car) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.info_outline_rounded, color: context.primaryColor, size: 24),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Xác nhận dừng hoạt động',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Bạn có chắc chắn muốn dừng hoạt động xe "${car.name}" không?',
+            style: TextStyle(fontSize: 14, color: context.textPrimary, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(
+                'Hủy',
+                style: TextStyle(color: context.textSecondary, fontWeight: FontWeight.w600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context); // Tắt dialog xác nhận
+
+                // Hiển thị loading indicator
+                showDialog(
+                  context: this.context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+
+                final viewModel = this.context.read<OwnerVehicleViewModel>();
+                final error = await viewModel.toggleCarStatus(car); // Bỏ truyền reason
+
+                if (mounted) {
+                  Navigator.pop(this.context); // Tắt loading indicator
+                  if (error == null) {
+                    AppToast.show(
+                      this.context,
+                      message: 'Đã dừng hoạt động xe thành công!',
+                      type: ToastType.success,
+                    );
+                  } else {
+                    AppToast.show(
+                      this.context,
+                      message: error,
+                      type: ToastType.error,
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              child: const Text('Đồng ý', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

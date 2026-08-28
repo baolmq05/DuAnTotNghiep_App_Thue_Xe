@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:duantotnghiep_app_thue_xe/utils/error_helper.dart';
 
 /// Lỗi phát sinh khi đi gọi API gặp chuyện.
 class ApiException implements Exception {
@@ -92,12 +93,15 @@ abstract class BaseService {
     try {
       final json = jsonDecode(response.body);
       if (json is Map) {
-        if (json.containsKey('message') && json.containsKey('errors')) {
-          errorMsg = "${json['message']} (${json['errors']})";
+        if (json.containsKey('errors')) {
+          final formattedErrors = formatValidationErrors(json['errors']);
+          if (formattedErrors.isNotEmpty) {
+            errorMsg = formattedErrors;
+          } else if (json.containsKey('message')) {
+            errorMsg = json['message']?.toString() ?? errorMsg;
+          }
         } else if (json.containsKey('message')) {
-          errorMsg = json['message'];
-        } else if (json.containsKey('errors')) {
-          errorMsg = json['errors']?.toString() ?? '';
+          errorMsg = json['message']?.toString() ?? errorMsg;
         }
       }
     } catch (_) {}
@@ -204,6 +208,22 @@ abstract class BaseService {
   }) {
     return _sendRequest(
       'PUT',
+      endpoint,
+      body: body,
+      headers: headers,
+      requiresAuth: requiresAuth,
+    );
+  }
+
+  // Patch
+  Future<dynamic> patch(
+    String endpoint, {
+    dynamic body,
+    Map<String, String>? headers,
+    bool requiresAuth = false,
+  }) {
+    return _sendRequest(
+      'PATCH',
       endpoint,
       body: body,
       headers: headers,
