@@ -883,44 +883,51 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.amber.shade50,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.amber.shade200),
+          border: Border.all(color: context.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Đánh giá của bạn về khách thuê',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: context.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.star_rounded, color: Colors.amber.shade600, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Đánh giá của bạn về khách thuê',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.amber.shade900,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: List.generate(5, (i) {
-                return Icon(
+                ...List.generate(5, (i) => Icon(
                   i < review.rating.round()
                       ? Icons.star_rounded
                       : Icons.star_outline_rounded,
                   color: Colors.amber,
-                  size: 22,
-                );
-              }),
+                  size: 20,
+                )),
+                const SizedBox(width: 6),
+                Text(
+                  review.rating.toStringAsFixed(1),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: context.textPrimary,
+                  ),
+                ),
+              ],
             ),
             if (review.comment != null && review.comment!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                review.comment!,
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                '"${review.comment!}"',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  color: context.textSecondary,
+                ),
               ),
             ],
           ],
@@ -932,23 +939,23 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade200),
+        border: Border.all(color: context.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.rate_review_outlined, color: Colors.orange.shade700, size: 20),
+              const Icon(Icons.rate_review_outlined, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Đánh giá khách thuê',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
-                  color: Colors.orange.shade900,
+                  color: context.textPrimary,
                 ),
               ),
             ],
@@ -956,20 +963,20 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
           const SizedBox(height: 8),
           Text(
             'Chuyến đi đã hoàn thành! Hãy đánh giá khách thuê để giúp cộng đồng.',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.4),
+            style: TextStyle(fontSize: 12, color: context.textSecondary, height: 1.4),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () => _showOwnerReviewDialog(trip),
-              icon: const Icon(Icons.star_rounded, color: Colors.white, size: 18),
+              icon: const Icon(Icons.star_outline_rounded, color: Colors.white, size: 18),
               label: const Text(
                 'Đánh giá ngay',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade600,
+                backgroundColor: context.primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 elevation: 0,

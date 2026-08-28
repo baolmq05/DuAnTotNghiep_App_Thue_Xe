@@ -1780,157 +1780,102 @@ class _OrderDetailViewState extends State<OrderDetailView> {
 
   Widget _buildCompletedReviewCard(TripModel trip) {
     final renterReview = trip.renterReview;
-    final isDark = context.isDarkMode;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1B382B) : const Color(0xFFECFDF5),
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.green.shade800 : Colors.green.shade200,
-        ),
+        border: Border.all(color: context.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_circle_rounded,
-                  color: Color(0xFF059669),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 10),
+              const Icon(Icons.check_circle_outline, size: 20),
+              const SizedBox(width: 8),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Chuyến đi đã kết thúc',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: isDark
-                            ? Colors.green.shade100
-                            : Colors.green.shade900,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Cảm ơn bạn đã sử dụng dịch vụ! Chuyến đi đã được hoàn thành thành công.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark
-                            ? Colors.green.shade200
-                            : Colors.green.shade800,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'Chuyến đi đã hoàn thành',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: context.textPrimary,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Divider(
-            height: 1,
-            color: isDark ? Colors.green.shade800 : Colors.green.shade200,
+          const SizedBox(height: 4),
+          Text(
+            'Cảm ơn bạn đã sử dụng dịch vụ Drivio!',
+            style: TextStyle(fontSize: 12, color: context.textSecondary),
           ),
           const SizedBox(height: 14),
+          Divider(height: 1, color: context.border),
+          const SizedBox(height: 14),
           if (renterReview != null) ...[
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Đánh giá của bạn về chủ xe:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: context.textPrimary,
-                        ),
-                      ),
-                      Row(
-                        children: List.generate(5, (index) {
-                          final starValue = index + 1;
-                          return Icon(
-                            starValue <= renterReview.rating
-                                ? Icons.star_rounded
-                                : Icons.star_outline_rounded,
-                            color: starValue <= renterReview.rating
-                                ? Colors.amber
-                                : Colors.grey.shade400,
-                            size: 18,
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                  if (renterReview.comment != null &&
-                      renterReview.comment!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '"${renterReview.comment}"',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontStyle: FontStyle.italic,
-                        color: context.textSecondary,
-                      ),
-                    ),
-                  ] else ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      'Không có bình luận.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                  ],
-                ],
+            Text(
+              'Đánh giá của bạn về chủ xe',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: context.textPrimary,
               ),
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                ...List.generate(5, (index) {
+                  final starValue = index + 1;
+                  return Icon(
+                    starValue <= renterReview.rating
+                        ? Icons.star_rounded
+                        : Icons.star_outline_rounded,
+                    color: starValue <= renterReview.rating
+                        ? Colors.amber
+                        : Colors.grey.shade400,
+                    size: 20,
+                  );
+                }),
+                const SizedBox(width: 6),
+                Text(
+                  renterReview.rating.toStringAsFixed(1),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: context.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            if (renterReview.comment != null &&
+                renterReview.comment!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                '"${renterReview.comment}"',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  color: context.textSecondary,
+                ),
+              ),
+            ],
           ] else ...[
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () => _showReviewDialog(trip),
-                icon: const Icon(
-                  Icons.star_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                icon: const Icon(Icons.star_outline_rounded, color: Colors.white, size: 18),
                 label: const Text(
                   'Đánh giá chủ xe & chuyến đi',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF059669),
+                  backgroundColor: context.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
                 ),
               ),
