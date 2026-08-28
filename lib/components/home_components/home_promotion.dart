@@ -30,8 +30,10 @@ class _HomePromotionState extends State<HomePromotion> {
           children: [
             // Title Section
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -96,7 +98,7 @@ class _HomePromotionState extends State<HomePromotion> {
                           enlargeCenterPage: true,
                           enlargeFactor: 0.22,
                           viewportFraction: 0.9,
-                          enableInfiniteScroll: true,
+                          enableInfiniteScroll: false,
                           onPageChanged: (index, reason) {
                             setState(() {
                               _currentIndex = index;
@@ -122,8 +124,9 @@ class _HomePromotionState extends State<HomePromotion> {
                               duration: const Duration(milliseconds: 300),
                               width: isActive ? 18.0 : 6.0,
                               height: 6.0,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 3.0),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 3.0,
+                              ),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(3.0),
                                 color: isActive
@@ -142,4 +145,3 @@ class _HomePromotionState extends State<HomePromotion> {
     );
   }
 }
-

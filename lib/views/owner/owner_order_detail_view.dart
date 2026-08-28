@@ -322,6 +322,12 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
                           ),
                         ],
 
+                        // ===== 4. ĐÁNH GIÁ KHÁCH THUÊ (STATUS == 4, CHỦ XE CHƯA ĐÁNH GIÁ) =====
+                        if (trip.status == 4) ...[ 
+                          const SizedBox(height: 20),
+                          _buildOwnerReviewSection(trip),
+                        ],
+
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -861,6 +867,264 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
     }
 
     return const SizedBox.shrink();
+  }
+
+  /// Kiểm tra chủ xe đã đánh giá chuyến này chưa (reviewType == 0: owner → renter)
+  bool _hasOwnerReviewed(TripModel trip) {
+    return trip.reviews.any((r) => r.reviewType == 0);
+  }
+
+  Widget _buildOwnerReviewSection(TripModel trip) {
+    final alreadyReviewed = _hasOwnerReviewed(trip);
+
+    if (alreadyReviewed) {
+      final review = trip.reviews.firstWhere((r) => r.reviewType == 0);
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.amber.shade50,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.amber.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.star_rounded, color: Colors.amber.shade600, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Đánh giá của bạn về khách thuê',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: List.generate(5, (i) {
+                return Icon(
+                  i < review.rating.round()
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
+                  color: Colors.amber,
+                  size: 22,
+                );
+              }),
+            ),
+            if (review.comment != null && review.comment!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                review.comment!,
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orange.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.rate_review_outlined, color: Colors.orange.shade700, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Đánh giá khách thuê',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.orange.shade900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Chuyến đi đã hoàn thành! Hãy đánh giá khách thuê để giúp cộng đồng.',
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.4),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _showOwnerReviewDialog(trip),
+              icon: const Icon(Icons.star_rounded, color: Colors.white, size: 18),
+              label: const Text(
+                'Đánh giá ngay',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade600,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOwnerReviewDialog(TripModel trip) {
+    int selectedRating = 5;
+    bool isSubmitting = false;
+    final commentController = TextEditingController();
+
+    String getRatingLabel(int r) {
+      switch (r) {
+        case 1: return 'Rất tệ 😞';
+        case 2: return 'Không tốt 😕';
+        case 3: return 'Bình thường 😐';
+        case 4: return 'Tốt 😊';
+        case 5: return 'Tuyệt vời 🥰';
+        default: return 'Chọn số sao';
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (_, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.star_rounded, color: Colors.amber, size: 24),
+              SizedBox(width: 8),
+              Text('Đánh giá khách thuê', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (trip.renter != null) ...[
+                  Text(
+                    'Khách thuê: ${trip.renter!.name}',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                Text(
+                  'Hãy chia sẻ trải nghiệm của bạn về khách thuê trong chuyến vừa rồi!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    final starValue = index + 1;
+                    return IconButton(
+                      onPressed: isSubmitting
+                          ? null
+                          : () => setDialogState(() => selectedRating = starValue),
+                      icon: Icon(
+                        starValue <= selectedRating ? Icons.star_rounded : Icons.star_outline_rounded,
+                        color: starValue <= selectedRating ? Colors.amber : Colors.grey.shade400,
+                        size: 36,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      constraints: const BoxConstraints(),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  getRatingLabel(selectedRating),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.primaryColor),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: commentController,
+                  enabled: !isSubmitting,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'Nhận xét về khách thuê (không bắt buộc)...',
+                    hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                    filled: true,
+                    fillColor: Theme.of(context).cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: context.primaryColor),
+                    ),
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isSubmitting ? null : () => Navigator.pop(dialogCtx),
+              child: Text('Hủy', style: TextStyle(color: Colors.grey.shade600)),
+            ),
+            ElevatedButton(
+              onPressed: isSubmitting
+                  ? null
+                  : () async {
+                      final currentCtx = context;
+                      final nav = Navigator.of(dialogCtx);
+                      final viewModel = currentCtx.read<OwnerOrderDetailViewModel>();
+                      setDialogState(() => isSubmitting = true);
+
+                      final result = await viewModel.submitReview(
+                        trip.id,
+                        rating: selectedRating,
+                        comment: commentController.text.trim(),
+                      );
+
+                      nav.pop();
+                      if (!mounted) return;
+                      if (currentCtx.mounted) {
+                        AppToast.show(
+                          currentCtx,
+                          message: result['message'] ?? (result['success'] == true
+                              ? 'Gửi đánh giá thành công!'
+                              : 'Gửi đánh giá thất bại.'),
+                          type: result['success'] == true ? ToastType.success : ToastType.error,
+                        );
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF059669),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: isSubmitting
+                  ? const SizedBox(
+                      width: 18, height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text('Gửi đánh giá', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showApproveExtensionDialog(TripModel trip) {

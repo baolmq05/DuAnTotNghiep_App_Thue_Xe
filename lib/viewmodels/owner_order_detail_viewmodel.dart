@@ -312,6 +312,27 @@ class OwnerOrderDetailViewModel extends ChangeNotifier {
     }
   }
 
+  // Submit review (owner rates renter, reviewType = 0)
+  Future<Map<String, dynamic>> submitReview(
+    int tripId, {
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final result = await _tripService.submitReview(
+        tripId,
+        rating: rating,
+        comment: comment,
+      );
+      if (result['success'] == true) {
+        await fetchTripDetail(tripId);
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
+    }
+  }
+
   // Reject extension request
   Future<Map<String, dynamic>> rejectExtension(int tripId, {String? reason}) async {
     _isSubmittingExtension = true;
