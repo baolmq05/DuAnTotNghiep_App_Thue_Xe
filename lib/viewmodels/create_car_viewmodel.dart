@@ -36,6 +36,7 @@ class CreateCarViewModel extends ChangeNotifier {
   bool _isUploadingImage = false;
   String _errorMessage = '';
   String _successMessage = '';
+  final Map<String, String> _fieldErrors = {};
 
   // Location suggestions from GoongMap
   List<String> _locationSuggestions = [];
@@ -51,6 +52,7 @@ class CreateCarViewModel extends ChangeNotifier {
   bool get isUploadingImage => _isUploadingImage;
   String get errorMessage => _errorMessage;
   String get successMessage => _successMessage;
+  Map<String, String> get fieldErrors => _fieldErrors;
 
   List<String> get locationSuggestions => _locationSuggestions;
   List<String> get addressSuggestions => _addressSuggestions;
@@ -414,54 +416,57 @@ class CreateCarViewModel extends ChangeNotifier {
   }
 
   /// Validate form client-side
-  String? validateForm() {
+  bool validateForm() {
+    _fieldErrors.clear();
+
     if (selectedBrandId == null || selectedBrandId == 0) {
-      return 'Vui lòng chọn Thương hiệu xe';
+      _fieldErrors['car_brand_id'] = 'Vui lòng chọn Thương hiệu xe';
     }
     if (selectedTypeId == null || selectedTypeId == 0) {
-      return 'Vui lòng chọn Loại xe';
+      _fieldErrors['car_type_id'] = 'Vui lòng chọn Loại xe';
     }
     if (licensePlate.trim().isEmpty) {
-      return 'Vui lòng nhập Biển số xe';
+      _fieldErrors['license_plate'] = 'Vui lòng nhập Biển số xe';
     }
     if (vin.trim().isEmpty) {
-      return 'Vui lòng nhập Số khung (VIN)';
+      _fieldErrors['vin'] = 'Vui lòng nhập Số khung (VIN)';
     }
     if (engineNumber.trim().isEmpty) {
-      return 'Vui lòng nhập Số máy';
+      _fieldErrors['engine_number'] = 'Vui lòng nhập Số máy';
     }
     if (unitPrice <= 0) {
-      return 'Đơn giá thuê xe phải lớn hơn 0';
+      _fieldErrors['unit_price'] = 'Đơn giá thuê xe phải lớn hơn 0';
     }
     if (seatCount <= 0) {
-      return 'Số chỗ ngồi phải lớn hơn 0';
+      _fieldErrors['seat_count'] = 'Số chỗ ngồi phải lớn hơn 0';
     }
     if (manufactureYear < 1990 || manufactureYear > DateTime.now().year + 1) {
-      return 'Năm sản xuất không hợp lệ';
+      _fieldErrors['manufacture_year'] = 'Năm sản xuất không hợp lệ';
     }
     if (location.trim().isEmpty) {
-      return 'Vui lòng nhập Tỉnh/Thành phố vị trí xe';
+      _fieldErrors['location'] = 'Vui lòng nhập Tỉnh/Thành phố vị trí xe';
     }
     if (address.trim().isEmpty) {
-      return 'Vui lòng nhập Địa chỉ chi tiết xe';
+      _fieldErrors['address'] = 'Vui lòng nhập Địa chỉ chi tiết xe';
     }
     if (selectedImageFiles.isEmpty && images.isEmpty) {
-      return 'Vui lòng chọn ít nhất 1 hình ảnh xe';
+      _fieldErrors['images'] = 'Vui lòng chọn ít nhất 1 hình ảnh xe';
     }
     final totalCount = selectedImageFiles.isNotEmpty ? selectedImageFiles.length : images.length;
-    if (thumbnailIndex < 0 || thumbnailIndex >= totalCount) {
-      return 'Chỉ số ảnh đại diện (Thumbnail) không hợp lệ';
+    if (thumbnailIndex < 0 || (totalCount > 0 && thumbnailIndex >= totalCount)) {
+      _fieldErrors['images'] = 'Chỉ số ảnh đại diện không hợp lệ';
     }
-    return null;
+
+    return _fieldErrors.isEmpty;
   }
 
   /// Thực hiện đăng ký xe qua API (Upload ảnh lên Cloudinary tại đây)
   Future<CreateCarResponse> submitCarRegistration() async {
-    final validationError = validateForm();
-    if (validationError != null) {
-      _errorMessage = validationError;
+    final isValid = validateForm();
+    if (!isValid) {
+      _errorMessage = _fieldErrors.values.first;
       notifyListeners();
-      return CreateCarResponse(success: false, message: validationError);
+      return CreateCarResponse(success: false, message: _errorMessage);
     }
 
     _isSubmitting = true;
@@ -485,6 +490,7 @@ class CreateCarViewModel extends ChangeNotifier {
             _isSubmitting = false;
             _isUploadingImage = false;
             _errorMessage = 'Tải ảnh thứ ${i + 1} lên Cloudinary thất bại. Vui lòng thử lại!';
+            _fieldErrors['images'] = _errorMessage;
             notifyListeners();
             return CreateCarResponse(success: false, message: _errorMessage);
           }
@@ -528,6 +534,15 @@ class CreateCarViewModel extends ChangeNotifier {
         _successMessage = res.message;
       } else {
         _errorMessage = res.message;
+        if (res.errors != null) {
+          res.errors!.forEach((key, value) {
+            if (value is List && value.isNotEmpty) {
+              _fieldErrors[key] = value.first.toString();
+            } else if (value != null) {
+              _fieldErrors[key] = value.toString();
+            }
+          });
+        }
       }
       return res;
     } catch (e) {

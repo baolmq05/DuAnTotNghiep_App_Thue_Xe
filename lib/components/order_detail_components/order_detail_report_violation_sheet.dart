@@ -281,6 +281,15 @@ class _OrderDetailReportViolationSheetState
       return;
     }
 
+    if (_selectedImages.isEmpty) {
+      AppToast.show(
+        context,
+        message: 'Vui lòng tải lên ít nhất 1 hình ảnh bằng chứng.',
+        type: ToastType.warning,
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -803,6 +812,13 @@ class _OrderDetailReportViolationSheetState
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: context.textPrimary,
+                            ),
+                          ),
+                          const Text(
+                            ' *',
+                            style: TextStyle(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(

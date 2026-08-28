@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_detail_model.dart';
 import 'package:duantotnghiep_app_thue_xe/models/CarDetail/car_brand_model.dart';
@@ -71,9 +72,19 @@ class CarService extends BaseService {
     } catch (e) {
       debugPrint('Lỗi khi đăng ký xe: $e');
       if (e is ApiException) {
+        Map<String, dynamic>? errors;
+        try {
+          if (e.body != null) {
+            final json = jsonDecode(e.body!);
+            if (json is Map && json.containsKey('errors')) {
+              errors = json['errors'] is Map<String, dynamic> ? json['errors'] as Map<String, dynamic> : null;
+            }
+          }
+        } catch (_) {}
         return CreateCarResponse(
           success: false,
           message: e.message,
+          errors: errors,
         );
       }
       return CreateCarResponse(
@@ -103,19 +114,88 @@ class CarService extends BaseService {
   }
 
   /// Cập nhật trạng thái xe (ví dụ: hoạt động, tạm khóa)
-  Future<bool> updateCarStatus(int carId, int status) async {
+  Future<bool> updateCarStatus(int carId, int status, {String? reason}) async {
     try {
+      // 1. Lấy thông tin chi tiết đầy đủ của xe
+      final carDetail = await getCarDetail(id: carId);
+
+      // 2. Chuyển đổi thông tin sang cấu trúc của update request (đầy đủ các trường bắt buộc của Laravel)
+      final int brandId = carDetail.carBrandId != 0 
+          ? carDetail.carBrandId 
+          : (carDetail.carType.carBrandId != 0 ? carDetail.carType.carBrandId : carDetail.carBrand.id);
+      
+      final int typeId = carDetail.carTypeId != 0 
+          ? carDetail.carTypeId 
+          : carDetail.carType.id;
+
+      final double price = double.tryParse(carDetail.unitPrice) ?? 0.0;
+      final double discount = double.tryParse(carDetail.discountValue) ?? 0.0;
+      final int manufactureYr = int.tryParse(carDetail.manufactureYear) ?? 2020;
+      final int seat = int.tryParse(carDetail.seatCount) ?? 5;
+
+      final bool isDelivery = carDetail.deliveryOption.status == 1;
+      final bool isKmLimit = carDetail.usageLimit.status == 1;
+      final double extraFee = double.tryParse(carDetail.usageLimit.extraDistanceFee) ?? 0.0;
+
+      final String fullAddress = carDetail.carLocation.address;
+      String locationStr = '';
+      if (fullAddress.isNotEmpty) {
+        final parts = fullAddress.split(',');
+        if (parts.isNotEmpty) {
+          locationStr = parts.last.trim();
+        }
+      }
+
+      final List<int> featuresList = carDetail.features.map((f) => f.id).toList();
+      final List<String> imagesList = carDetail.images.map((img) => img.imageUrl).toList();
+      int thumbnailIdx = carDetail.images.indexWhere((img) => img.isThumbnail == 1);
+      if (thumbnailIdx == -1) thumbnailIdx = 0;
+
+      // 3. Tạo payload đầy đủ
+      final Map<String, dynamic> body = {
+        'car_brand_id': brandId,
+        'car_type_id': typeId,
+        'license_plate': carDetail.licensePlate,
+        'VIN': carDetail.VIN,
+        'engine_number': carDetail.engineNumber,
+        'fuel_consumption': carDetail.fuelConsumption.toDouble(),
+        'unit_price': price.toInt(),
+        'discount_value': discount.toInt(),
+        'description': carDetail.description ?? '',
+        'rental_terms': carDetail.rentalTerms,
+        'seat_count': seat,
+        'manufacture_year': manufactureYr,
+        'fuel_type': carDetail.fuelType,
+        'transmission': carDetail.transmission,
+        'location': locationStr,
+        'address': fullAddress,
+        'delivery_enabled': isDelivery ? '1' : '0',
+        'delivery_max_distance': isDelivery ? carDetail.deliveryOption.maxDistance.toDouble() : 0,
+        'delivery_fee': isDelivery ? carDetail.deliveryOption.feeDistance.toInt() : 0,
+        'delivery_free_distance': isDelivery ? carDetail.deliveryOption.freeDistance.toDouble() : 0,
+        'km_limit_enabled': isKmLimit ? '1' : '0',
+        'km_limit_val': isKmLimit ? carDetail.usageLimit.maxDailyDistance.toDouble() : 0,
+        'over_fee_val': isKmLimit ? extraFee.toInt() : 0,
+        'features': featuresList,
+        'images': imagesList,
+        'thumbnail_index': thumbnailIdx,
+        'status': status,
+      };
+
+      if (reason != null && reason.isNotEmpty) {
+        body['reason'] = reason;
+      }
+
+      // 4. Gửi PUT để cập nhật với đầy đủ các trường
       final response = await update(
         'api/cars/$carId',
-        body: {
-          'status': status,
-        },
+        body: body,
         requiresAuth: true,
       );
       return response != null && response['success'] == true;
     } catch (e) {
       debugPrint('Lỗi updateCarStatus: $e');
-      return false;
+      rethrow;
     }
   }
 
@@ -153,9 +233,19 @@ class CarService extends BaseService {
     } catch (e) {
       debugPrint('Lỗi khi cập nhật xe: $e');
       if (e is ApiException) {
+        Map<String, dynamic>? errors;
+        try {
+          if (e.body != null) {
+            final json = jsonDecode(e.body!);
+            if (json is Map && json.containsKey('errors')) {
+              errors = json['errors'] is Map<String, dynamic> ? json['errors'] as Map<String, dynamic> : null;
+            }
+          }
+        } catch (_) {}
         return CreateCarResponse(
           success: false,
           message: e.message,
+          errors: errors,
         );
       }
       return CreateCarResponse(

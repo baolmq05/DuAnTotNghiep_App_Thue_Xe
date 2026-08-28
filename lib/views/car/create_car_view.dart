@@ -371,8 +371,16 @@ class _CreateCarViewState extends State<CreateCarView> {
                               ? vm.selectedBrandName
                               : 'Bấm để tìm & chọn thương hiệu',
                           isSelected: vm.selectedBrandId != null,
+                          hasError: vm.fieldErrors['car_brand_id'] != null,
                         ),
                       ),
+                      if (vm.fieldErrors['car_brand_id'] != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          vm.fieldErrors['car_brand_id']!,
+                          style: const TextStyle(color: Colors.red, fontSize: 11),
+                        ),
+                      ],
                       const SizedBox(height: 12),
 
                       // Loại xe (Searchable Modal)
@@ -405,8 +413,16 @@ class _CreateCarViewState extends State<CreateCarView> {
                                     ? vm.selectedTypeName
                                     : 'Bấm để tìm & chọn loại xe',
                                 isSelected: vm.selectedTypeId != null,
+                                hasError: vm.fieldErrors['car_type_id'] != null,
                               ),
                             ),
+                      if (vm.fieldErrors['car_type_id'] != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          vm.fieldErrors['car_type_id']!,
+                          style: const TextStyle(color: Colors.red, fontSize: 11),
+                        ),
+                      ],
                       const SizedBox(height: 12),
 
                       // Biển số xe & Số khung
@@ -426,6 +442,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     'Ví dụ: 65A-12345',
+                                    errorText: vm.fieldErrors['license_plate'],
                                   ),
                                   onChanged: (v) => vm.licensePlate = v,
                                 ),
@@ -447,6 +464,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     '17 ký tự',
+                                    errorText: vm.fieldErrors['vin'],
                                   ),
                                   onChanged: (v) => vm.vin = v,
                                 ),
@@ -474,6 +492,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     'Nhập số máy',
+                                    errorText: vm.fieldErrors['engine_number'],
                                   ),
                                   onChanged: (v) => vm.engineNumber = v,
                                 ),
@@ -496,6 +515,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     '2022',
+                                    errorText: vm.fieldErrors['manufacture_year'],
                                   ),
                                   onChanged: (v) => vm.manufactureYear =
                                       int.tryParse(v) ?? 2022,
@@ -525,6 +545,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     '5',
+                                    errorText: vm.fieldErrors['seat_count'],
                                   ),
                                   onChanged: (v) =>
                                       vm.seatCount = int.tryParse(v) ?? 5,
@@ -544,6 +565,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     'Chọn',
+                                    errorText: vm.fieldErrors['fuel_type'],
                                   ),
                                   items: const [
                                     DropdownMenuItem(
@@ -588,6 +610,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     'Chọn',
+                                    errorText: vm.fieldErrors['transmission'],
                                   ),
                                   items: const [
                                     DropdownMenuItem(
@@ -625,6 +648,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     '6.5',
+                                    errorText: vm.fieldErrors['fuel_consumption'],
                                   ),
                                   onChanged: (v) => vm.fuelConsumption =
                                       double.tryParse(v) ?? 6.5,
@@ -664,6 +688,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     '500000',
+                                    errorText: vm.fieldErrors['unit_price'],
                                   ),
                                   onChanged: (v) =>
                                       vm.unitPrice = double.tryParse(v) ?? 0,
@@ -689,6 +714,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                                   decoration: _buildInputDecoration(
                                     context,
                                     '0',
+                                    errorText: vm.fieldErrors['discount_value'],
                                   ),
                                   onChanged: (v) => vm.discountValue =
                                       double.tryParse(v) ?? 0,
@@ -719,6 +745,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                         decoration: _buildInputDecoration(
                           context,
                           'Xe sạch sẽ, bảo dưỡng định kỳ...',
+                          errorText: vm.fieldErrors['description'],
                         ),
                         onChanged: (v) => vm.description = v,
                       ),
@@ -735,6 +762,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                         decoration: _buildInputDecoration(
                           context,
                           'Không hút thuốc trong xe, giữ vệ sinh...',
+                          errorText: vm.fieldErrors['rental_terms'],
                         ),
                         onChanged: (v) => vm.rentalTerms = v,
                       ),
@@ -758,6 +786,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                         decoration: _buildInputDecoration(
                           context,
                           'Ví dụ: Ninh Kiều, Cần Thơ',
+                          errorText: vm.fieldErrors['location'],
                         ),
                         onChanged: (v) => vm.location = v,
                       ),
@@ -776,6 +805,7 @@ class _CreateCarViewState extends State<CreateCarView> {
                         decoration: _buildInputDecoration(
                           context,
                           'Nhập số nhà, tên đường để gợi ý tìm địa chỉ...',
+                          errorText: vm.fieldErrors['address'],
                         ),
                         onChanged: (v) => vm.fetchAddressSuggestions(v),
                       ),
@@ -1194,6 +1224,13 @@ class _CreateCarViewState extends State<CreateCarView> {
                           ),
                         ),
                       ),
+                      if (vm.fieldErrors['images'] != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          vm.fieldErrors['images']!,
+                          style: const TextStyle(color: Colors.red, fontSize: 11),
+                        ),
+                      ],
                       const SizedBox(height: 12),
 
                       // Hoặc nhập URL thủ công
@@ -1476,6 +1513,7 @@ class _CreateCarViewState extends State<CreateCarView> {
     BuildContext context, {
     required String text,
     required bool isSelected,
+    bool hasError = false,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
@@ -1483,7 +1521,11 @@ class _CreateCarViewState extends State<CreateCarView> {
         color: context.inputBackground,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isSelected ? context.primaryColor : context.inputBorderColor,
+          color: hasError
+              ? Colors.red
+              : isSelected
+                  ? context.primaryColor
+                  : context.inputBorderColor,
         ),
       ),
       child: Row(
@@ -1564,27 +1606,47 @@ class _CreateCarViewState extends State<CreateCarView> {
     );
   }
 
-  InputDecoration _buildInputDecoration(BuildContext context, String hint) {
+  InputDecoration _buildInputDecoration(
+    BuildContext context,
+    String hint, {
+    String? errorText,
+  }) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
         color: context.textSecondary.withValues(alpha: 0.45),
         fontSize: 12.5,
       ),
+      errorText: errorText,
       filled: true,
       fillColor: context.inputBackground,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: context.inputBorderColor),
+        borderSide: BorderSide(
+          color: errorText != null ? Colors.red : context.inputBorderColor,
+        ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: context.inputBorderColor),
+        borderSide: BorderSide(
+          color: errorText != null ? Colors.red : context.inputBorderColor,
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: context.primaryColor, width: 1.5),
+        borderSide: BorderSide(
+          color: errorText != null ? Colors.red : context.primaryColor,
+          width: 1.5,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.red, width: 1.0),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
     );
   }
