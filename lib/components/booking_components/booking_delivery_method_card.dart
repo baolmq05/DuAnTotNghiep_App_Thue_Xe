@@ -9,6 +9,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/address_viewmodel.dart';
 
 class BookingDeliveryMethodCard extends StatefulWidget {
   final CarModel car;
@@ -55,7 +58,7 @@ class BookingDeliveryMethodCard extends StatefulWidget {
 }
 
 class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
-  final String goongApiKey = "Gmptoo7f9LZDC6Mrcib9N...";
+  final String goongApiKey = "xEcFmnV3loWHnfqa9ZsEENH7Wu6lehK4QmabQk7V";
   List<Map<String, String>> _suggestions = [];
   final MapController _mapController = MapController();
 
@@ -226,6 +229,154 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
   void _showToastError(String message) {
     if (!mounted) return;
     AppToast.show(context, message: message, type: ToastType.error);
+  }
+
+  void _showSavedAddressesBottomSheet(BuildContext context) {
+    context.read<AddressViewModel>().loadAddresses();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (modalContext) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(modalContext).size.height * 0.7,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Địa chỉ đã lưu',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: context.textPrimary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(modalContext);
+                      context.push('/address');
+                    },
+                    child: Text(
+                      'Quản lý',
+                      style: TextStyle(
+                        color: context.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: Consumer<AddressViewModel>(
+                  builder: (context, addressVM, child) {
+                    if (addressVM.isLoading) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(context.primaryColor),
+                        ),
+                      );
+                    }
+
+                    if (addressVM.addresses.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.location_off_outlined,
+                                size: 48,
+                                color: context.textSecondary,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Chưa có địa chỉ nào được lưu',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: context.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(modalContext);
+                                  context.push('/address');
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: context.primaryColor,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: const Text('Thêm địa chỉ'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      itemCount: addressVM.addresses.length,
+                      separatorBuilder: (context, index) => Divider(
+                        height: 1,
+                        color: context.border,
+                      ),
+                      itemBuilder: (context, index) {
+                        final address = addressVM.addresses[index];
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: context.primaryColor.withValues(alpha: 0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.place_rounded,
+                              color: context.primaryColor,
+                              size: 20,
+                            ),
+                          ),
+                          title: Text(
+                            address.addressName,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: context.textPrimary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          onTap: () async {
+                            Navigator.pop(modalContext);
+                            widget.addressController.text = address.addressName;
+                            await _searchAndVerifyAddress(address.addressName);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   String _formatCurrency(double amount) {
@@ -456,6 +607,14 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
                         color: context.primaryColor,
                         size: 20,
                       ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    Icons.collections_bookmark_rounded,
+                    color: context.primaryColor,
+                  ),
+                  tooltip: 'Địa chỉ đã lưu',
+                  onPressed: () => _showSavedAddressesBottomSheet(context),
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,

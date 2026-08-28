@@ -5,6 +5,7 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:duantotnghiep_app_thue_xe/providers/auth_provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/address_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/models/address_model.dart';
+import 'package:duantotnghiep_app_thue_xe/services/goong_map_service.dart';
 
 // Components
 import 'package:duantotnghiep_app_thue_xe/components/address_components/address_card.dart';
@@ -48,6 +49,7 @@ class _AddressViewState extends State<AddressView> {
   void _showAddressDialog({AddressModel? address}) {
     final isEdit = address != null;
     _addressController.text = isEdit ? address.addressName : '';
+    List<String> dialogSuggestions = [];
 
     showDialog(
       context: context,
@@ -56,28 +58,105 @@ class _AddressViewState extends State<AddressView> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             isEdit ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới',
-            style: TextStyle(fontWeight: FontWeight.bold, color: context.primaryColor),
-          ),
-          content: TextField(
-            controller: _addressController,
-            autofocus: true,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            decoration: InputDecoration(
-              hintText: 'Nhập địa chỉ của bạn...',
-              hintStyle: TextStyle(color: context.textSecondary),
-              filled: true,
-              fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: context.primaryColor, width: 1.5),
-              ),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: context.isDarkMode ? Colors.white : context.primaryColor,
             ),
+          ),
+          content: StatefulBuilder(
+            builder: (dialogContext, setDialogState) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _addressController,
+                      autofocus: true,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      onChanged: (value) async {
+                        if (value.trim().isEmpty) {
+                          if (dialogContext.mounted) {
+                            setDialogState(() => dialogSuggestions = []);
+                          }
+                          return;
+                        }
+                        final suggestions = await GoongMapService().getSuggestions(value);
+                        if (dialogContext.mounted) {
+                          setDialogState(() {
+                            dialogSuggestions = suggestions;
+                          });
+                        }
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Nhập địa chỉ của bạn...',
+                        hintStyle: TextStyle(color: context.textSecondary),
+                        filled: true,
+                        fillColor: context.inputBackground,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: context.isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: context.primaryColor, width: 1.5),
+                        ),
+                      ),
+                    ),
+                    if (dialogSuggestions.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: context.cardColor,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: context.border),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: dialogSuggestions.asMap().entries.map((entry) {
+                            final idx = entry.key;
+                            final suggestion = entry.value;
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (idx > 0)
+                                  Divider(height: 1, color: context.border),
+                                ListTile(
+                                  dense: true,
+                                  leading: Icon(
+                                    Icons.location_on_outlined,
+                                    size: 18,
+                                    color: context.primaryColor,
+                                  ),
+                                  title: Text(
+                                    suggestion,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: context.textPrimary,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    _addressController.text = suggestion;
+                                    if (dialogContext.mounted) {
+                                      setDialogState(() {
+                                        dialogSuggestions = [];
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
           actions: [
             TextButton(
@@ -216,7 +295,7 @@ class _AddressViewState extends State<AddressView> {
         title: Text(
           'Địa chỉ của tôi',
           style: TextStyle(
-            color: context.primaryColor,
+            color: context.isDarkMode ? Colors.white : context.primaryColor,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -234,7 +313,11 @@ class _AddressViewState extends State<AddressView> {
         actions: [
           if (user != null)
             IconButton(
-              icon: Icon(Icons.add_location_alt_outlined, color: context.primaryColor, size: 26),
+              icon: Icon(
+                Icons.add_location_alt_outlined,
+                color: context.isDarkMode ? Colors.white : context.primaryColor,
+                size: 26,
+              ),
               onPressed: () => _showAddressDialog(),
               tooltip: 'Thêm địa chỉ',
             ),
