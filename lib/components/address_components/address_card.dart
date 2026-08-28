@@ -21,12 +21,15 @@ class AddressCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100, width: 1.2),
+        border: Border.all(
+          color: context.isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: context.isDarkMode ? 0.1 : 0.02),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -62,7 +65,9 @@ class AddressCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: context.primaryColor.withValues(alpha: 0.8),
+                        color: context.isDarkMode
+                            ? Colors.white70
+                            : context.primaryColor.withValues(alpha: 0.8),
                       ),
                     ),
                     const SizedBox(height: 4),

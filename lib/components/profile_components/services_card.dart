@@ -43,6 +43,13 @@ class ServicesCard extends StatelessWidget {
             },
           ),
           ProfileMenuItem(
+            icon: Icons.location_on_outlined,
+            title: 'Địa chỉ đã lưu',
+            onTap: () {
+              context.push('/address');
+            },
+          ),
+          ProfileMenuItem(
             icon: Icons.lock_outline,
             title: 'Đặt lại mật khẩu',
             onTap: () {
