@@ -19,6 +19,9 @@ class CarInfoHeader extends StatelessWidget {
     final double unitPrice = double.tryParse(car.unitPrice) ?? 0;
     final double discount = double.tryParse(car.discountValue) ?? 0;
     final double finalPrice = unitPrice - discount;
+    final int discountPct = (unitPrice > 0 && discount > 0)
+        ? ((discount / unitPrice) * 100).round()
+        : 0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -100,7 +103,7 @@ class CarInfoHeader extends StatelessWidget {
                 ),
               ),
               // Nhãn giảm giá (nếu có) - Hiển thị dạng badge nổi bật, gọn gàng
-              if ((double.tryParse(car.discountValue) ?? 0) > 0)
+              if (discountPct > 0)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                   decoration: BoxDecoration(
@@ -121,7 +124,7 @@ class CarInfoHeader extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Giảm ${formatPrice(car.discountValue)}đ',
+                        'Giảm $discountPct%',
                         style: TextStyle(
                           fontSize: 12.0,
                           fontWeight: FontWeight.bold,

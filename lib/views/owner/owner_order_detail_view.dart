@@ -612,18 +612,28 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
       return '${pad(dt.hour)}:${pad(dt.minute)} ${pad(dt.day)}/${pad(dt.month)}/${dt.year}';
     }
 
+    final DateTime? newEndDate = ext.endDate != null ? DateTime.tryParse(ext.endDate!) : null;
+    final int extendedDays = ext.extendedDays ??
+        (newEndDate != null ? (newEndDate.difference(trip.endAt).inMinutes / 1440).ceil() : 0);
+    final int displayDays = extendedDays <= 0 ? 1 : extendedDays;
+
     if (ext.status == 1) {
+      final isDark = context.isDarkMode;
       return Container(
         width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.amber.shade50,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.amber.shade300, width: 1.2),
+          border: Border.all(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            width: 1.2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.amber.withValues(alpha: 0.1),
-              blurRadius: 8,
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -631,114 +641,237 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header Row (Icon + Title + Status Badge)
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade100,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.more_time_rounded, color: Colors.amber.shade900, size: 20),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Yêu cầu gia hạn chuyến đi',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade900,
-                        ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
+                        shape: BoxShape.circle,
                       ),
-                      Text(
-                        'Khách thuê muốn gia hạn thêm thời gian',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.amber.shade800,
-                        ),
+                      child: const Icon(
+                        Icons.history_toggle_off_rounded,
+                        color: Color(0xFFD97706),
+                        size: 20,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Yêu cầu gia hạn',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: context.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.amber.shade200,
-                    borderRadius: BorderRadius.circular(12),
+                    color: isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF78350F) : const Color(0xFFFCD34D),
+                    ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Chờ bạn duyệt',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Colors.amber.shade900,
+                      color: Color(0xFFB45309),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            const Divider(color: Colors.amber, height: 1),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Thời gian trả xe mới:',
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
+            
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.only(left: 38),
+              child: Text(
+                'Khách thuê đề xuất thêm thời gian cho chuyến đi này',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.textSecondary,
                 ),
-                Text(
-                  formatDateTimeStr(ext.endDate),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimary,
-                  ),
-                ),
-              ],
+              ),
             ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Phí gia hạn đề xuất:',
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
+            
+            const SizedBox(height: 14),
+            
+            // Nested Time & Duration Box
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                 ),
-                Text(
-                  formatPriceWithUnit(ext.extensionAmount.toStringAsFixed(0)),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: context.primaryColor,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'HẠN TRẢ CŨ',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            color: context.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          formatDateTimeStr(trip.endAt.toIso8601String()),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: context.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF1D4ED8) : const Color(0xFFBFDBFE),
+                      ),
+                    ),
+                    child: Text(
+                      '+$displayDays ngày',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'HẠN TRẢ MỚI',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            color: context.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          formatDateTimeStr(ext.endDate),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            const SizedBox(height: 12),
+
+            // Price Row
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF047857) : const Color(0xA36EE7B7),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.payments_outlined,
+                        size: 20,
+                        color: Color(0xFF059669),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Phí gia hạn đề xuất',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: context.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    formatPriceWithUnit(ext.extensionAmount.toStringAsFixed(0)),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF059669),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 16),
+
+            // Action Buttons Row
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 42,
-                    child: OutlinedButton.icon(
+                    height: 44,
+                    child: OutlinedButton(
                       onPressed: viewModel.isSubmittingExtension
                           ? null
                           : () => _showRejectExtensionDialog(trip),
-                      icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
-                      label: const Text(
-                        'Từ chối',
-                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                      ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.red, width: 1.2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        backgroundColor: isDark ? const Color(0xFF451A1A) : const Color(0xFFFEF2F2),
+                        side: BorderSide(
+                          color: isDark ? Colors.red.shade800 : const Color(0xFFFCA5A5),
+                          width: 1.0,
                         ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.close_rounded, size: 16, color: Color(0xFFDC2626)),
+                          SizedBox(width: 6),
+                          Text(
+                            'Từ chối',
+                            style: TextStyle(
+                              color: Color(0xFFDC2626),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -746,32 +879,44 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: SizedBox(
-                    height: 42,
-                    child: ElevatedButton.icon(
+                    height: 44,
+                    child: ElevatedButton(
                       onPressed: viewModel.isSubmittingExtension
                           ? null
                           : () => _showApproveExtensionDialog(trip),
-                      icon: viewModel.isSubmittingExtension
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF059669),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: viewModel.isSubmittingExtension
                           ? const SizedBox(
-                              width: 16,
-                              height: 16,
+                              width: 18,
+                              height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
                               ),
                             )
-                          : const Icon(Icons.check_rounded, size: 16, color: Colors.white),
-                      label: const Text(
-                        'Đồng ý gia hạn',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green.shade600,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 0,
-                      ),
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.check_rounded, size: 16, color: Colors.white),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Đồng ý gia hạn',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
                   ),
                 ),
@@ -781,76 +926,129 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
         ),
       );
     } else if (ext.status == 2) {
+      final isDark = context.isDarkMode;
       return Container(
         width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.blue.shade50,
+          color: isDark ? const Color(0xFF13283B) : Colors.blue.shade50,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.blue.shade200),
+          border: Border.all(color: isDark ? Colors.blue.shade800 : Colors.blue.shade200, width: 1.2),
         ),
         child: Row(
           children: [
-            Icon(Icons.hourglass_top_rounded, color: Colors.blue.shade700, size: 20),
-            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.blue.shade900 : Colors.blue.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.hourglass_top_rounded, color: isDark ? Colors.blue.shade300 : Colors.blue.shade800, size: 20),
+            ),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                'Bạn đã đồng ý yêu cầu gia hạn đến ${formatDateTimeStr(ext.endDate)}. Đang chờ khách thuê thanh toán phí ${formatPriceWithUnit(ext.extensionAmount.toStringAsFixed(0))}.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.blue.shade900,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Đã đồng ý gia hạn • Chờ thanh toán',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.blue.shade300 : Colors.blue.shade900,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Hạn mới: ${formatDateTimeStr(ext.endDate)} • Phí: ${formatPriceWithUnit(ext.extensionAmount.toStringAsFixed(0))}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.blue.shade200 : Colors.blue.shade800,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       );
     } else if (ext.status == 3) {
+      final isDark = context.isDarkMode;
       return Container(
         width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.green.shade50,
+          color: isDark ? const Color(0xFF142E1B) : Colors.green.shade50,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.green.shade200),
+          border: Border.all(color: isDark ? Colors.green.shade800 : Colors.green.shade200, width: 1.2),
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle_outline_rounded, color: Colors.green.shade700, size: 20),
-            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.green.shade900 : Colors.green.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.check_circle_outline_rounded, color: isDark ? Colors.green.shade300 : Colors.green.shade800, size: 20),
+            ),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                'Chuyến đi đã được gia hạn thành công đến ${formatDateTimeStr(ext.endDate)} (+${formatPriceWithUnit(ext.extensionAmount.toStringAsFixed(0))}).',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.green.shade900,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Gia hạn chuyến đi thành công',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.green.shade300 : Colors.green.shade900,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Hạn mới: ${formatDateTimeStr(ext.endDate)} (+${formatPriceWithUnit(ext.extensionAmount.toStringAsFixed(0))})',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.green.shade200 : Colors.green.shade800,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       );
     } else if (ext.status == 4) {
+      final isDark = context.isDarkMode;
       return Container(
         width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: isDark ? const Color(0xFF262626) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, width: 1.2),
         ),
         child: Row(
           children: [
-            Icon(Icons.cancel_outlined, color: Colors.grey.shade600, size: 20),
-            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.cancel_outlined, color: isDark ? Colors.grey.shade400 : Colors.grey.shade700, size: 20),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Yêu cầu gia hạn chuyến đi đã bị từ chối hoặc hủy bỏ.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade700,
+                  color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
                   fontWeight: FontWeight.w500,
                 ),
               ),

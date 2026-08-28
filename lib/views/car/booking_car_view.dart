@@ -424,9 +424,12 @@ class _BookingCarViewState extends State<BookingCarView> {
 
       setState(() {
         car = CarModel.fromJson(response['data']);
-        carActiveTrips = activeTrips
-            .where((t) => t.status != 5 && t.status != 6)
-            .toList();
+        carActiveTrips = activeTrips.where((t) {
+          if (t.status == 5 || t.status == 6) return false;
+          if (t.carId != 0 && t.carId != widget.carId) return false;
+          if (t.car != null && t.car!.id != 0 && t.car!.id != widget.carId) return false;
+          return true;
+        }).toList();
         _updateTotalDays();
 
         if (car != null && car!.carLocation?.location != null) {

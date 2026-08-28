@@ -252,15 +252,17 @@ class _ZaloPayCheckoutSheetState extends State<ZaloPayCheckoutSheet> with Widget
 
   @override
   Widget build(BuildContext context) {
-    final double totalCost = widget.trip.cost;
+    final double grossCost = widget.trip.cost;
     final double discount = widget.trip.discountAmount;
-    final double subtotal = totalCost + discount;
+    final double netTotal = (grossCost - discount) < 0 ? 0.0 : (grossCost - discount);
     final int rentalDays = _calculateDays(widget.trip.startAt, widget.trip.endAt);
-    final double unitPrice = subtotal / rentalDays;
+    final double unitPrice = (widget.trip.car != null && widget.trip.car!.unitPrice > 0)
+        ? widget.trip.car!.unitPrice
+        : (rentalDays > 0 ? (grossCost / rentalDays) : 0.0);
     
-    final double depositAmount = totalCost * 0.4;
-    final double remainingAmount = totalCost * 0.6;
-    final double amountToPay = _isDeposit ? depositAmount : totalCost;
+    final double depositAmount = (netTotal * 0.4 / 1000).round() * 1000.0;
+    final double remainingAmount = netTotal - depositAmount;
+    final double amountToPay = _isDeposit ? depositAmount : netTotal;
 
     final sheetHeight = MediaQuery.of(context).size.height * 0.85;
 
@@ -279,7 +281,7 @@ class _ZaloPayCheckoutSheetState extends State<ZaloPayCheckoutSheet> with Widget
                   ? _buildLoadingScreen()
                   : _isWaitingForPayment
                       ? _buildWaitingForPaymentScreen()
-                      : _buildCheckoutContent(subtotal, unitPrice, discount, totalCost, depositAmount, remainingAmount, amountToPay),
+                      : _buildCheckoutContent(grossCost, unitPrice, discount, netTotal, depositAmount, remainingAmount, amountToPay),
         ),
       ),
     );
@@ -287,10 +289,10 @@ class _ZaloPayCheckoutSheetState extends State<ZaloPayCheckoutSheet> with Widget
 
   // Màn hình chi tiết thanh toán chính
   Widget _buildCheckoutContent(
-    double subtotal,
+    double grossCost,
     double unitPrice,
     double discount,
-    double totalCost,
+    double netTotal,
     double depositAmount,
     double remainingAmount,
     double amountToPay,
@@ -398,7 +400,7 @@ class _ZaloPayCheckoutSheetState extends State<ZaloPayCheckoutSheet> with Widget
                         isDepositCard: false,
                         title: 'Thanh toán 100%',
                         description: 'Thanh toán toàn bộ hóa đơn',
-                        price: _currencyFormat.format(totalCost),
+                        price: _currencyFormat.format(netTotal),
                         footer: 'Bạn không cần phải thanh toán thêm tại quầy khi nhận xe',
                       ),
                     ),
@@ -550,7 +552,7 @@ class _ZaloPayCheckoutSheetState extends State<ZaloPayCheckoutSheet> with Widget
                       const SizedBox(height: 6),
                       _buildInfoRow('Khuyến mãi', '-${_currencyFormat.format(discount)}', valueColor: AppColors.success),
                       const SizedBox(height: 6),
-                      _buildInfoRow('Thành tiền', _currencyFormat.format(totalCost), isBold: true),
+                      _buildInfoRow('Thành tiền', _currencyFormat.format(netTotal), isBold: true),
                       
                       const Divider(height: 24),
 
