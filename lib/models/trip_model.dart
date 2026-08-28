@@ -77,6 +77,26 @@ class TripExtensionModel {
   });
 
   factory TripExtensionModel.fromJson(Map<String, dynamic> json) {
+    int? extDays = json['extended_days'] is int
+        ? json['extended_days'] as int
+        : int.tryParse(json['extended_days']?.toString() ?? '');
+
+    final startDateStr = json['start_date']?.toString();
+    final endDateStr = json['end_date']?.toString();
+
+    if (endDateStr != null) {
+      final end = DateTime.tryParse(endDateStr);
+      if (end != null) {
+        final start = startDateStr != null ? DateTime.tryParse(startDateStr) : null;
+        if (start != null) {
+          final diffMinutes = end.difference(start).inMinutes;
+          if (diffMinutes > 0) {
+            extDays = (diffMinutes / 1440).ceil().clamp(1, 365);
+          }
+        }
+      }
+    }
+
     return TripExtensionModel(
       id: json['id'] is int
           ? json['id'] as int
@@ -89,11 +109,9 @@ class TripExtensionModel {
       status: json['status'] is int
           ? json['status'] as int
           : int.tryParse(json['status']?.toString() ?? '0') ?? 0,
-      startDate: json['start_date']?.toString(),
-      endDate: json['end_date']?.toString(),
-      extendedDays: json['extended_days'] is int
-          ? json['extended_days'] as int
-          : int.tryParse(json['extended_days']?.toString() ?? ''),
+      startDate: startDateStr,
+      endDate: endDateStr,
+      extendedDays: extDays,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
@@ -268,6 +286,13 @@ class TripModel {
       (tripCode != null && tripCode!.isNotEmpty) ? tripCode! : '#RT$id';
 
   factory TripModel.fromJson(Map<String, dynamic> json) {
+    final parsedStartAt = json['start_at'] != null
+        ? DateTime.tryParse(json['start_at'].toString()) ?? DateTime.now()
+        : DateTime.now();
+    final parsedEndAt = json['end_at'] != null
+        ? DateTime.tryParse(json['end_at'].toString()) ?? DateTime.now()
+        : DateTime.now();
+
     CarModel? parsedCar;
     if (json['car'] != null && json['car'] is Map<String, dynamic>) {
       parsedCar = CarModel.fromJson(json['car'] as Map<String, dynamic>);
@@ -359,6 +384,34 @@ class TripModel {
       parsedExtension = TripExtensionModel.fromJson(
         json['latest_extension'] as Map<String, dynamic>,
       );
+
+      // Calculate/verify extendedDays based on dates to ensure accuracy
+      if (parsedExtension.endDate != null) {
+        final newEnd = DateTime.tryParse(parsedExtension.endDate!);
+        if (newEnd != null) {
+          final start = parsedExtension.startDate != null
+              ? (DateTime.tryParse(parsedExtension.startDate!) ?? parsedEndAt)
+              : parsedEndAt;
+
+          final diffMinutes = newEnd.difference(start).inMinutes;
+          if (diffMinutes > 0) {
+            final calculatedDays = (diffMinutes / 1440).ceil().clamp(1, 365);
+            if (parsedExtension.extendedDays != calculatedDays) {
+              parsedExtension = TripExtensionModel(
+                id: parsedExtension.id,
+                tripId: parsedExtension.tripId,
+                extensionAmount: parsedExtension.extensionAmount,
+                status: parsedExtension.status,
+                startDate: parsedExtension.startDate,
+                endDate: parsedExtension.endDate,
+                extendedDays: calculatedDays,
+                createdAt: parsedExtension.createdAt,
+                updatedAt: parsedExtension.updatedAt,
+              );
+            }
+          }
+        }
+      }
     }
 
     // Parse reviews
@@ -431,12 +484,8 @@ class TripModel {
       tripType: json['trip_type'] is int
           ? json['trip_type'] as int
           : int.tryParse(json['trip_type']?.toString() ?? '') ?? 0,
-      startAt: json['start_at'] != null
-          ? DateTime.tryParse(json['start_at'].toString()) ?? DateTime.now()
-          : DateTime.now(),
-      endAt: json['end_at'] != null
-          ? DateTime.tryParse(json['end_at'].toString()) ?? DateTime.now()
-          : DateTime.now(),
+      startAt: parsedStartAt,
+      endAt: parsedEndAt,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
