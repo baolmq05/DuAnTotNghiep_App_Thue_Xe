@@ -47,7 +47,8 @@ class _ConversationsViewState extends State<ConversationsView> {
 
     var filtered = originalList.where((conv) {
       final nameMatch = conv.name.toLowerCase().contains(query);
-      final lastMsgMatch = conv.lastMessage.toLowerCase().contains(query);
+      final lastMsgMatch = conv.displayLastMessage.toLowerCase().contains(query) ||
+          conv.lastMessage.toLowerCase().contains(query);
       final searchMatch = nameMatch || lastMsgMatch;
 
       if (_filterType == 'unread') {

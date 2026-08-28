@@ -114,36 +114,6 @@ class ConversationItemCard extends StatelessWidget {
     );
   }
 
-  /// Format last message for preview: replace raw JSON / image URLs with friendly text
-  String _formatLastMessage(String message) {
-    final trimmed = message.trim();
-
-    // JSON car suggestions from AI agent
-    if (trimmed.startsWith('{') && trimmed.contains('"cars"')) {
-      return 'Đã gợi ý xe cho bạn';
-    }
-
-    // Image URL (Cloudinary or any http image link)
-    final imageExtensions = [
-      '.jpg',
-      '.jpeg',
-      '.png',
-      '.gif',
-      '.webp',
-      '.bmp',
-      '.svg',
-    ];
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      final lowerUrl = trimmed.toLowerCase();
-      if (imageExtensions.any((ext) => lowerUrl.contains(ext))) {
-        return 'Đã gửi một hình ảnh';
-      }
-      return 'Đã gửi một liên kết';
-    }
-
-    return message;
-  }
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -185,7 +155,7 @@ class ConversationItemCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          _formatLastMessage(conversation.lastMessage),
+                          conversation.displayLastMessage,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

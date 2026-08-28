@@ -144,7 +144,7 @@ class ConversationViewmodel extends ChangeNotifier {
       if (senderId == conv.otherUser.id) {
         FcmService().showLocalNotification(
           title: conv.otherUser.name,
-          body: type == 'image' ? '[Hình ảnh]' : text,
+          body: type == 'image' ? '[Hình ảnh]' : Conversation.formatMessagePreview(text),
           payload: jsonEncode({
             'type': 'chat',
             'conversation_id': conversationId,

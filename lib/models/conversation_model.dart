@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class OtherUser {
   final int id;
   final String name;
@@ -168,6 +170,141 @@ class Conversation {
   }
   String get avatarUrl => otherUser.avatar ?? '';
   String get lastMessage => lastMessageObj?.text ?? '';
+  String get displayLastMessage => formatMessagePreview(lastMessage);
+
+  static String formatMessagePreview(String rawMessage) {
+    if (rawMessage.trim().isEmpty) return '';
+    final text = rawMessage.trim();
+
+    // 1. Nếu chứa code block markdown (```json ... ``` hoặc ``` ... ```)
+    if (text.contains('```')) {
+      final codeBlockRegex = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```');
+      final match = codeBlockRegex.firstMatch(text);
+      if (match != null) {
+        final inside = match.group(1)?.trim() ?? '';
+        final jsonResult = _extractJsonSummary(inside);
+        if (jsonResult != null) return jsonResult;
+      }
+    }
+
+    // 2. Thử parse JSON trực tiếp hoặc từ khối JSON trong văn bản
+    final jsonResult = _extractJsonSummary(text);
+    if (jsonResult != null) return jsonResult;
+
+    // 3. Link hình ảnh / tập tin
+    final imageExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.bmp',
+      '.svg',
+    ];
+    if (text.startsWith('http://') || text.startsWith('https://')) {
+      final lower = text.toLowerCase();
+      if (imageExtensions.any((ext) => lower.contains(ext))) {
+        return 'Đã gửi một hình ảnh';
+      }
+      return 'Đã gửi một liên kết';
+    }
+
+    // 4. Văn bản Markdown thông thường: làm sạch ký tự định dạng
+    return _cleanMarkdownText(text);
+  }
+
+  static String? _extractJsonSummary(String input) {
+    final trimmed = input.trim();
+
+    // 2.1 Thử tìm và parse JSON Object { ... }
+    final firstBrace = trimmed.indexOf('{');
+    final lastBrace = trimmed.lastIndexOf('}');
+    if (firstBrace != -1 && lastBrace > firstBrace) {
+      try {
+        final candidate = trimmed.substring(firstBrace, lastBrace + 1);
+        final decoded = jsonDecode(candidate);
+        if (decoded is Map<String, dynamic>) {
+          // Nếu có message riêng (VD: "Drivio hiện có 3 xe phù hợp...", "Không tìm thấy xe...")
+          final msg = decoded['message']?.toString().trim();
+          if (msg != null && msg.isNotEmpty) {
+            return _cleanMarkdownText(msg);
+          }
+
+          // Nếu có mảng cars
+          if (decoded['cars'] is List) {
+            final cars = decoded['cars'] as List;
+            if (cars.isEmpty) {
+              return 'Không tìm thấy xe phù hợp';
+            }
+            final names = cars
+                .whereType<Map>()
+                .map((c) => c['name']?.toString().trim())
+                .where((n) => n != null && n.isNotEmpty)
+                .toList();
+            if (names.isNotEmpty) {
+              if (names.length == 1) {
+                return 'Gợi ý xe: ${names.first}';
+              }
+              return 'Đã gợi ý ${cars.length} xe: ${names.take(2).join(', ')}${names.length > 2 ? '...' : ''}';
+            }
+            return 'Đã gợi ý ${cars.length} xe cho bạn';
+          }
+
+          // Nếu là JSON 1 xe đơn lẻ
+          if (decoded.containsKey('name')) {
+            return 'Gợi ý xe: ${decoded['name']}';
+          }
+
+          if (decoded.containsKey('text')) {
+            return _cleanMarkdownText(decoded['text'].toString());
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 2.2 Thử tìm và parse JSON Array [ ... ]
+    final firstBracket = trimmed.indexOf('[');
+    final lastBracket = trimmed.lastIndexOf(']');
+    if (firstBracket != -1 && lastBracket > firstBracket) {
+      try {
+        final candidate = trimmed.substring(firstBracket, lastBracket + 1);
+        final decoded = jsonDecode(candidate);
+        if (decoded is List) {
+          if (decoded.isEmpty) {
+            return 'Không tìm thấy xe phù hợp';
+          }
+          final names = decoded
+              .whereType<Map>()
+              .map((c) => c['name']?.toString().trim())
+              .where((n) => n != null && n.isNotEmpty)
+              .toList();
+          if (names.isNotEmpty) {
+            if (names.length == 1) {
+              return 'Gợi ý xe: ${names.first}';
+            }
+            return 'Đã gợi ý ${decoded.length} xe: ${names.take(2).join(', ')}${names.length > 2 ? '...' : ''}';
+          }
+          return 'Đã gợi ý ${decoded.length} xe cho bạn';
+        }
+      } catch (_) {}
+    }
+
+    return null;
+  }
+
+  static String _cleanMarkdownText(String text) {
+    var cleaned = text
+        .replaceAll(RegExp(r'\*\*|__'), '') // Bỏ bold **text**
+        .replaceAll(RegExp(r'\*|_'), '') // Bỏ italic *text*
+        .replaceAll(RegExp(r'~~.*?~~'), '') // Bỏ strikethrough
+        .replaceAll(RegExp(r'#+\s*'), '') // Bỏ headers #
+        .replaceAll(RegExp(r'`+'), '') // Bỏ inline code `
+        .replaceAll(RegExp(r'\[(.*?)\]\(.*?\)'), r'$1') // Bỏ link [text](url) -> text
+        .replaceAll(RegExp(r'[\r\n]+'), ' ') // Bỏ xuống dòng, thay bằng dấu cách
+        .replaceAll(RegExp(r'\s+'), ' ') // Gộp khoảng trắng thừa
+        .trim();
+    return cleaned;
+  }
   String get time {
     if (lastMessageObj != null) {
       final String cat = lastMessageObj!.created_at;
