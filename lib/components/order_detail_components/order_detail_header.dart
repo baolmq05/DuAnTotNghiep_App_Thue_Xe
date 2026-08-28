@@ -29,26 +29,7 @@ class OrderDetailHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color statusBgColor;
-    switch (trip.status) {
-      case 0:
-        statusBgColor = Colors.orange;
-        break;
-      case 1:
-        statusBgColor = Colors.blue;
-        break;
-      case 2:
-      case 3:
-      case 4:
-      case 8:
-        statusBgColor = AppColors.success;
-        break;
-      case 7:
-        statusBgColor = Colors.indigo;
-        break;
-      default:
-        statusBgColor = AppColors.error;
-    }
+    final statusBgColor = trip.getStatusSolidColor(context);
 
     final double netTotal = (trip.cost - trip.discountAmount) < 0
         ? 0.0

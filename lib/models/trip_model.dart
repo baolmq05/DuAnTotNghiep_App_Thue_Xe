@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'report_model.dart';
 
 class TripReviewModel {
@@ -566,6 +568,82 @@ class TripModel {
         return 'Chờ trả xe';
       default:
         return 'Không xác định';
+    }
+  }
+
+  /// Màu nền nhạt (Surface) dùng cho Badge / Tag trạng thái
+  Color getStatusBackgroundColor(BuildContext context) {
+    final isDark = context.isDarkMode;
+    switch (status) {
+      case 0: // Chờ duyệt (Cam)
+        return context.warningSurface;
+      case 1: // Chờ thanh toán (Xanh dương)
+        return context.infoSurface;
+      case 2: // Đã xác nhận / Đã cọc (Xanh Cyan/Sky)
+        return isDark ? const Color(0xFF0C3B5E) : const Color(0xFFE0F2FE);
+      case 3: // Đang di chuyển (Xanh Indigo)
+        return isDark ? const Color(0xFF1E1B4B) : const Color(0xFFEEF2FF);
+      case 4: // Hoàn tất (Xanh lá)
+        return context.successSurface;
+      case 5: // Người thuê hủy (Đỏ)
+      case 6: // Chủ xe hủy (Đỏ)
+        return context.errorSurface;
+      case 7: // Chờ gia hạn (Tím)
+        return isDark ? const Color(0xFF3B0764) : const Color(0xFFFAF5FF);
+      case 8: // Chờ trả xe (Cam đậm/Amber)
+        return isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7);
+      default:
+        return context.cardColor;
+    }
+  }
+
+  /// Màu chữ đậm dùng cho Badge / Tag trạng thái
+  Color getStatusTextColor(BuildContext context) {
+    switch (status) {
+      case 0: // Chờ duyệt
+        return context.warning;
+      case 1: // Chờ thanh toán
+        return context.info;
+      case 2: // Đã xác nhận / Đã cọc
+        return const Color(0xFF0284C7);
+      case 3: // Đang di chuyển
+        return const Color(0xFF4F46E5);
+      case 4: // Hoàn tất
+        return context.success;
+      case 5: // Người thuê hủy
+      case 6: // Chủ xe hủy
+        return context.error;
+      case 7: // Chờ gia hạn
+        return const Color(0xFF9333EA);
+      case 8: // Chờ trả xe
+        return const Color(0xFFD97706);
+      default:
+        return context.textSecondary;
+    }
+  }
+
+  /// Màu đậm (Solid Color) dùng cho Header hoặc các thành phần cần nền màu đậm chữ trắng
+  Color getStatusSolidColor(BuildContext context) {
+    switch (status) {
+      case 0: // Chờ duyệt
+        return const Color(0xFFF59E0B);
+      case 1: // Chờ thanh toán
+        return const Color(0xFF3B82F6);
+      case 2: // Đã xác nhận / Đã cọc
+        return const Color(0xFF0284C7);
+      case 3: // Đang di chuyển
+        return const Color(0xFF4F46E5);
+      case 4: // Hoàn tất
+        return AppColors.success;
+      case 5: // Người thuê hủy
+      case 6: // Chủ xe hủy
+        return AppColors.error;
+      case 7: // Chờ gia hạn
+        return const Color(0xFF9333EA);
+      case 8: // Chờ trả xe
+        return const Color(0xFFD97706);
+      default:
+        return Colors.grey;
     }
   }
 }

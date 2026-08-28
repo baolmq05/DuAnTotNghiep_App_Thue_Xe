@@ -82,31 +82,6 @@ class OrderDetailTimeline extends StatelessWidget {
     );
   }
 
-  String _getStatusLabel(int status) {
-    switch (status) {
-      case 0:
-        return 'Chờ duyệt';
-      case 1:
-        return 'Chờ thanh toán';
-      case 2:
-        return 'Đã xác nhận';
-      case 3:
-        return 'Đang diễn ra';
-      case 4:
-        return 'Đã hoàn thành';
-      case 5:
-        return 'Người dùng hủy';
-      case 6:
-        return 'Chủ xe hủy';
-      case 7:
-        return 'Chờ gia hạn';
-      case 8:
-        return 'Chờ trả xe';
-      default:
-        return 'Không xác định';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final status = trip.status;
@@ -144,23 +119,15 @@ class OrderDetailTimeline extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isCancelled
-                      ? Colors.red.shade100
-                      : (status == 4
-                          ? Colors.green.shade100
-                          : Colors.orange.shade100),
+                  color: trip.getStatusBackgroundColor(context),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  _getStatusLabel(status),
+                  trip.getStatusDisplay(),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: isCancelled
-                        ? Colors.red.shade700
-                        : (status == 4
-                            ? Colors.green.shade700
-                            : Colors.orange.shade800),
+                    color: trip.getStatusTextColor(context),
                   ),
                 ),
               ),
@@ -247,7 +214,7 @@ class OrderDetailTimeline extends StatelessWidget {
                   Icon(Icons.cancel_outlined, color: Colors.red.shade600, size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    _getStatusLabel(status),
+                    trip.getStatusDisplay(),
                     style: TextStyle(
                       color: Colors.red.shade700,
                       fontWeight: FontWeight.w600,

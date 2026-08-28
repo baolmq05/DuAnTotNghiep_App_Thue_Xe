@@ -46,6 +46,23 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
 
     if (viewModel.isLoading) {
       return Scaffold(
+        appBar: AppBar(
+          backgroundColor: context.primaryColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => context.pop(),
+          ),
+          title: const Text(
+            'Chi tiết đơn thuê',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+        ),
         body: Center(
           child: CircularProgressIndicator(color: context.primaryColor),
         ),
@@ -94,29 +111,34 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: context.primaryColor,
-            pinned: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.pop(),
-            ),
-            title: const Text(
-              'Chi tiết đơn thuê',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            centerTitle: true,
+      appBar: AppBar(
+        backgroundColor: context.primaryColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text(
+          'Chi tiết đơn thuê',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                OrderDetailHeader(trip: trip),
+        ),
+        centerTitle: true,
+      ),
+      body: RefreshIndicator(
+        color: context.primaryColor,
+        backgroundColor: Colors.white,
+        onRefresh: () async {
+          await context.read<OwnerOrderDetailViewModel>().fetchTripDetail(widget.orderId);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              OrderDetailHeader(trip: trip),
                 Transform.translate(
                   offset: const Offset(0, -30),
                   child: Padding(
@@ -336,10 +358,9 @@ class _OwnerOrderDetailViewState extends State<OwnerOrderDetailView> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      );
+    }
 
   Widget _buildOwnerActions(TripModel trip) {
     final status = trip.status;

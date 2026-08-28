@@ -46,24 +46,34 @@ class OwnerOrderDetailViewModel extends ChangeNotifier {
   // Alias for backward compatibility
   List<XFile> get selectedLocalPhotos => selectedPreTripPhotos;
 
-  Future<void> fetchTripDetail(int orderId) async {
-    _isLoading = true;
-    _errorMessage = '';
-    _selectedPreTripPhotos.clear();
-    _selectedPostTripPhotos.clear();
-    _actionError = null;
-    notifyListeners();
+  Future<void> fetchTripDetail(int orderId, {bool showLoading = true}) async {
+    if (showLoading) {
+      _isLoading = true;
+      _errorMessage = '';
+      _selectedPreTripPhotos.clear();
+      _selectedPostTripPhotos.clear();
+      _actionError = null;
+      notifyListeners();
+    }
 
     try {
       final trip = await _tripService.getTripDetail(orderId);
       _trip = trip;
       if (_trip == null) {
-        _errorMessage = 'Không tìm thấy đơn thuê xe.';
+        if (showLoading || _trip == null) {
+          _errorMessage = 'Không tìm thấy đơn thuê xe.';
+        }
+      } else {
+        _errorMessage = '';
       }
     } catch (_) {
-      _errorMessage = 'Không thể tải chi tiết đơn thuê xe. Vui lòng thử lại!';
+      if (showLoading || _trip == null) {
+        _errorMessage = 'Không thể tải chi tiết đơn thuê xe. Vui lòng thử lại!';
+      }
     } finally {
-      _isLoading = false;
+      if (showLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }

@@ -23,16 +23,19 @@ class OrderDetailViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  Future<void> fetchTripDetail(int orderId) async {
-    _isLoading = true;
-    _errorMessage = '';
-    _report = null;
-    notifyListeners();
+  Future<void> fetchTripDetail(int orderId, {bool showLoading = true}) async {
+    if (showLoading) {
+      _isLoading = true;
+      _errorMessage = '';
+      _report = null;
+      notifyListeners();
+    }
 
     try {
       final trip = await _tripService.getTripDetail(orderId);
       _trip = trip;
       _report = trip?.report;
+      _errorMessage = '';
 
       debugPrint('[DEBUG] Đã gán báo cáo từ chi tiết chuyến đi: ${_report?.id}');
     } catch (e, stack) {
@@ -41,9 +44,13 @@ class OrderDetailViewModel extends ChangeNotifier {
       try {
         File('error_log.txt').writeAsStringSync('Error: $e\n\n$stack');
       } catch (_) {}
-      _errorMessage = 'Không thể tải chi tiết đơn hàng. Vui lòng thử lại!';
+      if (showLoading || _trip == null) {
+        _errorMessage = 'Không thể tải chi tiết đơn hàng. Vui lòng thử lại!';
+      }
     } finally {
-      _isLoading = false;
+      if (showLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
