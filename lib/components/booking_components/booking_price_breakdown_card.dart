@@ -102,7 +102,7 @@ class BookingPriceBreakdownCard extends StatelessWidget {
             _formatCurrency(baseRentalPrice),
           ),
           const SizedBox(height: 12),
-          if (isDeliveryToLocation)
+          if (isDeliveryToLocation) ...[
             _buildPriceRow(
               context,
               'Phí giao xe tận nơi',
@@ -111,20 +111,26 @@ class BookingPriceBreakdownCard extends StatelessWidget {
                   : _formatCurrency(calculatedDeliveryFee),
               isFree: calculatedDeliveryFee == 0,
             ),
-          if (car.discountValue > 0)
+            const SizedBox(height: 12),
+          ],
+          if (car.discountValue > 0) ...[
             _buildPriceRow(
               context,
               'Giảm giá từ chủ xe',
               '-${_formatCurrency(carDiscountTotal)}',
               isDiscount: true,
             ),
-          if (promoDiscount > 0)
+            const SizedBox(height: 12),
+          ],
+          if (promoDiscount > 0) ...[
             _buildPriceRow(
               context,
               'Mã voucher giảm thêm',
               '-${_formatCurrency(promoDiscount)}',
               isDiscount: true,
             ),
+            const SizedBox(height: 12),
+          ],
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Divider(height: 1, thickness: 1, color: AppColors.border),
