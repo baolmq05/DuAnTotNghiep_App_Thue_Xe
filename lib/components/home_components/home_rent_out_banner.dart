@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeRentOutBanner extends StatelessWidget {
   const HomeRentOutBanner({super.key});
@@ -58,7 +59,7 @@ class HomeRentOutBanner extends StatelessWidget {
 
             // Action Button using Primary color from Theme
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () => context.push('/register-car'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
