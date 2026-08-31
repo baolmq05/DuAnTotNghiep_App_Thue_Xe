@@ -12,6 +12,7 @@ import 'package:duantotnghiep_app_thue_xe/themes/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/chatbot_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/chat_detail_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
 
 class ChatDetailView extends StatefulWidget {
   final String conversationId;
@@ -142,6 +143,26 @@ class _ChatDetailViewState extends State<ChatDetailView> {
 
   void _loadInitialMessages() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.conversation == null && !widget.conversationId.startsWith('chatbot')) {
+        try {
+          final convVm = context.read<ConversationViewmodel>();
+          // Kiểm tra trong danh sách cuộc trò chuyện hiện có
+          final matches = convVm.conversations.where((c) => c.id == widget.conversationId);
+          if (matches.isNotEmpty) {
+            _conv = matches.first;
+          } else {
+            // Nếu danh sách chưa có, tải lại từ API
+            await convVm.fetchConversations();
+            final updatedMatches = convVm.conversations.where((c) => c.id == widget.conversationId);
+            if (updatedMatches.isNotEmpty) {
+              _conv = updatedMatches.first;
+            }
+          }
+        } catch (e) {
+          debugPrint('Lỗi tải thông tin cuộc trò chuyện: $e');
+        }
+      }
+
       final chatDetailViewModel = context.read<ChatDetailViewModel>();
       await chatDetailViewModel.loadMessagesForConversation(_conv);
       if (mounted) {

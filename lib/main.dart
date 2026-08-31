@@ -5,7 +5,7 @@ import 'package:duantotnghiep_app_thue_xe/providers/theme_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:device_preview/device_preview.dart';
+// import 'package:device_preview/device_preview.dart';
 import 'package:duantotnghiep_app_thue_xe/routes/router_config.dart';
 import 'package:provider/provider.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/conversation_viewmodel.dart';
@@ -78,12 +78,9 @@ void main() async {
   }
 
   runApp(
-    DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => ChangeNotifierProvider(
-        create: (_) => AuthProvider(),
-        child: const DrivioApp(),
-      ),
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: const DrivioApp(),
     ),
   );
 }
@@ -113,9 +110,9 @@ class DrivioApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp.router(
-            // Device_Preview Package (Important)
-            locale: DevicePreview.locale(context),
-            builder: DevicePreview.appBuilder,
+            // Device_Preview Package (Disabled for APK build)
+            // locale: DevicePreview.locale(context),
+            // builder: DevicePreview.appBuilder,
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,

@@ -20,12 +20,16 @@ class ConversationViewmodel extends ChangeNotifier {
   List<Conversation> get conversations => _conversations;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  int get totalUnreadCount =>
+      _conversations.fold(0, (sum, conv) => sum + conv.unreadCount);
 
   /// Fetch conversations from API and merge with chatbot session
-  Future<void> fetchConversations() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  Future<void> fetchConversations({bool showLoading = true}) async {
+    if (showLoading) {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       final List<Conversation> userConversations = await conversationService.getConversations();
@@ -160,6 +164,9 @@ class ConversationViewmodel extends ChangeNotifier {
       }
       _conversations.insert(insertIndex, updatedConv);
       notifyListeners();
+    } else {
+      // Cuộc hội thoại mới chưa có trong danh sách -> Tải lại danh sách ngầm để cập nhật badge
+      fetchConversations(showLoading: false);
     }
   }
 

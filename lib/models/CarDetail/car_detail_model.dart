@@ -30,6 +30,7 @@ class Car_Detail {
   final int deliveryOptionId;
   final int usageLimitId;
   final int status;
+  final String? rejectionReason;
   final String createdAt;
   final String updatedAt;
   final double? reviewsAvgRating;
@@ -65,6 +66,7 @@ class Car_Detail {
     required this.deliveryOptionId,
     required this.usageLimitId,
     required this.status,
+    this.rejectionReason,
     required this.createdAt,
     required this.updatedAt,
     this.reviewsAvgRating,
@@ -120,6 +122,7 @@ class Car_Detail {
       status: json['status'] is int
           ? json['status']
           : int.tryParse(json['status']?.toString() ?? '') ?? 0,
+      rejectionReason: json['rejection_reason']?.toString(),
       createdAt: json['created_at']?.toString() ?? '',
       updatedAt: json['updated_at']?.toString() ?? '',
       reviewsAvgRating: json['reviews_avg_rating'] == null

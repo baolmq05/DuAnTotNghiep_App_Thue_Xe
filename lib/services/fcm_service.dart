@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:duantotnghiep_app_thue_xe/services/base_service.dart';
 
@@ -55,7 +56,7 @@ class FcmService extends BaseService {
       debugPrint('Trạng thái quyền FCM: ${settings.authorizationStatus}');
 
       // 2. Khởi tạo Flutter Local Notifications (hiển thị banner khi app foreground)
-      const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidInit = AndroidInitializationSettings('@mipmap/ic_notification');
       const iosInit = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
@@ -82,12 +83,13 @@ class FcmService extends BaseService {
         },
       );
 
-      // Tạo Android Channel nếu chạy trên Android
+      // Tạo Android Channel và xin quyền thông báo trên Android 13+
       final androidPlatform = _localNotifications
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
       if (androidPlatform != null) {
         await androidPlatform.createNotificationChannel(_androidChannel);
+        await androidPlatform.requestNotificationsPermission();
       }
 
       // 3. Cấu hình foreground presentation trên iOS
@@ -179,7 +181,9 @@ class FcmService extends BaseService {
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
-      icon: '@mipmap/ic_launcher',
+      icon: '@mipmap/ic_notification',
+      largeIcon: DrawableResourceAndroidBitmap('@mipmap/launcher_icon'),
+      color: Color(0xFF005BAA),
     );
 
     const iosDetails = DarwinNotificationDetails(

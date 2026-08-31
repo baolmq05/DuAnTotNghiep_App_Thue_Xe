@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:duantotnghiep_app_thue_xe/services/base_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/payment_service.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 
 class TripService extends BaseService {
@@ -113,83 +114,26 @@ class TripService extends BaseService {
     }
   }
 
-  // Tạo giao dịch ZaloPay qua API Backend (Sandbox)
+  // ==========================================
+  // NOTE: Logic thanh toán đã được tách sang PaymentService (lib/services/payment_service.dart)
+  // Các hàm dưới đây ủy quyền sang PaymentService để đảm bảo tính tương thích ngược.
+  // ==========================================
+  final PaymentService _paymentService = PaymentService();
+
   Future<Map<String, dynamic>> createZaloPayPayment(
     int tripId, {
     double? amount,
     String? paymentType,
     String? customEndpoint,
-  }) async {
-    try {
-      final endpoint = customEndpoint ?? 'api/auth/zalopay/create-payment';
-      final response = await store(
-        endpoint,
-        body: {
-          'trip_id': tripId,
-          if (amount != null) 'amount': amount,
-          if (paymentType != null) 'payment_type': paymentType,
-        },
-        requiresAuth: true,
+  }) => _paymentService.createZaloPayPayment(
+        tripId,
+        amount: amount,
+        paymentType: paymentType,
+        customEndpoint: customEndpoint,
       );
 
-      if (response != null) {
-        // Hỗ trợ parse mềm dẻo tùy cấu trúc dữ liệu của backend trả về
-        final success = response['success'] ?? (response['return_code'] == 1) ?? false;
-        final data = response['data'] ?? response;
-        
-        // Trích xuất app_trans_id từ nhiều vị trí phản hồi có thể có
-        final appTransId = response['app_trans_id'] ?? 
-                           response['appTransId'] ?? 
-                           (response['zalopay'] != null ? response['zalopay']['app_trans_id'] : null) ??
-                           (response['data'] != null ? response['data']['app_trans_id'] : null);
-        
-        return {
-          'success': success,
-          'message': response['message'] ?? response['return_message'] ?? 'Thành công',
-          'order_url': response['payment_url'] ?? data['order_url'] ?? data['orderUrl'] ?? response['order_url'],
-          'zp_trans_token': data['zp_trans_token'] ?? data['zpTransToken'] ?? response['zp_trans_token'],
-          'app_trans_id': appTransId,
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Không nhận được phản hồi từ backend.',
-      };
-    } on ApiException catch (e) {
-      debugPrint('Lỗi khi gọi API thanh toán ZaloPay: ${e.message}');
-      return {'success': false, 'message': e.message};
-    } catch (e) {
-      debugPrint('Lỗi khi gọi API thanh toán ZaloPay: $e');
-      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
-    }
-  }
-
-  // Gọi API verify để chủ động truy vấn trạng thái thanh toán từ ZaloPay (Không cần ngrok)
-  Future<Map<String, dynamic>> verifyZaloPayPayment(String appTransId) async {
-    try {
-      final response = await get(
-        'api/zalopay/verify?app_trans_id=$appTransId',
-        requiresAuth: true,
-      );
-
-      if (response != null) {
-        return {
-          'success': response['success'] ?? false,
-          'message': response['message'] ?? 'Thành công',
-          'data': response['data'],
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Không nhận được phản hồi xác thực từ backend.',
-      };
-    } catch (e) {
-      debugPrint('Lỗi khi gọi API xác thực ZaloPay: $e');
-      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
-    }
-  }
+  Future<Map<String, dynamic>> verifyZaloPayPayment(String appTransId) =>
+      _paymentService.verifyZaloPayPayment(appTransId);
 
   // Gửi yêu cầu gia hạn chuyến đi
   Future<Map<String, dynamic>> requestExtension(
@@ -230,48 +174,9 @@ class TripService extends BaseService {
     }
   }
 
-  // Tạo giao dịch ZaloPay để thanh toán phí gia hạn
-  Future<Map<String, dynamic>> createExtensionPayment(int tripId) async {
-    try {
-      final response = await store(
-        'api/auth/zalopay/create-payment',
-        body: {
-          'trip_id': tripId,
-          'payment_type': 'extension',
-        },
-        requiresAuth: true,
-      );
-
-      if (response != null) {
-        final success = response['success'] ?? (response['return_code'] == 1) ?? false;
-        final data = response['data'] ?? response;
-
-        final appTransId = response['app_trans_id'] ??
-            response['appTransId'] ??
-            (response['zalopay'] != null ? response['zalopay']['app_trans_id'] : null) ??
-            (response['data'] != null ? response['data']['app_trans_id'] : null);
-
-        return {
-          'success': success,
-          'message': response['message'] ?? response['return_message'] ?? 'Thành công',
-          'order_url': response['payment_url'] ?? data['order_url'] ?? data['orderUrl'] ?? response['order_url'],
-          'zp_trans_token': data['zp_trans_token'] ?? data['zpTransToken'] ?? response['zp_trans_token'],
-          'app_trans_id': appTransId,
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Không nhận được phản hồi từ backend.',
-      };
-    } on ApiException catch (e) {
-      debugPrint('Lỗi khi gọi API thanh toán gia hạn ZaloPay: ${e.message}');
-      return {'success': false, 'message': e.message};
-    } catch (e) {
-      debugPrint('Lỗi khi gọi API thanh toán gia hạn ZaloPay: $e');
-      return {'success': false, 'message': 'Có lỗi xảy ra: $e'};
-    }
-  }
+  // Tạo giao dịch thanh toán phí gia hạn (ủy quyền sang PaymentService)
+  Future<Map<String, dynamic>> createExtensionPayment(int tripId) =>
+      _paymentService.createExtensionPayment(tripId);
 
   // Gửi yêu cầu trả xe
   Future<Map<String, dynamic>> requestReturn(int tripId) async {

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../themes/app_colors.dart';
 import '../../models/trip_model.dart';
-import '../../services/trip_service.dart';
+import '../../services/payment_service.dart';
 import '../../widgets/app_toast.dart';
 
 /// Bottom sheet thanh toán phí gia hạn qua ZaloPay
@@ -24,7 +24,7 @@ class ExtensionPaymentSheet extends StatefulWidget {
 
 class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
     with WidgetsBindingObserver {
-  final TripService _tripService = TripService();
+  final PaymentService _paymentService = PaymentService();
   final NumberFormat _currencyFormat =
       NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
@@ -78,7 +78,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
     await Future.delayed(const Duration(seconds: 1));
 
     final verifyResult =
-        await _tripService.verifyZaloPayPayment(_currentAppTransId!);
+        await _paymentService.verifyZaloPayPayment(_currentAppTransId!);
 
     setState(() => _isLoading = false);
 
@@ -163,7 +163,7 @@ class _ExtensionPaymentSheetState extends State<ExtensionPaymentSheet>
     final ext = widget.trip.latestExtension;
     final amount = ext?.extensionAmount ?? 0.0;
 
-    final result = await _tripService.createZaloPayPayment(
+    final result = await _paymentService.createZaloPayPayment(
       widget.trip.id,
       amount: amount,
       paymentType: 'extension',

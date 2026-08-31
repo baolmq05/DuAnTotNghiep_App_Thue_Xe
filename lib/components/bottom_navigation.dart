@@ -17,10 +17,7 @@ class BottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final conversationViewModel = context.watch<ConversationViewmodel>();
-    final int messageCount = conversationViewModel.conversations.fold(
-      0,
-      (sum, conv) => sum + conv.unreadCount,
-    );
+    final int messageCount = conversationViewModel.totalUnreadCount;
 
     return Container(
       decoration: BoxDecoration(

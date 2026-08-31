@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
 import 'package:duantotnghiep_app_thue_xe/services/report_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/fcm_service.dart';
 import 'package:duantotnghiep_app_thue_xe/models/report_model.dart';
 
 class OrderDetailViewModel extends ChangeNotifier {
@@ -70,6 +71,11 @@ class OrderDetailViewModel extends ChangeNotifier {
         extensionAmount: extensionAmount,
       );
       if (result['success'] == true) {
+        FcmService().showLocalNotification(
+          title: 'Gửi yêu cầu gia hạn thành công! ⏳',
+          body: 'Yêu cầu gia hạn thêm $extendedDays ngày cho đơn #$tripId đã được gửi.',
+          payload: '{"type": "trip", "trip_id": "$tripId"}',
+        );
         // Refresh trip detail after success
         await fetchTripDetail(tripId);
       }
@@ -84,6 +90,11 @@ class OrderDetailViewModel extends ChangeNotifier {
     try {
       final result = await _tripService.confirmTrip(tripId);
       if (result['success'] == true) {
+        FcmService().showLocalNotification(
+          title: 'Duyệt đơn thành công! ✅',
+          body: 'Đơn thuê xe #$tripId đã được xác nhận. Khách hàng sẽ tiến hành thanh toán cọc.',
+          payload: '{"type": "owner_order", "trip_id": "$tripId"}',
+        );
         await fetchTripDetail(tripId);
       }
       return result;
@@ -97,6 +108,11 @@ class OrderDetailViewModel extends ChangeNotifier {
     try {
       final result = await _tripService.rejectTrip(tripId, reason: reason);
       if (result['success'] == true) {
+        FcmService().showLocalNotification(
+          title: 'Đã từ chối đơn thuê ❌',
+          body: 'Đơn thuê xe #$tripId đã được từ chối.',
+          payload: '{"type": "owner_order", "trip_id": "$tripId"}',
+        );
         await fetchTripDetail(tripId);
       }
       return result;

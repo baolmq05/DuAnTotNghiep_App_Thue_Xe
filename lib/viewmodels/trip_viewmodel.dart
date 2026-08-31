@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:duantotnghiep_app_thue_xe/models/trip_model.dart';
 import 'package:duantotnghiep_app_thue_xe/services/trip_service.dart';
+import 'package:duantotnghiep_app_thue_xe/services/fcm_service.dart';
 
 class TripViewModel extends ChangeNotifier {
   TripViewModel({TripService? tripService})
@@ -24,6 +25,12 @@ class TripViewModel extends ChangeNotifier {
 
       _isLoading = false;
       if (result['success'] == true) {
+        // Nổ thông báo đẩy xuống điện thoại
+        FcmService().showLocalNotification(
+          title: 'Đặt xe thành công! 🚗',
+          body: 'Yêu cầu thuê xe đã được gửi đến chủ xe. Vui lòng chờ phản hồi!',
+          payload: '{"type": "order"}',
+        );
         notifyListeners();
         return true;
       } else {

@@ -358,7 +358,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                   if (trip.status == 1) ...[
                     ElevatedButton.icon(
                       onPressed: () => _showZaloPayCheckoutSheet(trip),
-                      icon: const Icon(Icons.payment, color: Colors.white),
+                      icon: const Icon(Icons.account_balance_wallet, color: Colors.white, size: 18),
                       label: const Text(
                         'Thanh toán đặt cọc qua ZaloPay',
                         style: TextStyle(
@@ -368,7 +368,7 @@ class _OrderDetailViewState extends State<OrderDetailView> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: context.primaryColor,
+                        backgroundColor: const Color(0xFF0068FF),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

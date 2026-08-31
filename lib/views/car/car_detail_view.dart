@@ -130,6 +130,52 @@ class _CarDetailPageState extends State<CarDetailPage> {
             padding: EdgeInsets.zero,
             children: [
               CarImageCarousel(imageUrls: imageUrls),
+              if (car.status == 3) ...[
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: context.errorSurface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: context.error.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.error_outline_rounded, color: context.error, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Xe bị từ chối phê duyệt',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: context.error,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              (car.rejectionReason != null && car.rejectionReason!.trim().isNotEmpty)
+                                  ? car.rejectionReason!
+                                  : 'Vui lòng kiểm tra lại giấy tờ, biển số hoặc hình ảnh của xe.',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: context.error,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 20.0),
               CarInfoHeader(car: car),
               const SizedBox(height: 12.0),

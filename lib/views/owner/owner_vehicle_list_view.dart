@@ -22,6 +22,7 @@ class _OwnerVehicleListViewState extends State<OwnerVehicleListView>
     'Tất cả',
     'Hoạt động',
     'Chờ duyệt',
+    'Bị từ chối',
     'Dừng hoạt động',
   ];
 
@@ -63,6 +64,8 @@ class _OwnerVehicleListViewState extends State<OwnerVehicleListView>
       case 2:
         return viewModel.pendingCars;
       case 3:
+        return viewModel.rejectedCars;
+      case 4:
         return viewModel.lockedCars;
       case 0:
       default:
@@ -125,7 +128,8 @@ class _OwnerVehicleListViewState extends State<OwnerVehicleListView>
               color: context.scaffoldBackgroundColor,
               child: TabBar(
                 controller: _tabController,
-                isScrollable: false,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
                 indicator: BoxDecoration(
                   color: context.primaryColor,
                   borderRadius: BorderRadius.circular(30),
@@ -398,6 +402,50 @@ class _OwnerVehicleListViewState extends State<OwnerVehicleListView>
                     ),
                   ],
                 ),
+                if (car.status == 3) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: context.errorSurface,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: context.error.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.error_outline_rounded, color: context.error, size: 16),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Lý do từ chối phê duyệt:',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.bold,
+                                color: context.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          (car.rejectionReason != null && car.rejectionReason!.trim().isNotEmpty)
+                              ? car.rejectionReason!
+                              : 'Vui lòng kiểm tra lại thông tin, giấy tờ xe hoặc liên hệ quản trị viên.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.error,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Divider(color: context.border, height: 1),
                 const SizedBox(height: 12),

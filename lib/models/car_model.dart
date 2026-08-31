@@ -103,6 +103,7 @@ class Car {
   final String fuelType;
   final String transmission;
   final int status;
+  final String? rejectionReason;
   final int userId;
   final double reviewsAvgRating;
   final int tripsCount;
@@ -125,6 +126,7 @@ class Car {
     required this.fuelType,
     required this.transmission,
     required this.status,
+    this.rejectionReason,
     required this.userId,
     required this.reviewsAvgRating,
     required this.tripsCount,
@@ -156,6 +158,7 @@ class Car {
       fuelType: json['fuel_type'] ?? '',
       transmission: json['transmission'] ?? '',
       status: int.tryParse(json['status']?.toString() ?? '') ?? 0,
+      rejectionReason: json['rejection_reason']?.toString(),
       userId: int.tryParse(json['user_id']?.toString() ?? '') ?? 0,
       reviewsAvgRating: rating,
       tripsCount: int.tryParse(json['trips_count']?.toString() ?? '') ?? 0,

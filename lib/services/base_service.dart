@@ -19,14 +19,14 @@ class ApiException implements Exception {
 }
 
 abstract class BaseService {
-  String get baseUrl {
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:8000';
-    }
-    return 'http://127.0.0.1:8000';
-  }
+  // String get baseUrl {
+  //   if (!kIsWeb && Platform.isAndroid) {
+  //     return 'http://10.0.2.2:8000';
+  //   }
+  //   return 'http://127.0.0.1:8000';
+  // }
 
-  // String get baseUrl => 'https://backend.teamfpoly.vn';
+  String get baseUrl => 'https://drivio.up.railway.app/';
 
   /// Lấy cái Token ra xài (mốt gắn storage sau).
   Future<String?> _getToken() async {
@@ -72,8 +72,9 @@ abstract class BaseService {
 
   /// Ráp link gốc với cái đường đi cho ra cái địa chỉ chuẩn.
   Uri _buildUri(String endpoint) {
+    final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
     final cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
-    return Uri.parse('$baseUrl$cleanEndpoint');
+    return Uri.parse('$cleanBase$cleanEndpoint');
   }
 
   /// Coi kết quả server trả về ngon hay bị lỗi thì xử lý liền.
