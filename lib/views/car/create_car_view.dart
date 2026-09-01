@@ -1089,88 +1089,10 @@ class _CreateCarViewState extends State<CreateCarView> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Section 6: Giới hạn km
+                  // Section 6: Features
                   _buildSectionCard(
                     context,
-                    title: '6. Giới hạn số km',
-                    icon: Icons.speed_outlined,
-                    children: [
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          'Giới hạn số km di chuyển mỗi ngày',
-                          style: TextStyle(
-                            color: context.textPrimary,
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        value: vm.kmLimitEnabled,
-                        activeColor: context.primaryColor,
-                        onChanged: (val) => vm.setKmLimitEnabled(val),
-                      ),
-                      if (vm.kmLimitEnabled) ...[
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel(context, 'Số km tối đa/ngày'),
-                                  TextFormField(
-                                    initialValue: vm.kmLimitValue.toString(),
-                                    keyboardType: TextInputType.number,
-                                    style: TextStyle(
-                                      color: context.textPrimary,
-                                      fontSize: 13,
-                                    ),
-                                    decoration: _buildInputDecoration(
-                                      context,
-                                      '200',
-                                    ),
-                                    onChanged: (v) => vm.kmLimitValue =
-                                        double.tryParse(v) ?? 0,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel(context, 'Phí vượt km (VNĐ/km)'),
-                                  TextFormField(
-                                    initialValue: vm.overFeeValue
-                                        .toInt()
-                                        .toString(),
-                                    keyboardType: TextInputType.number,
-                                    style: TextStyle(
-                                      color: context.textPrimary,
-                                      fontSize: 13,
-                                    ),
-                                    decoration: _buildInputDecoration(
-                                      context,
-                                      '5000',
-                                    ),
-                                    onChanged: (v) => vm.overFeeValue =
-                                        double.tryParse(v) ?? 0,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Section 7: Features
-                  _buildSectionCard(
-                    context,
-                    title: '7. Tính năng tiện ích nổi bật',
+                    title: '6. Tính năng tiện ích nổi bật',
                     icon: Icons.star_outline_rounded,
                     children: [
                       vm.features.isEmpty
@@ -1212,10 +1134,10 @@ class _CreateCarViewState extends State<CreateCarView> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Section 8: Images (Tải ảnh trực tiếp lên Cloudinary)
+                  // Section 7: Images (Tải ảnh trực tiếp lên Cloudinary)
                   _buildSectionCard(
                     context,
-                    title: '8. Hình ảnh xe (Tải ảnh từ máy)',
+                    title: '7. Hình ảnh xe (Tải ảnh từ máy)',
                     icon: Icons.cloud_upload_outlined,
                     children: [
                       // Nút chọn & tải ảnh trực tiếp lên Cloudinary

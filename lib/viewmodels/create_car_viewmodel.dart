@@ -86,10 +86,6 @@ class CreateCarViewModel extends ChangeNotifier {
   double deliveryFee = 0;
   double deliveryFreeDistance = 0;
 
-  bool kmLimitEnabled = false;
-  double kmLimitValue = 0;
-  double overFeeValue = 0;
-
   final List<int> selectedFeatures = [];
 
   final List<String> images = [];
@@ -244,10 +240,6 @@ class CreateCarViewModel extends ChangeNotifier {
       deliveryMaxDistance = carDetail.deliveryOption.maxDistance.toDouble();
       deliveryFee = carDetail.deliveryOption.feeDistance.toDouble();
       deliveryFreeDistance = carDetail.deliveryOption.freeDistance.toDouble();
-
-      kmLimitEnabled = carDetail.usageLimit.status == 1;
-      kmLimitValue = carDetail.usageLimit.maxDailyDistance.toDouble();
-      overFeeValue = double.tryParse(carDetail.usageLimit.extraDistanceFee) ?? 0.0;
 
       selectedFeatures.clear();
       for (final f in carDetail.features) {
@@ -406,15 +398,6 @@ class CreateCarViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setKmLimitEnabled(bool val) {
-    kmLimitEnabled = val;
-    if (!val) {
-      kmLimitValue = 0;
-      overFeeValue = 0;
-    }
-    notifyListeners();
-  }
-
   /// Validate form client-side
   bool validateForm() {
     _fieldErrors.clear();
@@ -519,9 +502,6 @@ class CreateCarViewModel extends ChangeNotifier {
         deliveryMaxDistance: deliveryEnabled ? deliveryMaxDistance : 0,
         deliveryFee: deliveryEnabled ? deliveryFee : 0,
         deliveryFreeDistance: deliveryEnabled ? deliveryFreeDistance : 0,
-        kmLimitEnabled: kmLimitEnabled,
-        kmLimitValue: kmLimitEnabled ? kmLimitValue : 0,
-        overFeeValue: kmLimitEnabled ? overFeeValue : 0,
         features: selectedFeatures,
         images: finalUploadedUrls,
         thumbnailIndex: thumbnailIndex,

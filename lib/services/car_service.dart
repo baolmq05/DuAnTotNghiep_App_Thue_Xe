@@ -134,8 +134,6 @@ class CarService extends BaseService {
       final int seat = int.tryParse(carDetail.seatCount) ?? 5;
 
       final bool isDelivery = carDetail.deliveryOption.status == 1;
-      final bool isKmLimit = carDetail.usageLimit.status == 1;
-      final double extraFee = double.tryParse(carDetail.usageLimit.extraDistanceFee) ?? 0.0;
 
       final String fullAddress = carDetail.carLocation.address;
       String locationStr = '';
@@ -173,9 +171,6 @@ class CarService extends BaseService {
         'delivery_max_distance': isDelivery ? carDetail.deliveryOption.maxDistance.toDouble() : 0,
         'delivery_fee': isDelivery ? carDetail.deliveryOption.feeDistance.toInt() : 0,
         'delivery_free_distance': isDelivery ? carDetail.deliveryOption.freeDistance.toDouble() : 0,
-        'km_limit_enabled': isKmLimit ? '1' : '0',
-        'km_limit_val': isKmLimit ? carDetail.usageLimit.maxDailyDistance.toDouble() : 0,
-        'over_fee_val': isKmLimit ? extraFee.toInt() : 0,
         'features': featuresList,
         'images': imagesList,
         'thumbnail_index': thumbnailIdx,

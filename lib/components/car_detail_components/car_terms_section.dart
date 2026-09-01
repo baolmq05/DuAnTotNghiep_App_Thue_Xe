@@ -28,11 +28,6 @@ class CarTermsSection extends StatelessWidget {
           // Các dòng thông tin điều khoản riêng biệt
           _buildTermItem(
             context,
-            Icons.info_outline,
-            'Giới hạn quãng đường: Tối đa ${car.usageLimit.maxDailyDistance}km/ngày, phụ trội ${formatPrice(car.usageLimit.extraDistanceFee)}đ/km.',
-          ),
-          _buildTermItem(
-            context,
             Icons.local_shipping_outlined,
             'Giao xe tận nơi: Tối đa ${car.deliveryOption.maxDistance}km, miễn phí ${car.deliveryOption.freeDistance}km đầu, phí ${formatPrice(car.deliveryOption.feeDistance.toString())}đ/km.',
           ),

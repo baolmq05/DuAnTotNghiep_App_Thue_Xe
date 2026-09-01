@@ -27,10 +27,6 @@ class CreateCarRequest {
   final double deliveryFee;
   final double deliveryFreeDistance;
 
-  final bool kmLimitEnabled;
-  final double kmLimitValue;
-  final double overFeeValue;
-
   final List<int> features;
 
   final List<String> images;
@@ -57,9 +53,6 @@ class CreateCarRequest {
     required this.deliveryMaxDistance,
     required this.deliveryFee,
     required this.deliveryFreeDistance,
-    required this.kmLimitEnabled,
-    required this.kmLimitValue,
-    required this.overFeeValue,
     required this.features,
     required this.images,
     required this.thumbnailIndex,
@@ -87,9 +80,6 @@ class CreateCarRequest {
       'delivery_max_distance': deliveryEnabled ? deliveryMaxDistance : 0,
       'delivery_fee': deliveryEnabled ? deliveryFee.toInt() : 0,
       'delivery_free_distance': deliveryEnabled ? deliveryFreeDistance : 0,
-      'km_limit_enabled': kmLimitEnabled ? '1' : '0',
-      'km_limit_val': kmLimitEnabled ? kmLimitValue : 0,
-      'over_fee_val': kmLimitEnabled ? overFeeValue.toInt() : 0,
       'features': features,
       'images': images,
       'thumbnail_index': thumbnailIndex,
