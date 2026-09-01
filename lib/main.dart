@@ -18,6 +18,8 @@ import 'package:duantotnghiep_app_thue_xe/viewmodels/address_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/policy_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/favorite_viewmodel.dart';
 import 'package:duantotnghiep_app_thue_xe/viewmodels/wallet_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/viewmodels/network_viewmodel.dart';
+import 'package:duantotnghiep_app_thue_xe/widgets/no_internet_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:duantotnghiep_app_thue_xe/firebase_options.dart';
 import 'package:duantotnghiep_app_thue_xe/services/fcm_service.dart';
@@ -92,6 +94,7 @@ class DrivioApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => NetworkViewModel()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => ConversationViewmodel()),
         ChangeNotifierProvider(create: (context) => ChatbotViewModel()),
@@ -136,6 +139,16 @@ class DrivioApp extends StatelessWidget {
             darkTheme: darkTheme,
             themeMode: themeProvider.themeMode,
             routerConfig: drivioRouter,
+            builder: (context, routerChild) {
+              final networkVM = context.watch<NetworkViewModel>();
+              if (!networkVM.isOnline) {
+                return NoInternetScreen(
+                  onRetry: () => networkVM.checkConnection(),
+                  isChecking: networkVM.isChecking,
+                );
+              }
+              return routerChild ?? const SizedBox.shrink();
+            },
           );
         },
       ),
