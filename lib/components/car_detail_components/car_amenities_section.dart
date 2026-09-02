@@ -53,17 +53,29 @@ class CarAmenitiesSection extends StatelessWidget {
 
   /// Hàm phụ hiển thị ảnh và tên của từng tiện ích
   Widget _buildAmenityImage(BuildContext context, String name, String imageUrl) {
+    final isDark = context.isDarkMode;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Khung hiển thị ảnh tiện ích
         Container(
-          width: 50,
-          height: 50,
+          width: 52,
+          height: 52,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: context.primaryColor.withAlpha(13), // Tạo màu nền mờ cho icon thêm đẹp
+            color: isDark
+                ? const Color(0xFFF1F3F6) // Nền sáng khi Dark mode để các icon/chữ đen trên ảnh hiển thị rõ nét
+                : context.primaryColor.withAlpha(15), // Tạo màu nền mờ cho icon thêm đẹp
             borderRadius: BorderRadius.circular(12),
+            boxShadow: isDark
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1.5),
+                    ),
+                  ]
+                : null,
           ),
           child: Image.network(
             imageUrl,

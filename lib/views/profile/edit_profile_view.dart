@@ -339,12 +339,24 @@ class _EditProfileViewState extends State<EditProfileView> {
                             firstDate: DateTime(1900),
                             lastDate: DateTime.now(),
                             builder: (context, child) {
+                              final isDark = context.isDarkMode;
                               return Theme(
                                 data: Theme.of(context).copyWith(
-                                  colorScheme: ColorScheme.light(
-                                    primary: context.primaryColor,
-                                    onPrimary: Colors.white,
-                                    onSurface: context.textPrimary,
+                                  colorScheme: isDark
+                                      ? ColorScheme.dark(
+                                          primary: context.primaryColor,
+                                          onPrimary: Colors.white,
+                                          surface: context.cardColor,
+                                          onSurface: context.textPrimary,
+                                        )
+                                      : ColorScheme.light(
+                                          primary: context.primaryColor,
+                                          onPrimary: Colors.white,
+                                          surface: context.cardColor,
+                                          onSurface: context.textPrimary,
+                                        ),
+                                  dialogTheme: DialogThemeData(
+                                    backgroundColor: context.cardColor,
                                   ),
                                 ),
                                 child: child!,

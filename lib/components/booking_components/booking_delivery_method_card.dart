@@ -821,7 +821,9 @@ class _BookingDeliveryMethodCardState extends State<BookingDeliveryMethodCard> {
                   children: [
                     TileLayer(
                       urlTemplate:
-                          'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName:
+                          'com.example.duantotnghiep_app_thue_xe',
                     ),
                     MarkerLayer(
                       markers: [

@@ -418,28 +418,42 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
     return '$hour:$minute';
   }
 
+  Widget _pickerTheme(BuildContext context, Widget? child) {
+    final isDark = context.isDarkMode;
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: isDark
+            ? ColorScheme.dark(
+                primary: context.primaryColor,
+                onPrimary: Colors.white,
+                surface: context.cardColor,
+                onSurface: context.textPrimary,
+              )
+            : ColorScheme.light(
+                primary: context.primaryColor,
+                onPrimary: Colors.white,
+                surface: context.cardColor,
+                onSurface: context.textPrimary,
+              ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: context.cardColor,
+        ),
+      ),
+      child: Localizations.override(
+        context: context,
+        locale: const Locale('vi', 'VN'),
+        child: child!,
+      ),
+    );
+  }
+
   Future<void> _selectPickupDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: _pickupDate,
       firstDate: DateTime.now().subtract(const Duration(days: 30)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: context.primaryColor,
-              onPrimary: Colors.white,
-              onSurface: context.textPrimary,
-            ),
-          ),
-          child: Localizations.override(
-            context: context,
-            locale: const Locale('vi', 'VN'),
-            child: child!,
-          ),
-        );
-      },
+      builder: (context, child) => _pickerTheme(context, child),
     );
     if (picked != null) {
       setState(() {
@@ -457,22 +471,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
       initialDate: _returnDate,
       firstDate: _pickupDate,
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: context.primaryColor,
-              onPrimary: Colors.white,
-              onSurface: context.textPrimary,
-            ),
-          ),
-          child: Localizations.override(
-            context: context,
-            locale: const Locale('vi', 'VN'),
-            child: child!,
-          ),
-        );
-      },
+      builder: (context, child) => _pickerTheme(context, child),
     );
     if (picked != null) {
       setState(() {
@@ -485,22 +484,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
     final picked = await showTimePicker(
       context: context,
       initialTime: _pickupTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: context.primaryColor,
-              onPrimary: Colors.white,
-              onSurface: context.textPrimary,
-            ),
-          ),
-          child: Localizations.override(
-            context: context,
-            locale: const Locale('vi', 'VN'),
-            child: child!,
-          ),
-        );
-      },
+      builder: (context, child) => _pickerTheme(context, child),
     );
     if (picked != null) {
       setState(() {
@@ -513,22 +497,7 @@ class _FilterModalBottomSheetState extends State<_FilterModalBottomSheet> {
     final picked = await showTimePicker(
       context: context,
       initialTime: _returnTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: context.primaryColor,
-              onPrimary: Colors.white,
-              onSurface: context.textPrimary,
-            ),
-          ),
-          child: Localizations.override(
-            context: context,
-            locale: const Locale('vi', 'VN'),
-            child: child!,
-          ),
-        );
-      },
+      builder: (context, child) => _pickerTheme(context, child),
     );
     if (picked != null) {
       setState(() {
