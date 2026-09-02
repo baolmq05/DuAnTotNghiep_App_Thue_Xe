@@ -9,8 +9,10 @@ class PromotionImage {
 
   factory PromotionImage.fromJson(Map<String, dynamic> json) {
     return PromotionImage(
-      id: json['id'],
-      imageUrl: json['image_url'] ?? '',
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      imageUrl: json['image_url']?.toString() ?? '',
     );
   }
 }
@@ -46,20 +48,31 @@ class Promotion {
 
   factory Promotion.fromJson(Map<String, dynamic> json) {
     return Promotion(
-      id: json['id'],
-      code: json['code'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      discountType: json['discount_type'].toString(),
-      discountValue: json['discount_value'],
-      startDate: json['start_date'] ?? '',
-      endDate: json['end_date'] ?? '',
-      usageLimit: json['usage_limit'],
-      perUserLimit: json['per_user_limit'],
-      status: json['status'].toString(),
-      images: (json['images'] as List<dynamic>)
-          .map((e) => PromotionImage.fromJson(e))
-          .toList(),
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+      code: json['code']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      discountType: json['discount_type']?.toString() ?? '0',
+      discountValue: json['discount_value'] is num
+          ? json['discount_value'] as num
+          : num.tryParse(json['discount_value']?.toString() ?? '') ?? 0,
+      startDate: json['start_date']?.toString() ?? '',
+      endDate: json['end_date']?.toString() ?? '',
+      usageLimit: json['usage_limit'] is int
+          ? json['usage_limit'] as int
+          : int.tryParse(json['usage_limit']?.toString() ?? '') ?? 0,
+      perUserLimit: json['per_user_limit'] is int
+          ? json['per_user_limit'] as int
+          : int.tryParse(json['per_user_limit']?.toString() ?? '') ?? 0,
+      status: json['status']?.toString() ?? '1',
+      images: json['images'] is List
+          ? (json['images'] as List<dynamic>)
+              .whereType<Map<String, dynamic>>()
+              .map((e) => PromotionImage.fromJson(e))
+              .toList()
+          : [],
     );
   }
 }

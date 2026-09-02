@@ -5,9 +5,14 @@ class PromotionService extends BaseService {
   Future<List<Promotion>> getPromotions() async {
     final response = await get('/api/promotions');
 
-    final List data = response['data'];
-
-    return data.map((e) => Promotion.fromJson(e)).toList();
+    final dynamic data = response['data'];
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map((e) => Promotion.fromJson(e))
+          .toList();
+    }
+    return [];
   }
 
   Future<Map<String, dynamic>> checkPromotion({
@@ -28,6 +33,6 @@ class PromotionService extends BaseService {
       },
       requiresAuth: true,
     );
-    return response['data'];
+    return response['data'] ?? {};
   }
 }
