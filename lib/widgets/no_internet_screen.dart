@@ -18,120 +18,100 @@ class NoInternetScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
-
-              // Icon container with soft circular glow
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isDark
-                      ? const Color(0xFF2C1A1D)
-                      : const Color(0xFFFEE2E2),
-                  border: Border.all(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Minimalist compact icon container with soft brand tint
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
                     color: isDark
-                        ? const Color(0xFF7F1D1D)
-                        : const Color(0xFFFECACA),
-                    width: 2,
+                        ? context.primaryColor.withValues(alpha: 0.15)
+                        : context.primaryColor.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.wifi_off_rounded,
+                      size: 34,
+                      color: context.primaryColor,
+                    ),
                   ),
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.wifi_off_rounded,
-                    size: 54,
-                    color: isDark
-                        ? const Color(0xFFF87171)
-                        : const Color(0xFFDC2626),
+                const SizedBox(height: 20),
+
+                // Title
+                Text(
+                  'Không có kết nối mạng',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: context.textPrimary,
                   ),
                 ),
-              ),
-              const SizedBox(height: 28),
+                const SizedBox(height: 8),
 
-              // Title
-              Text(
-                'Mất kết nối Internet',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                  color: context.textPrimary,
-                  letterSpacing: -0.3,
+                // Description
+                Text(
+                  'Vui lòng kiểm tra kết nối Wi-Fi hoặc dữ liệu di động để tiếp tục trải nghiệm Drivio.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.textSecondary,
+                    height: 1.4,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 22),
 
-              // Subtitle / Description
-              Text(
-                'Ứng dụng Drivio yêu cầu kết nối mạng để tải dữ liệu.\nVui lòng kiểm tra lại đường truyền Wi-Fi hoặc dữ liệu di động (4G/5G) của bạn.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.textSecondary,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Retry Button
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton.icon(
+                // Compact refined retry button
+                OutlinedButton.icon(
                   onPressed: isChecking ? null : onRetry,
                   icon: isChecking
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
+                      ? SizedBox(
+                          width: 14,
+                          height: 14,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: context.primaryColor,
                           ),
                         )
-                      : const Icon(
+                      : Icon(
                           Icons.refresh_rounded,
-                          size: 20,
-                          color: Colors.white,
+                          size: 16,
+                          color: context.primaryColor,
                         ),
                   label: Text(
-                    isChecking ? 'Đang kiểm tra kết nối...' : 'Thử kết nối lại',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    isChecking ? 'Đang kết nối lại...' : 'Thử lại',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: context.primaryColor,
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.primaryColor,
-                    disabledBackgroundColor:
-                        context.primaryColor.withValues(alpha: 0.6),
-                    elevation: 0,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 10,
+                    ),
+                    side: BorderSide(
+                      color: context.primaryColor.withValues(alpha: 0.4),
+                      width: 1,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                    backgroundColor: isDark
+                        ? context.primaryColor.withValues(alpha: 0.08)
+                        : Colors.transparent,
                   ),
                 ),
-              ),
-
-              const Spacer(flex: 3),
-
-              // Footer Note
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text(
-                  'Cần trợ giúp khẩn cấp? Hotline: 1900 9217',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.textSecondary.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
